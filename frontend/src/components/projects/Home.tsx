@@ -133,7 +133,7 @@ export function Home() {
                 <div className="px-5 pb-10 pt-[40px] flex-1 flex flex-col grow overflow-hidden">
                   <div className="px-[60px] text-white ">
                     <img src="favicon.png" className="shadows-lg w-[60px] h-[60px] mx-auto m-4" alt="Logo" />
-                    <h1 className="mb-[50px] font-black text-center">
+                    <h1 className="mb-[50px] font-extrabold text-center">
                       Welcome to <span className=" text-primary">AIConsole!</span>
                     </h1>
                     <div className="px-4 pb-[30px] text-center opacity-75 text-gray-400">Recent projects:</div>
@@ -156,7 +156,9 @@ export function Home() {
                   </div>
                 </div>
               </div>
-            ) : <RecentProjectsEmpty openAiApiKey={openAiApiKey} isApiKeyValid={isApiKeyValid} />}
+            ) : (
+              <RecentProjectsEmpty openAiApiKey={openAiApiKey} isApiKeyValid={isApiKeyValid} />
+            )}
           </>
         )}
       </div>
