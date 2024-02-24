@@ -1,5 +1,6 @@
 name = "Countdown"
 usage = "Countdown from 10 to 0"
+usage_examples = ["Countdown from 10 to 0"]
 gpt_mode = "speed"
 execution_mode = "aiconsole.core.chat.execution_modes.example_countdown:execution_mode"
 default_status = "disabled"

@@ -1,5 +1,10 @@
 name = "Automator"
 usage = "When you need to execute code in order to calculate something, access access real-time data, connect to API, perform an action etc. You can use this if one one subtask is creating content, but it requires doing something with it in a programatic way."
+usage_examples = [
+    "Calculate 5! + 3^2",
+    "Open the file 'example.txt' and read its content",
+    "List files in the current directory",
+]
 gpt_mode = "quality"
 execution_mode = "aiconsole.core.chat.execution_modes.interpreter:execution_mode"
 system = """

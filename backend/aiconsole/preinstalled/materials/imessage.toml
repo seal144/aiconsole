@@ -1,7 +1,10 @@
 name = "IMessage"
 version = "0.0.3"
 usage = "Use this to get to know how to handle iMessage and Contacts apps in mac in order to perform tasks using them."
-usage_examples = []
+usage_examples = [
+    "What is the phone number of John?",
+    "Send 'Love! ❤️' iMessage to +1111111111",
+]
 default_status = "enabled"
 content_type = "static_text"
 content = """
