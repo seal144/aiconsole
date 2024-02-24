@@ -7,7 +7,7 @@ async function submitCommand(command: string): Promise<void> {
   const submitCommand = useChatStore.getState().submitCommand;
   return submitCommand(command);
 }
-
+/*
 async function fetchCommand(command: string, columns: string[]): Promise<object[]> {
   const rets = [];
 
@@ -23,12 +23,13 @@ async function fetchCommand(command: string, columns: string[]): Promise<object[
 
   return rets;
 }
+*/
 
 export const createSandbox = (code: string): ReactElement | null => {
   const apis = {
     React,
     submitCommand,
-    fetchCommand,
+    //fetchCommand,
   };
 
   const frame = document.createElement('iframe');
