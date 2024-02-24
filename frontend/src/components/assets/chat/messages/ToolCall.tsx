@@ -156,7 +156,7 @@ export function ToolCall({ group, toolCall: tool_call }: MessageProps) {
           <div className="flex-grow flex flex-row gap-3 items-center">
             {shouldDisplaySpinner && <Spinner width={20} height={20} />}
             {!shouldDisplaySpinner &&
-              tool_call.is_successful &&
+              !tool_call.is_successful &&
               !(tool_call.output != undefined || tool_call.language == 'react_ui') && (
                 <Icon icon={CircleDashedIcon} width={20} height={20} className="text-success flex-shrink-0" />
               )}
@@ -165,9 +165,11 @@ export function ToolCall({ group, toolCall: tool_call }: MessageProps) {
               (tool_call.output != undefined || tool_call.language == 'react_ui') && (
                 <Icon icon={CheckCircle2Icon} width={20} height={20} className="text-success flex-shrink-0" />
               )}
-            {!shouldDisplaySpinner && !tool_call.is_successful && (
-              <Icon icon={AlertCircleIcon} width={20} height={20} className="text-danger flex-shrink-0" />
-            )}
+            {!shouldDisplaySpinner &&
+              !tool_call.is_successful &&
+              (tool_call.output != undefined || tool_call.language == 'react_ui') && (
+                <Icon icon={AlertCircleIcon} width={20} height={20} className="text-danger flex-shrink-0" />
+              )}
 
             <span className="font-semibold"> {tool_call.headline ? tool_call.headline : 'Task'}</span>
           </div>

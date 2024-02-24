@@ -136,12 +136,15 @@ async def generate_response_message_with_code(
                 )
 
     finally:
-        await chat_mutator.mutate(
-            SetIsStreamingMessageMutation(
-                message_id=message_id,
-                is_streaming=False,
+        message_location = chat_mutator.chat.get_message_location(message_id)
+
+        if message_location and message_location.message.is_streaming:
+            await chat_mutator.mutate(
+                SetIsStreamingMessageMutation(
+                    message_id=message_id,
+                    is_streaming=False,
+                )
             )
-        )
 
         for tool_id in tools_requiring_closing_parenthesis:
             await chat_mutator.mutate(
@@ -150,11 +153,16 @@ async def generate_response_message_with_code(
                     code_delta=")",
                 )
             )
+
+        # Finish streaming for all tool calls
         for tool_call in executor.partial_response.choices[0].message.tool_calls:
-            await chat_mutator.mutate(
-                SetIsStreamingToolCallMutation(
-                    tool_call_id=tool_call.id,
-                    is_streaming=False,
+            tool_call_location = chat_mutator.chat.get_tool_call_location(tool_call.id)
+            if tool_call_location and tool_call_location.tool_call.is_streaming:
+                await chat_mutator.mutate(
+                    SetIsStreamingToolCallMutation(
+                        tool_call_id=tool_call.id,
+                        is_streaming=False,
+                    )
                 )
-            )
+
         _log.debug(f"tools_requiring_closing_parenthesis: {tools_requiring_closing_parenthesis}")

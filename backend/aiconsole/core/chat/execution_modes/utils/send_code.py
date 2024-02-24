@@ -7,6 +7,7 @@ from aiconsole.core.chat.chat_mutations import (
     CreateToolCallMutation,
     SetCodeToolCallMutation,
     SetHeadlineToolCallMutation,
+    SetIsStreamingToolCallMutation,
     SetLanguageToolCallMutation,
 )
 from aiconsole.core.chat.chat_mutator import ChatMutator
@@ -44,6 +45,16 @@ async def send_code(
             )
 
             tools_requiring_closing_parenthesis.remove(prev_tool.id)
+
+        if prev_tool:
+            tool_call_location = chat_mutator.chat.get_tool_call_location(prev_tool.id)
+            if tool_call_location and tool_call_location.tool_call.is_streaming:
+                await chat_mutator.mutate(
+                    SetIsStreamingToolCallMutation(
+                        tool_call_id=prev_tool.id,
+                        is_streaming=False,
+                    )
+                )
 
         tool_call_info = chat_mutator.chat.get_tool_call_location(tool_call.id)
 
