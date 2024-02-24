@@ -19,7 +19,7 @@ import { useState } from 'react';
 import { Button } from '../common/Button';
 import { useApiKey } from '@/utils/settings/useApiKey';
 import { useToastsStore } from '@/store/common/useToastsStore';
-import { TextInput } from '../editables/assets/TextInput';
+import { TextInput } from '../assets/assets/TextInput';
 
 const OpenAiApiKeyForm = () => {
   const [inputText, setInputText] = useState('');

@@ -16,9 +16,9 @@
 
 import { create } from 'zustand';
 
-import { useEditablesStore } from '@/store/editables/useEditablesStore';
+import { useEditablesStore } from '@/store/assets/useEditablesStore';
 import { ProjectsAPI } from '../../api/api/ProjectsAPI';
-import { useChatStore } from '../editables/chat/useChatStore';
+import { useChatStore } from '../assets/chat/useChatStore';
 import { useSettingsStore } from '../settings/useSettingsStore';
 
 export type ProjectSlice = {

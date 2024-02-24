@@ -1,4 +1,4 @@
-import { useChatStore } from '@/store/editables/chat/useChatStore';
+import { useChatStore } from '@/store/assets/chat/useChatStore';
 import React, { ReactElement } from 'react';
 
 // APIs to be injected

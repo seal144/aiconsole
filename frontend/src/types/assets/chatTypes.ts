@@ -1,0 +1,108 @@
+import { z } from 'zod';
+import { EditableObjectSchema, GPTRoleSchema } from './assetTypes'; // Import necessary types and schemas
+
+export const AICToolCallSchema = z.object({
+  id: z.string(),
+  language: z.string().optional(),
+  code: z.string(),
+  headline: z.string(),
+  output: z.string().optional(),
+  is_successful: z.boolean(),
+  is_executing: z.boolean(),
+  is_streaming: z.boolean(),
+});
+
+export type AICToolCall = z.infer<typeof AICToolCallSchema>;
+
+export const AICMessageSchema = z.object({
+  id: z.string(),
+  timestamp: z.string(),
+  content: z.string(),
+  tool_calls: z.array(AICToolCallSchema),
+  is_streaming: z.boolean(),
+});
+
+export const ActorIdSchema = z.object({
+  type: z.enum(['user', 'agent']),
+  id: z.string(),
+});
+
+export type ActorId = z.infer<typeof ActorIdSchema>;
+
+export type AICMessage = z.infer<typeof AICMessageSchema>;
+
+export const AICMessageGroupSchema = z.object({
+  id: z.string(),
+  actor_id: ActorIdSchema,
+  role: GPTRoleSchema,
+  task: z.string(),
+  materials_ids: z.array(z.string()),
+  messages: z.array(AICMessageSchema),
+  analysis: z.string(),
+});
+
+export type AICMessageGroup = z.infer<typeof AICMessageGroupSchema>;
+
+export const AICChatHeadlineSchema = EditableObjectSchema.extend({
+  last_modified: z.string(),
+});
+
+export type AICChatHeadline = z.infer<typeof AICChatHeadlineSchema>;
+
+const AICChatOptionsSchema = z.object({
+  agent_id: z.string().optional().default(''),
+  materials_ids: z.array(z.string()).default([]),
+});
+
+export const AICChatSchema = EditableObjectSchema.extend({
+  lock_id: z.string().optional(),
+  title_edited: z.boolean(),
+  last_modified: z.string(),
+  chat_options: AICChatOptionsSchema,
+  message_groups: z.array(AICMessageGroupSchema),
+  is_analysis_in_progress: z.boolean(),
+});
+
+export type AICChat = z.infer<typeof AICChatSchema>;
+
+// Helper functions
+
+export function getMessageGroup(chat: AICChat, message_group_id: string) {
+  for (const group of chat.message_groups) {
+    if (group.id === message_group_id) {
+      return group;
+    }
+  }
+  throw new Error(`Message group ${message_group_id} not found`);
+}
+
+export function getMessageLocation(chat: AICChat, message_id: string) {
+  for (const group of chat.message_groups) {
+    for (const message of group.messages) {
+      if (message.id === message_id) {
+        return {
+          group,
+          message,
+        };
+      }
+    }
+  }
+  throw new Error(`Message ${message_id} not found`);
+}
+
+export function getToolCallLocation(chat: AICChat, tool_call_id: string) {
+  for (const group of chat.message_groups) {
+    for (const message of group.messages) {
+      for (const tool_call of message.tool_calls) {
+        if (tool_call.id === tool_call_id) {
+          return {
+            group,
+            message,
+            tool_call,
+          };
+        }
+      }
+    }
+  }
+  throw new Error(`Tool call ${tool_call_id} not found`);
+}

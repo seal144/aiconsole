@@ -1,13 +1,13 @@
-import { useChatStore } from '../../store/editables/chat/useChatStore';
+import { useChatStore } from '../../store/assets/chat/useChatStore';
 import { useSettingsStore } from '../../store/settings/useSettingsStore';
 import { useProjectStore } from '@/store/projects/useProjectStore';
-import { useEditablesStore } from '@/store/editables/useEditablesStore';
+import { useEditablesStore } from '@/store/assets/useEditablesStore';
 import { useToastsStore } from '@/store/common/useToastsStore';
 import { ServerMessage } from './serverMessages';
 import { applyMutation } from './chat/applyMutation';
-import { deepCopyChat } from '@/utils/editables/chatUtils';
-import { EditablesAPI } from '../api/EditablesAPI';
-import { Chat } from '@/types/editables/chatTypes';
+import { deepCopyChat } from '@/utils/assets/chatUtils';
+import { AssetsAPI } from '../api/AssetsAPI';
+import { AICChat } from '@/types/assets/chatTypes';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function handleServerMessage(message: ServerMessage) {
@@ -106,8 +106,8 @@ export async function handleServerMessage(message: ServerMessage) {
       break;
     case 'ResponseServerMessage': {
       if (message.is_error) {
-        EditablesAPI.closeChat(message.payload.chat_id);
-        EditablesAPI.fetchEditableObject<Chat>({ editableObjectType: 'chat', id: uuidv4() }).then((chat) => {
+        AssetsAPI.closeChat(message.payload.chat_id);
+        AssetsAPI.fetchEditableObject<AICChat>({ editableObjectType: 'chat', id: uuidv4() }).then((chat) => {
           useChatStore.getState().setChat(chat);
         });
       }

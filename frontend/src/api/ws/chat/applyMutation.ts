@@ -1,10 +1,10 @@
-import { Chat, getMessageGroup, getMessageLocation, getToolCallLocation } from '@/types/editables/chatTypes';
+import { AICChat, getMessageGroup, getMessageLocation, getToolCallLocation } from '@/types/assets/chatTypes';
 import { ChatMutation } from '@/api/ws/chat/chatMutations';
 
 /**
  * KEEEP THIS IN SYNC WITH BACKEND apply_mutation!
  */
-export function applyMutation(chat: Chat, mutation: ChatMutation) {
+export function applyMutation(chat: AICChat, mutation: ChatMutation) {
   switch (mutation.type) {
     case 'LockAcquiredMutation':
       chat.lock_id = mutation.lock_id;

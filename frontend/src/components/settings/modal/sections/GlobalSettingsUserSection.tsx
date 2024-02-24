@@ -21,7 +21,7 @@ import { Pencil } from 'lucide-react';
 
 import ImageUploader from '@/components/common/ImageUploader';
 import { Icon } from '@/components/common/icons/Icon';
-import { TextInput } from '@/components/editables/assets/TextInput';
+import { TextInput } from '@/components/assets/assets/TextInput';
 import { GlobalSettingsFormData } from '@/forms/globalSettingsForm';
 
 interface GlobalSettingsUserSectionProps {

@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Spinner } from '../editables/chat/Spinner';
+import { Spinner } from '../assets/chat/Spinner';
 
 export function FullScreenSpinner() {
   return (

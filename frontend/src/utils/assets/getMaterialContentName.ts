@@ -14,21 +14,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { create } from 'zustand';
-import { TabsValues } from '@/types/assets/assetTypes';
+import { MaterialContentType } from '@/types/assets/assetTypes';
 
-export type ActiveTab = TabsValues | string;
+export type MaterialContentNames = 'Note' | 'Dynamic Note' | 'Material' | 'Python API' | 'Agent';
 
-export type SidebarSlice = {
-  activeTab: ActiveTab;
-  setActiveTab: (tab: ActiveTab) => void;
-};
-
-export const useSidebarStore = create<SidebarSlice>((set) => ({
-  activeTab: 'chat',
-  setActiveTab: (tab: ActiveTab) => {
-    set(() => ({
-      activeTab: tab,
-    }));
-  },
-}));
+export function getMaterialContentName(contentType?: MaterialContentType): MaterialContentNames {
+  switch (contentType) {
+    case 'static_text':
+      return 'Note';
+    case 'dynamic_text':
+      return 'Dynamic Note';
+    case 'api':
+      return 'Python API';
+    default:
+      return 'Material';
+  }
+}

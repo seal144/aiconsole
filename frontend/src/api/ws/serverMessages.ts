@@ -15,8 +15,8 @@
 // limitations under the License.
 
 import { z } from 'zod';
-import { ChatSchema } from '@/types/editables/chatTypes';
-import { AssetTypeSchema } from '@/types/editables/assetTypes';
+import { AICChatSchema } from '@/types/assets/chatTypes';
+import { AssetTypeSchema } from '@/types/assets/assetTypes';
 import { ChatMutationSchema } from './chat/chatMutations';
 
 export const BaseServerMessageSchema = z.object({});
@@ -101,7 +101,7 @@ export type NotifyAboutChatMutationServerMessage = z.infer<typeof NotifyAboutCha
 
 export const ChatOpenedServerMessageSchema = BaseServerMessageSchema.extend({
   type: z.literal('ChatOpenedServerMessage'),
-  chat: ChatSchema,
+  chat: AICChatSchema,
 });
 
 export type ChatOpenedServerMessage = z.infer<typeof ChatOpenedServerMessageSchema>;

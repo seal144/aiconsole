@@ -36,8 +36,8 @@ import { useProjectStore } from '../../store/projects/useProjectStore';
 import { ContextMenu, ContextMenuRef } from '../common/ContextMenu';
 import Tooltip from '../common/Tooltip';
 import { Icon } from '../common/icons/Icon';
-import { ActorAvatar } from '../editables/chat/ActorAvatar';
-import { Spinner } from '../editables/chat/Spinner';
+import { ActorAvatar } from '../assets/chat/ActorAvatar';
+import { Spinner } from '../assets/chat/Spinner';
 
 const MAX_CHATS_TO_DISPLAY = 3;
 interface CounterItemProps {

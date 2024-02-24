@@ -1,5 +1,5 @@
-import { GPTRoleSchema, LanguageStrSchema } from '@/types/editables/assetTypes';
-import { ActorIdSchema } from '@/types/editables/chatTypes';
+import { GPTRoleSchema, LanguageStrSchema } from '@/types/assets/assetTypes';
+import { ActorIdSchema } from '@/types/assets/chatTypes';
 import { z } from 'zod';
 
 export const LockAcquiredMutationSchema = z.object({

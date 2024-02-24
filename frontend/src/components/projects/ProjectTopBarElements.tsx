@@ -19,7 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { useProjectStore } from '@/store/projects/useProjectStore';
 import { useProjectContextMenu } from '@/utils/projects/useProjectContextMenu';
-import { AddAssetDropdown } from '../editables/assets/AddAssetDropdown';
+import { AddAssetDropdown } from '../assets/assets/AddAssetDropdown';
 import { ContextMenu } from '../common/ContextMenu';
 import { LeaveProjectDialog } from '../common/LeaveProjectDialog';
 

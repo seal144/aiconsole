@@ -31,12 +31,12 @@ import { ProjectTopBarElements } from '@/components/projects/ProjectTopBarElemen
 import { useToastsStore } from '@/store/common/useToastsStore';
 import { useProjectStore } from '@/store/projects/useProjectStore';
 import { useAPIStore } from '@/store/useAPIStore';
-import { AssetEditor } from './editables/assets/AssetEditor';
-import { ChatPage } from './editables/chat/ChatPage';
-import SideBar from './editables/sidebar/SideBar';
+import { AssetEditor } from './assets/assets/AssetEditor';
+import { ChatPage } from './assets/chat/ChatPage';
+import SideBar from './assets/sidebar/SideBar';
 import { Home } from './projects/Home';
 import { GlobalSettingsModal } from './settings/modal/GlobalSettingsModal';
-import { UI } from './editables/ui/Ui';
+import { UI } from './assets/ui/Ui';
 
 function Project() {
   const isProjectOpen = useProjectStore((state) => state.isProjectOpen);
