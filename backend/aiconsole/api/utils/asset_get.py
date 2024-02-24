@@ -35,6 +35,6 @@ async def asset_get(request, asset_type: AssetType, asset_id: str, new_asset: Ca
         return JSONResponse(
             {
                 **agent.model_dump(),
-                "status": assets.get_status(asset_type, agent.id),
+                "status": assets.is_enabled(asset_type, agent.id),
             }
         )

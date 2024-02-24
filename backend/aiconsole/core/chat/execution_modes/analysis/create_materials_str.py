@@ -16,7 +16,6 @@
 
 import random
 
-from aiconsole.core.assets.types import AssetStatus
 from aiconsole.core.project import project
 
 
@@ -33,8 +32,7 @@ def create_materials_str(materials_ids: list | None, let_ai_add_extra_materials:
     if let_ai_add_extra_materials:
         available_materials = [
             *available_materials,
-            *project.get_project_materials().assets_with_status(AssetStatus.FORCED),
-            *project.get_project_materials().assets_with_status(AssetStatus.ENABLED),
+            *project.get_project_materials().assets_with_enabled_flag_set_to(True),
         ]
 
     random_materials = (

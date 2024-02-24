@@ -14,25 +14,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EditableObject } from '@/types/assets/assetTypes';
+import { Asset } from '@/types/assets/assetTypes';
 import { cn } from '@/utils/common/cn';
 import { useEffect, useRef, useState } from 'react';
 
-interface InlineEditableObjectNameProps {
-  editableObject: EditableObject;
+interface InlineAssetNameProps {
+  editableObject: Asset;
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
   className?: string;
   onRename?: (newName: string) => void;
 }
 
-const InlineEditableObjectName = ({
+const InlineAssetName = ({
   editableObject, // The editable object with 'id' and 'name'
   isEditing,
   setIsEditing,
   className,
   onRename,
-}: InlineEditableObjectNameProps) => {
+}: InlineAssetNameProps) => {
   const [inputText, setInputText] = useState(editableObject.name);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -78,4 +78,4 @@ const InlineEditableObjectName = ({
   );
 };
 
-export default InlineEditableObjectName;
+export default InlineAssetName;

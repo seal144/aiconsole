@@ -18,7 +18,7 @@ from typing import Any
 
 import requests
 
-from aiconsole.core.chat.types import Chat
+from aiconsole.core.chat.types import AICChat
 
 
 def import_chat_gpt_link(chat_link: str) -> str:
@@ -29,7 +29,7 @@ def import_chat_gpt_link(chat_link: str) -> str:
 
     chat_data = extract_and_format_chat_data(chat_link)
 
-    chat = Chat(**chat_data)
+    chat = AICChat(**chat_data)
 
     with open(f"./chats/{chat.id}.json", "w") as f:
         json.dump(chat.model_dump(mode="json"), f, indent=4)

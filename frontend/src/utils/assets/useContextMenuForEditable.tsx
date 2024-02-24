@@ -15,50 +15,50 @@
 // limitations under the License.
 
 import { useAssetStore } from '@/store/assets/asset/useAssetStore';
-import { Asset, AssetStatus, AssetType, EditableObject, EditableObjectType } from '@/types/assets/assetTypes';
 import { Circle, Copy, Edit, File, FolderOpenIcon, Trash, Undo2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { useDeleteEditableObjectWithUserInteraction } from './useDeleteEditableObjectWithUserInteraction';
+import { useDeleteAssetWithUserInteraction } from './useDeleteAssetWithUserInteraction';
 import { useMemo } from 'react';
 import { RadioCheckedIcon } from '@/components/common/icons/RadioCheckedIcon';
 import { noop } from '../common/noop';
 import { useEditablesStore } from '@/store/assets/useEditablesStore';
 import { ContextMenuItem, ContextMenuItems } from '@/types/common/contextMenu';
+import { Asset, AssetType } from '@/types/assets/assetTypes';
 
 export const DISABLED_CSS_CLASSES = 'max-w-[400px] truncate !text-gray-400 pointer-events-none !cursor-default ';
 
 const statusHelper = (
-  status: AssetStatus,
+  enabled: boolean,
   editableObject: Asset,
-  editableObjectType: AssetType,
+  assetType: AssetType,
 ): Omit<ContextMenuItem, 'type' | 'title'> => {
-  const handleClick = (status: AssetStatus) => () => {
-    useAssetStore.getState().setAssetStatus(editableObjectType, editableObject.id, status);
+  const handleClick = (status: boolean) => () => {
+    useAssetStore.getState().setIsEnabledFlag(assetType, editableObject.id, status);
   };
 
-  const assetStatusIcon = (itemStatus: AssetStatus) => {
-    if ((editableObject as Asset)?.status === itemStatus) {
+  const assetStatusIcon = (itemStatus: boolean) => {
+    if ((editableObject as Asset)?.enabled === itemStatus) {
       return RadioCheckedIcon;
     }
 
     return Circle;
   };
 
-  const activeItemClass = editableObject.status === status ? 'text-white' : 'text-gray-400';
+  const activeItemClass = editableObject.enabled === enabled ? 'text-white' : 'text-gray-400';
 
   return {
     className: activeItemClass,
     iconClassName: activeItemClass,
-    disabled: editableObject.status === status,
-    icon: assetStatusIcon(status),
+    disabled: editableObject.enabled === enabled,
+    icon: assetStatusIcon(enabled),
     hidden: !editableObject,
-    action: editableObject.status === status ? noop : handleClick(status),
+    action: editableObject.enabled === enabled ? noop : handleClick(enabled),
   };
 };
 
-const assetItems = (editableObjectType: EditableObjectType, editableObject: EditableObject): ContextMenuItems => {
-  if (editableObjectType === 'chat') return [];
+const assetItems = (assetType: AssetType, editableObject: Asset): ContextMenuItems => {
+  if (assetType === 'chat') return [];
   const asset = editableObject as Asset;
 
   return [
@@ -71,43 +71,43 @@ const assetItems = (editableObjectType: EditableObjectType, editableObject: Edit
     {
       type: 'item',
       title: 'Enabled',
-      ...statusHelper('enabled', asset, editableObjectType),
+      ...statusHelper(true, asset, assetType),
     },
 
     {
       type: 'item',
       title: 'Disabled',
-      ...statusHelper('disabled', asset, editableObjectType),
+      ...statusHelper(false, asset, assetType),
     },
   ];
 };
 
-export function useEditableObjectContextMenu({
-  editableObjectType,
-  editable: editableObject,
+export function useAssetContextMenu({
+  assetType,
+  asset,
   setIsEditing,
 }: {
-  editableObjectType: EditableObjectType;
-  editable?: EditableObject;
+  assetType: AssetType;
+  asset?: Asset;
   setIsEditing?: (isEditing: boolean) => void;
 }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const handleDelete = useDeleteEditableObjectWithUserInteraction(editableObjectType);
+  const handleDelete = useDeleteAssetWithUserInteraction(assetType);
   const canOpenFinderForEditable = useEditablesStore((state) => state.canOpenFinderForEditable);
   const openFinderForEditable = useEditablesStore((state) => state.openFinderForEditable);
 
   const hasDelete = useMemo(
-    () => (editableObjectType === 'chat' ? true : (editableObject as Asset)?.defined_in === 'project'),
-    [editableObject, editableObjectType],
+    () => (assetType === 'chat' ? true : (asset as Asset)?.defined_in === 'project'),
+    [asset, assetType],
   );
   const isDeleteRevert = useMemo(
-    () => (editableObjectType === 'chat' ? false : (editableObject as Asset)?.override),
-    [editableObject, editableObjectType],
+    () => (assetType === 'chat' ? false : (asset as Asset)?.override),
+    [asset, assetType],
   );
 
   function getMenuItems() {
-    if (!editableObject) {
+    if (!asset) {
       return [];
     }
 
@@ -116,7 +116,7 @@ export function useEditableObjectContextMenu({
         type: 'item',
         icon: Edit,
         title: 'Rename',
-        hidden: !setIsEditing || (editableObject as Asset)?.defined_in === 'aiconsole',
+        hidden: !setIsEditing || (asset as Asset)?.defined_in === 'aiconsole',
         action: () => {
           if (!setIsEditing) {
             return;
@@ -129,38 +129,36 @@ export function useEditableObjectContextMenu({
         icon: Copy,
         title: 'Duplicate',
         action: () => {
-          navigate(
-            `/${editableObjectType}s/${editableObjectType === 'chat' ? uuidv4() : 'new'}?copy=${editableObject.id}`,
-          );
+          navigate(`/${assetType}s/${assetType === 'chat' ? uuidv4() : 'new'}?copy=${asset.id}`);
         },
       },
       {
         type: 'item',
         icon: File,
         title: 'Open',
-        hidden: location.pathname === `/${editableObjectType}s/${editableObject.id}`,
+        hidden: location.pathname === `/${assetType}s/${asset.id}`,
         action: () => {
-          navigate(`/${editableObjectType}s/${editableObject.id}`);
+          navigate(`/${assetType}s/${asset.id}`);
         },
       },
       {
         type: 'item',
         icon: FolderOpenIcon,
         title: `Reveal in ${window.window?.electron?.getFileManagerName()}`,
-        hidden: !canOpenFinderForEditable(editableObject),
+        hidden: !canOpenFinderForEditable(asset),
         action: () => {
-          openFinderForEditable(editableObject);
+          openFinderForEditable(asset);
         },
       },
 
-      ...assetItems(editableObjectType, editableObject),
+      ...assetItems(assetType, asset),
       { type: 'separator', key: 'delete-separator', hidden: !hasDelete },
       {
         type: 'item',
         icon: isDeleteRevert ? Undo2 : Trash,
         title: isDeleteRevert ? 'Revert' : 'Delete',
         hidden: !hasDelete,
-        action: () => handleDelete(editableObject.id),
+        action: () => handleDelete(asset.id),
       },
     ];
 

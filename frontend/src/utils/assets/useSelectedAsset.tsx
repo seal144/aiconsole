@@ -1,17 +1,17 @@
 import { useChatStore } from '@/store/assets/chat/useChatStore';
 import { useAssetStore } from '@/store/assets/asset/useAssetStore';
-import { Asset, EditableObject } from '@/types/assets/assetTypes';
 import { AICChat } from '@/types/assets/chatTypes';
-import { getEditableObjectType } from './getEditableObjectType';
+import { getAssetType } from './getAssetType';
 import { useCallback } from 'react';
+import { Asset } from '@/types/assets/assetTypes';
 
-export function useSelectedEditableObject(): [EditableObject | undefined, (editable: EditableObject) => void] {
+export function useSelectedAsset(): [Asset | undefined, (editable: Asset) => void] {
   const chat = useChatStore((state) => state.chat);
   const selectedAsset = useAssetStore((state) => state.selectedAsset);
-  const type = getEditableObjectType(selectedAsset);
+  const type = getAssetType(selectedAsset);
 
-  const setSelectedEditableObject = useCallback(
-    (editable: EditableObject) => {
+  const setSelectedAsset = useCallback(
+    (editable: Asset) => {
       if (type === 'chat') {
         useChatStore.setState({ chat: editable as AICChat });
       } else {
@@ -21,5 +21,5 @@ export function useSelectedEditableObject(): [EditableObject | undefined, (edita
     [type],
   );
 
-  return [chat || selectedAsset, setSelectedEditableObject];
+  return [chat || selectedAsset, setSelectedAsset];
 }

@@ -22,7 +22,7 @@ import rtoml
 from aiconsole.core.assets.agents.agent import AICAgent
 from aiconsole.core.assets.fs.exceptions import UserIsAnInvalidAgentIdError
 from aiconsole.core.assets.materials.material import Material, MaterialContentType
-from aiconsole.core.assets.types import Asset, AssetLocation, AssetStatus, AssetType
+from aiconsole.core.assets.types import Asset, AssetLocation, AssetType
 from aiconsole.core.gpt.consts import GPTMode
 from aiconsole.core.project.paths import (
     get_core_assets_directory,
@@ -70,7 +70,9 @@ async def load_asset_from_fs(asset_type: AssetType, asset_id: str, location: Ass
         "defined_in": location,
         "usage": str(tomldoc["usage"]).strip(),
         "usage_examples": tomldoc.get("usage_examples", []),
-        "default_status": AssetStatus(str(tomldoc.get("default_status", "enabled")).strip()),
+        "enabled_by_default": tomldoc.get(
+            "enabled_by_default", str(tomldoc.get("default_status", "enabled")).strip() == "enabned"
+        ),
         "override": location == AssetLocation.PROJECT_DIR and (core_resource_path / f"{asset_id}.toml").exists(),
     }
 

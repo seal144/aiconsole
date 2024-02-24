@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import cast
 
 import tomlkit
 import tomlkit.container
@@ -25,6 +26,19 @@ def load_settings_file(file_path: Path) -> PartialSettingsData:
 
             # save
             _write_document(file_path, document)
+
+    # Convert "enabled" to true and "disabled" to false for boolean fields
+    for collection_name in ["materials", "agents"]:
+        if collection_name in document:
+            coll_dict = cast(dict, document[collection_name])
+            for key, value in coll_dict.items():
+                if isinstance(value, str):
+                    if value.lower() == "enabled":
+                        coll_dict[key] = "true"
+                    elif value.lower() == "disabled":
+                        coll_dict[key] = "false"
+                    elif value.lower() == "forced":
+                        coll_dict[key] = "true"
 
     d: dict = dict(document)
     return PartialSettingsData(**d)

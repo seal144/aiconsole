@@ -22,7 +22,7 @@ from aiconsole.core.assets.materials.documentation_from_code import (
     documentation_from_code,
 )
 from aiconsole.core.assets.materials.rendered_material import RenderedMaterial
-from aiconsole.core.assets.types import Asset, AssetLocation, AssetStatus, AssetType
+from aiconsole.core.assets.types import Asset, AssetLocation, AssetType
 from aiconsole.utils.events import InternalEvent, internal_events
 
 if TYPE_CHECKING:
@@ -113,7 +113,9 @@ class Material(Asset):
             else:
                 raise ValueError("No callable content function found!")
         except Exception:
-            await internal_events().emit(MaterialRenderErrorEvent(), details=f"Error in DYNAMIC_TEXT material `{self.id}`")
+            await internal_events().emit(
+                MaterialRenderErrorEvent(), details=f"Error in DYNAMIC_TEXT material `{self.id}`"
+            )
             error_details = RenderedMaterial(id=self.id, content="", error=traceback.format_exc())
             raise ValueError("Error in Dynamic Note material", error_details)
 
@@ -126,7 +128,3 @@ class Material(Asset):
             await internal_events().emit(MaterialRenderErrorEvent(), details=f"Error in API material `{self.id}`")
             error_details = RenderedMaterial(id=self.id, content="", error=traceback.format_exc())
             raise ValueError("Error in Python API material", error_details)
-
-
-class MaterialWithStatus(Material):
-    status: AssetStatus = AssetStatus.ENABLED

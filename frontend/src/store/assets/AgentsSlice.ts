@@ -29,7 +29,7 @@ export const createAgentsSlice: StateCreator<EditablesStore, [], [], AgentsSlice
   agents: [],
   initAgents: async () => {
     if (useProjectStore.getState().isProjectOpen) {
-      const agents = await AssetsAPI.fetchEditableObjects<Agent>('agent');
+      const agents = await AssetsAPI.fetchAssets<Agent>('agent');
 
       set({
         agents,

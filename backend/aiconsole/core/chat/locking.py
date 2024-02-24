@@ -21,9 +21,9 @@ from aiconsole.core.chat.chat_mutations import (
 from aiconsole.core.chat.chat_mutator import ChatMutator
 from aiconsole.core.chat.load_chat_history import load_chat_history
 from aiconsole.core.chat.save_chat_history import save_chat_history
-from aiconsole.core.chat.types import Chat
+from aiconsole.core.chat.types import AICChat
 
-chats: dict[str, Chat] = {}
+chats: dict[str, AICChat] = {}
 lock_events: dict[str, asyncio.Event] = defaultdict(asyncio.Event)
 
 lock_timeout = 30  # Time in seconds to wait for the lock
@@ -92,7 +92,7 @@ class DefaultChatMutator(ChatMutator):
         self.connection = connection
 
     @property
-    def chat(self) -> Chat:
+    def chat(self) -> AICChat:
         return chats[self.chat_id]
 
     async def mutate(self, mutation: ChatMutation) -> None:
@@ -143,7 +143,7 @@ class SequentialChatMutator(ChatMutator):
         self._chat = None
 
     @property
-    def chat(self) -> Chat:
+    def chat(self) -> AICChat:
         return self.mutator.chat
 
     async def mutate(self, mutation: ChatMutation) -> None:
@@ -168,6 +168,6 @@ class SequentialChatMutator(ChatMutator):
         _waiting_mutations[self.mutator.chat_id].append(f())
         _check_mutation_queue(self.mutator.chat_id)
 
-    async def read(self) -> Chat:
+    async def read(self) -> AICChat:
         await self.wait_for_all_mutations()
         return await _read_chat_outside_of_lock(chat_id=self.mutator.chat_id)

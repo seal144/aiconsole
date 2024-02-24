@@ -19,24 +19,18 @@ import { ContextMenu, ContextMenuRef } from '@/components/common/ContextMenu';
 import { Icon } from '@/components/common/icons/Icon';
 import { useToastsStore } from '@/store/common/useToastsStore';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
-import { Asset, EditableObject, EditableObjectType } from '@/types/assets/assetTypes';
+import { Asset, AssetType } from '@/types/assets/assetTypes';
 import { AICChat } from '@/types/assets/chatTypes';
 import { cn } from '@/utils/common/cn';
 import { convertNameToId } from '@/utils/assets/convertNameToId';
-import { getEditableObjectIcon } from '@/utils/assets/getEditableObjectIcon';
+import { getAssetIcon } from '@/utils/assets/getAssetIcon';
 import { useAssets } from '@/utils/assets/useAssets';
-import { useEditableObjectContextMenu } from '@/utils/assets/useContextMenuForEditable';
+import { useAssetContextMenu } from '@/utils/assets/useContextMenuForEditable';
 import { MoreVertical } from 'lucide-react';
 import { KeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 
-const SideBarItem = ({
-  editableObjectType,
-  editableObject,
-}: {
-  editableObject: EditableObject;
-  editableObjectType: EditableObjectType;
-}) => {
+const SideBarItem = ({ assetType, editableObject }: { editableObject: Asset; assetType: AssetType }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -51,14 +45,14 @@ const SideBarItem = ({
 
   const showToast = useToastsStore((state) => state.showToast);
 
-  const { renameAsset } = useAssets(editableObjectType);
-  const menuItems = useEditableObjectContextMenu({
-    editableObjectType: editableObjectType,
-    editable: editableObject,
+  const { renameAsset } = useAssets(assetType);
+  const menuItems = useAssetContextMenu({
+    assetType: assetType,
+    asset: editableObject,
     setIsEditing,
   });
 
-  const EditableIcon = getEditableObjectIcon(editableObject);
+  const EditableIcon = getAssetIcon(editableObject);
 
   const [inputText, setInputText] = useState(editableObject.name);
 
@@ -91,25 +85,25 @@ const SideBarItem = ({
         name: inputText,
       };
 
-      if (editableObjectType === 'chat') {
-        const chat = await AssetsAPI.fetchEditableObject<AICChat>({
-          editableObjectType,
+      if (assetType === 'chat') {
+        const chat = await AssetsAPI.fetchAsset<AICChat>({
+          assetType,
           id: previousObjectId,
         });
         editableObject = { ...chat, name: inputText, title_edited: true } as AICChat;
         await renameChat(editableObject as AICChat);
-        if (location.pathname !== `/${editableObjectType}s/${chat.id}`) {
-          navigate(`/${editableObjectType}s/${chat.id}`);
+        if (location.pathname !== `/${assetType}s/${chat.id}`) {
+          navigate(`/${assetType}s/${chat.id}`);
         }
       } else {
         await renameAsset(previousObjectId, editableObject as Asset);
-        if (location.pathname === `/${editableObjectType}s/${previousObjectId}`) {
-          navigate(`/${editableObjectType}s/${newId}`);
+        if (location.pathname === `/${assetType}s/${previousObjectId}`) {
+          navigate(`/${assetType}s/${newId}`);
         }
       }
       showToast({
         title: 'Overwritten',
-        message: `The ${editableObjectType} has been successfully overwritten.`,
+        message: `The ${assetType} has been successfully overwritten.`,
         variant: 'success',
       });
     }
@@ -139,21 +133,19 @@ const SideBarItem = ({
     }
   };
 
-  let forced = false;
   let disabled = false;
 
-  if (editableObjectType === 'agent' || editableObjectType === 'material') {
+  if (assetType === 'agent' || assetType === 'material') {
     const asset: Asset = editableObject as Asset;
-    forced = asset.status === 'forced';
-    disabled = asset.status === 'disabled';
+    disabled = !asset.enabled;
   }
 
   const triggerRef = useRef<ContextMenuRef>(null);
 
   const handleLinkClick = () => {
-    if (editableObjectType === 'chat' && editableObject.id !== useChatStore.getState().chat?.id) {
+    if (assetType === 'chat' && editableObject.id !== useChatStore.getState().chat?.id) {
       setIsChatLoading(true);
-    } else if (editableObjectType !== 'chat') {
+    } else if (assetType !== 'chat') {
       setLastUsedChat(undefined);
     }
   };
@@ -174,8 +166,8 @@ const SideBarItem = ({
       <div className="max-w-[295px] mb-[5px]">
         <div
           className={cn(
-            forced && editableObjectType === 'agent' && 'text-agent',
-            forced && editableObjectType === 'material' && 'text-material',
+            false && assetType === 'agent' && 'text-agent',
+            false && assetType === 'material' && 'text-material',
             disabled && 'opacity-50',
           )}
         >
@@ -188,7 +180,7 @@ const SideBarItem = ({
                 },
               );
             }}
-            to={`/${editableObjectType}s/${editableObject.id}`}
+            to={`/${assetType}s/${editableObject.id}`}
             onClick={handleLinkClick}
           >
             {({ isActive }) => (
@@ -197,9 +189,9 @@ const SideBarItem = ({
                   icon={EditableIcon}
                   className={cn(
                     'min-w-[24px] min-h-[24px] w-[24px] h-[24px]',
-                    editableObjectType === 'chat' && 'text-chat',
-                    editableObjectType === 'agent' && 'text-agent',
-                    editableObjectType === 'material' && 'text-material',
+                    assetType === 'chat' && 'text-chat',
+                    assetType === 'agent' && 'text-agent',
+                    assetType === 'material' && 'text-material',
                   )}
                 />
                 {/* TODO: add validation for empty input value */}
@@ -231,9 +223,9 @@ const SideBarItem = ({
                 <div
                   className={cn(
                     'absolute bottom-[-15px] hidden left-[0px] opacity-[0.3] blur-[10px]  h-[34px] w-[34px] group-hover:block',
-                    editableObjectType === 'chat' && 'fill-chat bg-chat',
-                    editableObjectType === 'agent' && 'fill-agent bg-agent',
-                    editableObjectType === 'material' && 'fill-material bg-material',
+                    assetType === 'chat' && 'fill-chat bg-chat',
+                    assetType === 'agent' && 'fill-agent bg-agent',
+                    assetType === 'material' && 'fill-material bg-material',
                     {
                       block: isActive,
                     },

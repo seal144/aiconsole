@@ -15,7 +15,7 @@ export const createChatsSlice: StateCreator<EditablesStore, [], [], ChatsSlice> 
     set({ chats: [] });
     if (!useProjectStore.getState().isProjectOpen) return;
     try {
-      const chats: AICChatHeadline[] = await AssetsAPI.fetchEditableObjects<AICChatHeadline>('chat');
+      const chats: AICChatHeadline[] = await AssetsAPI.fetchAssets<AICChatHeadline>('chat');
       set(() => ({
         chats: chats,
       }));

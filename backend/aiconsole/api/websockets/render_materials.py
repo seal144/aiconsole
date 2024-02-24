@@ -9,7 +9,7 @@ from aiconsole.core.assets.materials.content_evaluation_context import (
 )
 from aiconsole.core.assets.materials.material import Material, MaterialRenderErrorEvent
 from aiconsole.core.assets.materials.rendered_material import RenderedMaterial
-from aiconsole.core.chat.types import Chat
+from aiconsole.core.chat.types import AICChat
 from aiconsole.core.project import project
 from aiconsole.utils.events import InternalEvent, internal_events
 
@@ -21,9 +21,11 @@ class MaterialsAndRenderedMaterials:
 
 
 async def render_materials(
-    materials_ids: list[str], chat: Chat, agent: AICAgent, init: bool = False
+    materials_ids: list[str], chat: AICChat, agent: AICAgent, init: bool = False
 ) -> MaterialsAndRenderedMaterials:
-    events_to_sub: list[type[InternalEvent]] = [MaterialRenderErrorEvent, ]
+    events_to_sub: list[type[InternalEvent]] = [
+        MaterialRenderErrorEvent,
+    ]
 
     async def _notify(event, **kwargs):
         if isinstance(event, MaterialRenderErrorEvent):
@@ -31,6 +33,7 @@ async def render_materials(
                 ErrorServerMessage(error=f"Incorrect material. {kwargs.get('details')}"),
                 chat.id,
             )
+
     try:
         for event in events_to_sub:
             internal_events().subscribe(

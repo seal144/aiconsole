@@ -19,11 +19,10 @@ from enum import Enum
 
 from pydantic import BaseModel
 
-from aiconsole.core.assets.materials.material import Material
-from aiconsole.core.assets.types import AssetLocation, AssetStatus, EditableObject
+from aiconsole.core.assets.types import Asset
 
 
-class EditableObjectType(str):
+class AssetType(str):
     pass
 
 
@@ -36,33 +35,29 @@ This, and execution modes should be assets / editable objects
 """
 
 
-class EditableObjectLocationLevel(str, Enum):
+class AssetLocationLevel(str, Enum):
     AICONSOLE_CORE = "aiconsole"
     WORKSPACE_DIR = "workspace"
     PROJECT_DIR = "project"
 
 
-class EditableObjectLocation(BaseModel):
-    level: EditableObjectLocationLevel
+class AssetLocation(BaseModel):
+    level: AssetLocationLevel
     id: str
     private: bool = False
 
 
-class Adapter(EditableObject):
+class Adapter(Asset):
     id: str
     name: str
     version: str = "0.0.1"
     defined_in: AssetLocation
 
-    async def fetch_objects(self, type: EditableObjectType) -> list[EditableObject]:
+    async def fetch_objects(self, type: AssetType) -> list[Asset]:
         return []
 
-    async def fetch_object(self, type: EditableObjectType, id: str) -> EditableObject:
+    async def fetch_object(self, type: AssetType, id: str) -> Asset:
         raise NotImplementedError
 
-    async def save_obj(self, obj: EditableObject):
+    async def save_obj(self, obj: Asset):
         raise NotImplementedError
-
-
-class MaterialWithStatus(Material):
-    status: AssetStatus = AssetStatus.ENABLED

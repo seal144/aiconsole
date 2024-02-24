@@ -14,6 +14,7 @@ from aiconsole.core.chat.execution_modes.utils.import_and_validate_execution_mod
     import_and_validate_execution_mode,
 )
 from aiconsole.core.gpt.consts import ANALYSIS_GPT_MODE
+from aiconsole.core.gpt.types import GPTRole
 
 _log = logging.getLogger(__name__)
 
@@ -31,6 +32,8 @@ _director_agent = AICAgent(
 
 
 async def do_process_chat(chat_mutator: ChatMutator):
+    role: GPTRole
+
     agent = _director_agent
 
     if chat_mutator.chat.chat_options.agent_id and not chat_mutator.chat.chat_options.let_ai_add_extra_materials:

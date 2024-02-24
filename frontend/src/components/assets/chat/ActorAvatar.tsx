@@ -24,8 +24,8 @@ export function ActorAvatar({ actorId, title, type, className, actorType }: Acto
       'w-20 h-20 ': type === 'large',
       'w-16 h-16': type === 'small',
       'w-6 h-6': type === 'extraSmall',
-      'border-[2px] border-agent shadow-agent': agent?.status === 'forced',
-      'shadow-md': agent?.status !== 'forced',
+      'border-[2px] border-agent shadow-agent': false,
+      'shadow-md': true,
       hidden: !actorId,
     });
   } else if (actorType === 'user') {

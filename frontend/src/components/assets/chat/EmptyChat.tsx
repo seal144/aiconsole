@@ -27,8 +27,8 @@ import { useEditablesStore } from '@/store/assets/useEditablesStore';
 import { useProjectStore } from '@/store/projects/useProjectStore';
 import { Agent, Asset, AssetType } from '@/types/assets/assetTypes';
 import { cn } from '@/utils/common/cn';
-import { getEditableObjectIcon } from '@/utils/assets/getEditableObjectIcon';
-import { useEditableObjectContextMenu } from '@/utils/assets/useContextMenuForEditable';
+import { getAssetIcon } from '@/utils/assets/getAssetIcon';
+import { useAssetContextMenu } from '@/utils/assets/useContextMenuForEditable';
 import { useProjectContextMenu } from '@/utils/projects/useProjectContextMenu';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -37,7 +37,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { ActorAvatar } from './ActorAvatar';
 
 function EmptyChatAgentAvatar({ agent }: { agent: Agent }) {
-  const menuItems = useEditableObjectContextMenu({ editableObjectType: 'agent', editable: agent });
+  const menuItems = useAssetContextMenu({ assetType: 'agent', asset: agent });
   const contextMenuRef = useRef<ContextMenuRef>(null);
   const handleClick = (event: MouseEvent) => {
     contextMenuRef.current?.handleTriggerClick(event);
@@ -51,7 +51,7 @@ function EmptyChatAgentAvatar({ agent }: { agent: Agent }) {
         className={cn(
           'flex flex-col justify-center items-center text-gray-400  hover:text-gray-300 cursor-pointer min-w-[110px]',
           {
-            'text-agent': agent.status === 'forced',
+            'text-agent': false,
           },
         )}
       >
@@ -63,8 +63,8 @@ function EmptyChatAgentAvatar({ agent }: { agent: Agent }) {
 }
 
 function EmptyChatAssetLink({ assetType, asset }: { assetType: AssetType; asset: Asset }) {
-  const menuItems = useEditableObjectContextMenu({ editableObjectType: assetType, editable: asset });
-  const Icon = getEditableObjectIcon(asset);
+  const menuItems = useAssetContextMenu({ assetType: assetType, asset: asset });
+  const Icon = getAssetIcon(asset);
   const contextMenuRef = useRef<ContextMenuRef>(null);
   const handleClick = (event: MouseEvent) => {
     contextMenuRef.current?.handleTriggerClick(event);
@@ -89,11 +89,9 @@ export const EmptyChat = () => {
   const agents = useEditablesStore((state) => state.agents);
   const materials = useEditablesStore((state) => state.materials || []);
   const { menuItems, isDialogOpen, closeDialog } = useProjectContextMenu();
-  const aiChoiceMaterials = materials.filter((m) => m.status === 'enabled');
-  const activeSystemAgents = agents.filter((agent) => agent.status !== 'disabled' && agent.id !== 'user');
-  const forcedMaterials = materials.filter((m) => m.status === 'forced');
+  const aiChoiceMaterials = materials.filter((m) => m.enabled);
+  const activeSystemAgents = agents.filter((agent) => !agent.enabled && agent.id !== 'user');
   const triggerRef = useRef<ContextMenuRef>(null);
-  const hasForcedMaterials = forcedMaterials.length > 0;
   const hasAiChoiceMaterials = aiChoiceMaterials.length > 0;
   const submitCommand = useChatStore((state) => state.submitCommand);
   const setActiveTab = useSidebarStore((state) => state.setActiveTab);
@@ -155,23 +153,6 @@ export const EmptyChat = () => {
 
       <div className="max-w-[700px]">
         <p className="mb-4 text-center text-[14px] text-gray-400">Custom materials in the project:</p>
-        {hasForcedMaterials && (
-          <div
-            className={cn('flex gap-[14px] py-[10px]', {
-              'border-b border-gray-600': hasAiChoiceMaterials,
-            })}
-          >
-            <p className="text-[14px] text-gray-400 py-2 min-w-[116px]">User enforced:</p>
-            <div className="flex flex-wrap gap-[20px]">
-              {forcedMaterials.map(
-                (material, index) =>
-                  index < MAX_ASSETS_TO_DISPLAY && (
-                    <EmptyChatAssetLink assetType="material" asset={material} key={material.id} />
-                  ),
-              )}
-            </div>
-          </div>
-        )}
         {hasAiChoiceMaterials && (
           <div className="flex gap-[14px] py-[10px]">
             <p className="text-[14px] py-2 text-gray-400 min-w-[116px]">AI choice:</p>
@@ -185,7 +166,7 @@ export const EmptyChat = () => {
             </div>
           </div>
         )}
-        {hasAiChoiceMaterials || hasForcedMaterials ? (
+        {hasAiChoiceMaterials ? (
           <p
             className=" text-gray-400 text-right text-[14px] cursor-pointer hover:text-gray-300"
             onClick={() => setActiveTab('materials')}

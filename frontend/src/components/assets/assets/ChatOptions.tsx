@@ -19,7 +19,7 @@ import { useChatStore } from '@/store/assets/chat/useChatStore';
 import { useEditablesStore } from '@/store/assets/useEditablesStore';
 import { Icon } from '@/components/common/icons/Icon';
 import { useClickOutside } from '@/utils/common/useClickOutside';
-import { getEditableObjectIcon } from '@/utils/assets/getEditableObjectIcon';
+import { getAssetIcon } from '@/utils/assets/getAssetIcon';
 import { Agent, Material } from '@/types/assets/assetTypes';
 import { ActorAvatar } from '../chat/ActorAvatar';
 import clsx from 'clsx';
@@ -34,7 +34,7 @@ type ChatOptionsProps = {
 };
 
 const MaterialIcon = ({ option }: { option: Material }) => {
-  const OptionIcon = getEditableObjectIcon(option);
+  const OptionIcon = getAssetIcon(option);
 
   return <Icon icon={OptionIcon} className="w-6 h-6 min-h-6 min-w-6 text-material flex-shrink-0" />;
 };
@@ -61,7 +61,7 @@ const ChatOptions = ({
   }, [materialsOptions]);
 
   useEffect(() => {
-    const filtredAgents = agents.filter((item) => item.status === 'enabled');
+    const filtredAgents = agents.filter((item) => item.enabled);
     setFilteredAgentsOptions(filtredAgents);
   }, [agents]);
 
@@ -79,9 +79,7 @@ const ChatOptions = ({
 
     const regex = new RegExp(`^${inputValue}`, 'i');
     const filteredMaterialOptions = materialsOptions.filter((item) => regex.test(item.name));
-    const filteredAgentOptions = agents
-      .filter((item) => regex.test(item.name))
-      .filter((item) => item.status === 'enabled');
+    const filteredAgentOptions = agents.filter((item) => regex.test(item.name)).filter((item) => item.enabled);
     setFilteredAgentsOptions(filteredAgentOptions);
     setFilteredMaterialsOptions(filteredMaterialOptions);
   };

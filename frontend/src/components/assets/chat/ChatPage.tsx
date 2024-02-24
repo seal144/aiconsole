@@ -27,7 +27,7 @@ import { useEditablesStore } from '@/store/assets/useEditablesStore';
 import { useProjectStore } from '@/store/projects/useProjectStore';
 import { AICChat } from '@/types/assets/chatTypes';
 import { cn } from '@/utils/common/cn';
-import { useEditableObjectContextMenu } from '@/utils/assets/useContextMenuForEditable';
+import { useAssetContextMenu } from '@/utils/assets/useContextMenuForEditable';
 import { ArrowDown, ReplyIcon, Square } from 'lucide-react';
 import { useEffect } from 'react';
 import { unstable_useBlocker as useBlocker, useParams, useSearchParams } from 'react-router-dom';
@@ -76,7 +76,7 @@ export function ChatPage() {
   // Monitors params and initialises useChatStore.chat and useAssetStore.selectedAsset zustand stores
   const params = useParams();
   const id = params.id || '';
-  const editableObjectType = 'chat';
+  const assetType = 'chat';
   const searchParams = useSearchParams()[0];
   const copyId = searchParams.get('copy');
   const forceRefresh = searchParams.get('forceRefresh'); // used to force a refresh
@@ -94,7 +94,7 @@ export function ChatPage() {
   const isProjectLoading = useProjectStore((state) => state.isProjectLoading);
   const appendFilePathToCommand = useChatStore((state) => state.appendFilePathToCommand);
   const showToast = useToastsStore((state) => state.showToast);
-  const menuItems = useEditableObjectContextMenu({ editable: chat, editableObjectType: 'chat' });
+  const menuItems = useAssetContextMenu({ asset: chat, assetType: 'chat' });
   const renameChat = useChatStore((state) => state.renameChat);
   const setChat = useChatStore((state) => state.setChat);
   const hasAnyCommandInput = command.trim() !== '';
@@ -137,7 +137,7 @@ export function ChatPage() {
   // Acquire the initial object
   useEffect(() => {
     if (copyId) {
-      AssetsAPI.fetchEditableObject<AICChat>({ editableObjectType, id: copyId }).then((orgChat) => {
+      AssetsAPI.fetchAsset<AICChat>({ assetType, id: copyId }).then((orgChat) => {
         orgChat.id = uuidv4();
         orgChat.name = orgChat.name + ' (copy)';
         orgChat.title_edited = true;
@@ -145,7 +145,7 @@ export function ChatPage() {
       });
     } else {
       //For id === 'new' This will get a default new asset
-      AssetsAPI.fetchEditableObject<AICChat>({ editableObjectType, id }).then((chat) => {
+      AssetsAPI.fetchAsset<AICChat>({ assetType, id }).then((chat) => {
         setChat(chat);
       });
     }
@@ -154,7 +154,7 @@ export function ChatPage() {
       AssetsAPI.closeChat(id);
       useChatStore.setState({ chat: undefined });
     };
-  }, [copyId, id, editableObjectType, forceRefresh, setChat]);
+  }, [copyId, id, assetType, forceRefresh, setChat]);
 
   const isLastMessageFromUser =
     chat?.message_groups.length && chat.message_groups[chat.message_groups.length - 1].actor_id.type === 'user';
@@ -249,7 +249,7 @@ export function ChatPage() {
   return (
     <div className="flex flex-col w-full h-full max-h-full overflow-hidden">
       <ContextMenu options={menuItems}>
-        <EditorHeader editableObjectType="chat" editable={chat} onRename={handleRename} isChanged={false} />
+        <EditorHeader assetType="chat" editable={chat} onRename={handleRename} isChanged={false} />
       </ContextMenu>
       <div className="flex flex-col overflow-hidden h-full w-full">
         <div className="flex-1 overflow-hidden">

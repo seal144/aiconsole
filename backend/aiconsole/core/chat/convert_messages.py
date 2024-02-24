@@ -16,7 +16,7 @@
 
 import json
 
-from aiconsole.core.chat.types import AICMessage, AICMessageGroup, Chat
+from aiconsole.core.chat.types import AICChat, AICMessage, AICMessageGroup
 from aiconsole.core.gpt.types import (
     GPTFunctionCall,
     GPTRequestMessage,
@@ -72,7 +72,7 @@ def convert_message(group: AICMessageGroup, message: AICMessage) -> list[GPTRequ
     return result
 
 
-def convert_messages(chat: Chat) -> list[GPTRequestMessage]:
+def convert_messages(chat: AICChat) -> list[GPTRequestMessage]:
     last_system_message = None
 
     messages: list[GPTRequestMessage] = []

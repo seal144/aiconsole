@@ -22,10 +22,10 @@ from aiconsole.api.endpoints.services import Agents, AssetWithGivenNameAlreadyEx
 from aiconsole.api.utils.asset_exists import asset_exists, asset_path
 from aiconsole.api.utils.asset_get import asset_get
 from aiconsole.api.utils.asset_status_change import asset_status_change
-from aiconsole.api.utils.status_change_post_body import StatusChangePostBody
-from aiconsole.core.assets.agents.agent import AgentWithStatus, AICAgent
+from aiconsole.api.utils.enabld_flag_change_post_body import EnabledFlagChangePostBody
+from aiconsole.core.assets.agents.agent import AICAgent
 from aiconsole.core.assets.fs.exceptions import UserIsAnInvalidAgentIdError
-from aiconsole.core.assets.types import AssetLocation, AssetStatus, AssetType
+from aiconsole.core.assets.types import AssetLocation, AssetType
 from aiconsole.core.project import project
 from aiconsole.core.project.paths import (
     get_core_assets_directory,
@@ -42,12 +42,12 @@ async def get_agent(request: Request, agent_id: str):
         request,
         AssetType.AGENT,
         agent_id,
-        lambda: AgentWithStatus(
+        lambda: AICAgent(
             id="new_agent",
             name="New Agent",
             usage="",
             usage_examples=[],
-            status=AssetStatus.ENABLED,
+            enabled=True,
             defined_in=AssetLocation.PROJECT_DIR,
             system="",
             override=False,
@@ -81,7 +81,7 @@ async def create_agent(agent_id: str, agent: AICAgent, agents_service: Agents = 
 
 
 @router.post("/{agent_id}/status-change")
-async def agent_status_change(agent_id: str, body: StatusChangePostBody):
+async def agent_status_change(agent_id: str, body: EnabledFlagChangePostBody):
     await asset_status_change(AssetType.AGENT, agent_id, body)
 
 

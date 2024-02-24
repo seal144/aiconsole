@@ -16,39 +16,30 @@
 
 import { StateCreator } from 'zustand';
 
-import { Asset, EditableObject, EditableObjectType, EditableObjectTypePlural } from '@/types/assets/assetTypes';
+import { Asset, AssetType, AssetTypePlural } from '@/types/assets/assetTypes';
 import { AssetsAPI } from '../../api/api/AssetsAPI';
 import { EditablesStore } from './useEditablesStore';
-import { getEditableObjectType } from '@/utils/assets/getEditableObjectType';
-import { isAsset } from '@/utils/assets/isAsset';
+import { getAssetType } from '@/utils/assets/getAssetType';
 
 export type EditablesSlice = {
-  deleteEditableObject: (editableObjectType: EditableObjectType, id: string) => Promise<void>;
-  canOpenFinderForEditable(editable: EditableObject): boolean;
-  openFinderForEditable: (editable: EditableObject) => void;
+  deleteAsset: (assetType: AssetType, id: string) => Promise<void>;
+  canOpenFinderForEditable(editable: Asset): boolean;
+  openFinderForEditable: (editable: Asset) => void;
 };
 
 export const createEditablesSlice: StateCreator<EditablesStore, [], [], EditablesSlice> = (set) => ({
-  deleteEditableObject: async (editableObjectType: EditableObjectType, id: string) => {
-    await AssetsAPI.deleteEditableObject(editableObjectType, id);
-    const editableObjectTypePlural = (editableObjectType + 's') as EditableObjectTypePlural;
+  deleteAsset: async (assetType: AssetType, id: string) => {
+    await AssetsAPI.deleteAsset(assetType, id);
+    const assetTypePlural = (assetType + 's') as AssetTypePlural;
 
     set((state) => ({
-      [editableObjectTypePlural]: (state[editableObjectTypePlural] || []).filter(
-        (editableObject) => editableObject.id !== id,
-      ),
+      [assetTypePlural]: (state[assetTypePlural] || []).filter((editableObject) => editableObject.id !== id),
     }));
   },
-  canOpenFinderForEditable: (editable: EditableObject) => {
-    const editableObjectType = getEditableObjectType(editable);
-
-    const isActuallyAnAsset = isAsset(editableObjectType);
-
-    if (isActuallyAnAsset) {
-      const asset = editable as Asset;
-      if (asset.defined_in === 'aiconsole') {
-        return false;
-      }
+  canOpenFinderForEditable: (editable: Asset) => {
+    const asset = editable as Asset;
+    if (asset.defined_in === 'aiconsole') {
+      return false;
     }
 
     if (window?.electron?.openFinder === undefined) {
@@ -57,13 +48,13 @@ export const createEditablesSlice: StateCreator<EditablesStore, [], [], Editable
 
     return true;
   },
-  openFinderForEditable: async (editable: EditableObject) => {
-    const type = getEditableObjectType(editable);
+  openFinderForEditable: async (editable: Asset) => {
+    const type = getAssetType(editable);
     if (type === undefined) {
       return;
     }
 
-    const path = await AssetsAPI.getPathForEditableObject(type, editable.id);
+    const path = await AssetsAPI.getPathForAsset(type, editable.id);
     window?.electron?.openFinder?.(path || '');
   },
 });

@@ -21,7 +21,7 @@ from aiconsole.core.chat.list_possible_historic_chat_ids import (
     list_possible_historic_chat_ids,
 )
 from aiconsole.core.chat.load_chat_history import load_chat_history
-from aiconsole.core.chat.types import ChatHeadline
+from aiconsole.core.chat.types import AICChatHeadline
 
 _log = logging.getLogger(__name__)
 
@@ -36,9 +36,18 @@ async def get_history_headlines():
 
             if chat:
                 headlines.append(
-                    ChatHeadline(id=chat_id, name=chat.name, last_modified=chat.last_modified).model_dump(
-                        exclude_none=True
-                    )
+                    AICChatHeadline(
+                        id=chat_id,
+                        name=chat.name,
+                        last_modified=chat.last_modified,
+                        usage=chat.usage,
+                        usage_examples=chat.usage_examples,
+                        enabled=chat.enabled,
+                        override=chat.override,
+                        defined_in=chat.defined_in,
+                        version=chat.version,
+                        type=chat.type,
+                    ).model_dump(exclude_none=True)
                 )
 
         except Exception as e:

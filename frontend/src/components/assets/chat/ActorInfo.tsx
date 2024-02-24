@@ -20,7 +20,7 @@ import { Link } from 'react-router-dom';
 
 import { useEditablesStore } from '@/store/assets/useEditablesStore';
 import { useUserContextMenu } from '@/utils/common/useUserContextMenu';
-import { useEditableObjectContextMenu } from '@/utils/assets/useContextMenuForEditable';
+import { useAssetContextMenu } from '@/utils/assets/useContextMenuForEditable';
 import { ActorAvatar } from './ActorAvatar';
 import { ContextMenu, ContextMenuRef } from '@/components/common/ContextMenu';
 import { cn } from '@/utils/common/cn';
@@ -39,7 +39,7 @@ function AgentInfoMaterialLink({
 }) {
   const materials = useEditablesStore((state) => state.materials) || [];
   const material = materials.find((m) => m.id === materialId);
-  const menuItems = useEditableObjectContextMenu({ editableObjectType: 'material', editable: material });
+  const menuItems = useAssetContextMenu({ assetType: 'material', asset: material });
 
   return (
     <ContextMenu options={menuItems}>
@@ -79,11 +79,19 @@ export function ActorInfo({
   const agent = agents.find((m) => m.id === actorId.id);
   const userMenuItems = useUserContextMenu();
 
-  const editableMenuItems = useEditableObjectContextMenu({
-    editableObjectType: 'agent',
-    editable: agent || {
+  const editableMenuItems = useAssetContextMenu({
+    assetType: 'agent',
+    asset: agent || {
+      type: 'agent',
       id: actorId.id,
       name: actorId.id,
+      version: '',
+      defined_in: 'project',
+      usage: '',
+      usage_examples: [],
+      enabled_by_default: false,
+      enabled: true,
+      override: false,
     },
   });
 

@@ -47,7 +47,7 @@ export const createChatSlice: StateCreator<ChatStore, [], [], ChatSlice> = (set,
     set({ chat });
   },
   renameChat: async (newChat: AICChat) => {
-    await AssetsAPI.updateEditableObject('chat', newChat, newChat.id);
+    await AssetsAPI.updateAsset('chat', newChat, newChat.id);
     get().setChat(newChat);
 
     //If it's chat we need to reload chat history because there is no autoreload on change for chats

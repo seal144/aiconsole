@@ -18,7 +18,7 @@ import os
 from aiconsole.api.websockets.base_server_message import BaseServerMessage
 from aiconsole.core.assets.types import AssetType
 from aiconsole.core.chat.chat_mutations import ChatMutation
-from aiconsole.core.chat.types import Chat
+from aiconsole.core.chat.types import AICChat
 
 
 class NotificationServerMessage(BaseServerMessage):
@@ -94,4 +94,4 @@ class ResponseServerMessage(BaseServerMessage):
 
 
 class ChatOpenedServerMessage(BaseServerMessage):
-    chat: Chat
+    chat: AICChat

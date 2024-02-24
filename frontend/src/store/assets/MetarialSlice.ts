@@ -30,7 +30,7 @@ export const createMaterialSlice: StateCreator<EditablesStore, [], [], MaterialS
   materials: undefined,
   initMaterials: async () => {
     if (useProjectStore.getState().isProjectOpen) {
-      const materials = await AssetsAPI.fetchEditableObjects<Material>('material');
+      const materials = await AssetsAPI.fetchAssets<Material>('material');
 
       //sort alphabetically
       materials.sort((a, b) => a.name.localeCompare(b.name));
@@ -44,8 +44,8 @@ export const createMaterialSlice: StateCreator<EditablesStore, [], [], MaterialS
 
       //sort by status (forced first, disabled last, enabled in the middle)
       materials.sort((a, b) => {
-        const aStatus = a.status === 'forced' ? 0 : a.status === 'enabled' ? 1 : 2;
-        const bStatus = b.status === 'forced' ? 0 : b.status === 'enabled' ? 1 : 2;
+        const aStatus = a.enabled ? 1 : 2;
+        const bStatus = b.enabled ? 1 : 2;
         return aStatus - bStatus;
       });
       set({

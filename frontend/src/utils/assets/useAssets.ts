@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 
 import { AssetsAPI } from '@/api/api/AssetsAPI';
 import { useAssetStore } from '@/store/assets/asset/useAssetStore';
-import { Asset, EditableObjectType } from '@/types/assets/assetTypes';
+import { Asset, AssetType } from '@/types/assets/assetTypes';
 import { useToastsStore } from '@/store/common/useToastsStore';
 
-export const useAssets = (assetType: EditableObjectType) => {
+export const useAssets = (assetType: AssetType) => {
   const asset = useAssetStore((state) => state.selectedAsset);
   const lastSavedAsset = useAssetStore((state) => state.lastSavedSelectedAsset);
   const showToast = useToastsStore((state) => state.showToast);
@@ -14,24 +14,24 @@ export const useAssets = (assetType: EditableObjectType) => {
     if (!asset || !lastSavedAsset) {
       return false;
     }
-    return asset.status !== lastSavedAsset.status;
+    return asset.enabled !== lastSavedAsset.enabled;
   }, [asset, lastSavedAsset]);
 
   const updateStatusIfNecessary = async () => {
     if (assetType === 'chat') return;
     if (isAssetStatusChanged && asset) {
-      await AssetsAPI.setAssetStatus(assetType, asset.id, asset.status);
+      await AssetsAPI.setAssetEnabledFlag(assetType, asset.id, asset.enabled);
 
       showToast({
         title: 'Status changed',
-        message: `Status changed to ${asset.status}`,
+        message: `Status changed to ${asset.enabled}`,
         variant: 'success',
       });
     }
   };
 
   const renameAsset = async (previousAssetId: string, updatedAsset: Asset) => {
-    await AssetsAPI.updateEditableObject(assetType, updatedAsset, previousAssetId);
+    await AssetsAPI.updateAsset(assetType, updatedAsset, previousAssetId);
     await updateStatusIfNecessary();
   };
 

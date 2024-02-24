@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { EditableObjectSchema, GPTRoleSchema } from './assetTypes'; // Import necessary types and schemas
+import { AssetSchema, GPTRoleSchema } from './assetTypes'; // Import necessary types and schemas
 
 export const AICToolCallSchema = z.object({
   id: z.string(),
@@ -43,7 +43,7 @@ export const AICMessageGroupSchema = z.object({
 
 export type AICMessageGroup = z.infer<typeof AICMessageGroupSchema>;
 
-export const AICChatHeadlineSchema = EditableObjectSchema.extend({
+export const AICChatHeadlineSchema = AssetSchema.extend({
   last_modified: z.string(),
 });
 
@@ -54,7 +54,7 @@ const AICChatOptionsSchema = z.object({
   materials_ids: z.array(z.string()).default([]),
 });
 
-export const AICChatSchema = EditableObjectSchema.extend({
+export const AICChatSchema = AssetSchema.extend({
   lock_id: z.string().optional(),
   title_edited: z.boolean(),
   last_modified: z.string(),

@@ -14,9 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EditableObject, EditableObjectType, Material, MaterialContentType } from '@/types/assets/assetTypes';
+import { Asset, AssetType, Material, MaterialContentType } from '@/types/assets/assetTypes';
 import { Blocks, Bot, FileQuestion, MessageSquare, ScanText, StickyNote } from 'lucide-react';
-import { getEditableObjectType } from './getEditableObjectType';
+import { getAssetType } from './getAssetType';
 
 export const MATERIAL_CONTENT_TYPE_ICONS = {
   static_text: StickyNote,
@@ -24,14 +24,14 @@ export const MATERIAL_CONTENT_TYPE_ICONS = {
   api: Blocks,
 };
 
-export function getEditableObjectIcon(editableObject?: EditableObject | EditableObjectType) {
+export function getAssetIcon(editableObject?: Asset | AssetType) {
   let assetType;
   let contentType: MaterialContentType = 'static_text';
 
   if (typeof editableObject === 'string') {
     assetType = editableObject;
   } else {
-    assetType = getEditableObjectType(editableObject);
+    assetType = getAssetType(editableObject);
     if (assetType === 'material') {
       contentType = (editableObject as Material).content_type;
     }

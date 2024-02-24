@@ -26,7 +26,7 @@ import { Agent, Asset, AssetType, Material } from '@/types/assets/assetTypes';
 import { cn } from '@/utils/common/cn';
 import { localStorageTyped } from '@/utils/common/localStorage';
 import { useAssets } from '@/utils/assets/useAssets';
-import { useEditableObjectContextMenu } from '@/utils/assets/useContextMenuForEditable';
+import { useAssetContextMenu } from '@/utils/assets/useContextMenuForEditable';
 import { usePrevious } from '@mantine/hooks';
 import { CheckCheck, Trash } from 'lucide-react';
 import { AssetsAPI } from '../../../api/api/AssetsAPI';
@@ -52,7 +52,6 @@ enum SubmitButtonLabels {
 export function AssetEditor({ assetType }: { assetType: AssetType }) {
   const params = useParams();
   const id = params.id || '';
-  const editableObjectType = assetType;
   const isNew = id === 'new';
 
   const [newPath, setNewPath] = useState<string>('');
@@ -74,11 +73,10 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
   const blocker = useBlocker(isAssetChanged);
   const isPrevAssetChanged = usePrevious(isAssetChanged);
   const { updateStatusIfNecessary, isAssetStatusChanged, renameAsset } = useAssets(assetType);
-  const { handleRevert, getInitialAsset, handleRename, handleDeleteWithInteraction } =
-    useAssetEditor(editableObjectType);
-  const menuItems = useEditableObjectContextMenu({
-    editable: asset,
-    editableObjectType: assetType,
+  const { handleRevert, getInitialAsset, handleRename, handleDeleteWithInteraction } = useAssetEditor(assetType);
+  const menuItems = useAssetContextMenu({
+    asset: asset,
+    assetType: assetType,
   });
   const isSystemAsset = asset?.defined_in === 'aiconsole';
   const isProjectAsset = asset?.defined_in === 'project';
@@ -169,7 +167,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
 
     if (lastSavedAsset === undefined) {
       if (!asset.override && isNew) {
-        await AssetsAPI.saveNewEditableObject(editableObjectType, asset.id, asset);
+        await AssetsAPI.saveNewAsset(assetType, asset.id, asset);
         await updateStatusIfNecessary();
 
         showToast({
@@ -178,7 +176,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
           variant: 'success',
         });
       } else {
-        await AssetsAPI.updateEditableObject(editableObjectType, asset);
+        await AssetsAPI.updateAsset(assetType, asset);
         showToast({
           title: 'Overwritten',
           message: `The ${assetType} has been overwritten.`,
@@ -187,8 +185,8 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
       }
     } else if (lastSavedAsset && lastSavedAsset.id !== asset.id) {
       await renameAsset(lastSavedAsset.id, asset);
-      lastSavedAsset.status = 'disabled';
-      await AssetsAPI.setAssetStatus(assetType, lastSavedAsset.id, lastSavedAsset.status);
+      lastSavedAsset.enabled = false;
+      await AssetsAPI.setAssetEnabledFlag(assetType, lastSavedAsset.id, lastSavedAsset.enabled);
       showToast({
         title: 'Overwritten',
         message: `The ${assetType} has been overwritten.`,
@@ -196,7 +194,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
       });
     } else {
       if (isAssetChanged) {
-        await AssetsAPI.updateEditableObject(editableObjectType, asset);
+        await AssetsAPI.updateAsset(assetType, asset);
 
         showToast({
           title: 'Saved',
@@ -209,11 +207,11 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
 
     if (lastSavedAsset?.id !== asset.id) {
       useAssetStore.setState({ lastSavedSelectedAsset: asset });
-      setNewPath(`/${editableObjectType}s/${asset.id}`);
+      setNewPath(`/${assetType}s/${asset.id}`);
     } else {
       // Reload the asset from server
-      const newAsset = await AssetsAPI.fetchEditableObject<Material>({
-        editableObjectType,
+      const newAsset = await AssetsAPI.fetchAsset<Material>({
+        assetType,
         id: asset.id,
       });
       setSelectedAsset(newAsset);
@@ -225,7 +223,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
     if (isAvatarOverwritten && avatarData) {
       avatarFormData = new FormData();
       avatarFormData.append('avatar', avatarData);
-      await AssetsAPI.setAgentAvatar(asset.id, avatarFormData);
+      await AssetsAPI.setAssetAvatar(asset.type, asset.id, avatarFormData);
       setIsAvatarOverwritten(false);
     }
   }, [
@@ -233,7 +231,6 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
     lastSavedAsset,
     isAvatarOverwritten,
     avatarData,
-    editableObjectType,
     updateStatusIfNecessary,
     showToast,
     assetType,
@@ -296,12 +293,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
   return (
     <div className="flex flex-col w-full h-full max-h-full overflow-hidden">
       <ContextMenu options={menuItems}>
-        <EditorHeader
-          editable={asset}
-          editableObjectType={editableObjectType}
-          onRename={handleRename}
-          isChanged={isAssetChanged}
-        >
+        <EditorHeader editable={asset} assetType={assetType} onRename={handleRename} isChanged={isAssetChanged}>
           <div className="flex gap-[20px] items-center">
             <p className={cn('text-[15px]', { 'font-bold': isSystemAsset })}>
               {assetSourceLabel()} {hasCore ? <span className="text-gray-300">(overwritten)</span> : null}
@@ -348,7 +340,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
                 <div className="flex items-center justify-between w-full gap-[10px]">
                   {isProjectAsset && lastSavedAsset ? (
                     <AlertDialog
-                      title={`Are you sure you want to delete this ${editableObjectType}?`}
+                      title={`Are you sure you want to delete this ${assetType}?`}
                       confirmationButtonText="Okay"
                       onConfirm={() => handleDeleteWithInteraction(asset.id)}
                       openModalButton={

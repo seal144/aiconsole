@@ -107,7 +107,7 @@ export async function handleServerMessage(message: ServerMessage) {
     case 'ResponseServerMessage': {
       if (message.is_error) {
         AssetsAPI.closeChat(message.payload.chat_id);
-        AssetsAPI.fetchEditableObject<AICChat>({ editableObjectType: 'chat', id: uuidv4() }).then((chat) => {
+        AssetsAPI.fetchAsset<AICChat>({ assetType: 'chat', id: uuidv4() }).then((chat) => {
           useChatStore.getState().setChat(chat);
         });
       }

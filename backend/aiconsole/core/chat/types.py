@@ -20,7 +20,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, field_serializer
 
-from aiconsole.core.assets.types import EditableObject
+from aiconsole.core.assets.types import Asset, AssetType
 from aiconsole.core.chat.actor_id import ActorId
 from aiconsole.core.code_running.code_interpreters.language import LanguageStr
 from aiconsole.core.gpt.tool_definition import ToolDefinition
@@ -58,7 +58,8 @@ class AICMessageGroup(BaseModel):
     messages: list[AICMessage]
 
 
-class ChatHeadline(EditableObject):
+class AICChatHeadline(Asset):
+    type: AssetType = AssetType.CHAT
     last_modified: datetime
 
     @field_serializer("last_modified")
@@ -79,7 +80,7 @@ class AICToolCallLocation:
     tool_call: AICToolCall
 
 
-class ChatOptions(BaseModel):
+class AICChatOptions(BaseModel):
     agent_id: Optional[str] = ""
     materials_ids: Optional[list[str]] = Field(default_factory=list)
 
@@ -91,10 +92,10 @@ class ChatOptions(BaseModel):
         return self.agent_id == "" and self.materials_ids == []
 
 
-class Chat(ChatHeadline):
+class AICChat(AICChatHeadline):
     lock_id: str | None = None
     title_edited: bool = False
-    chat_options: ChatOptions = Field(default_factory=ChatOptions)
+    chat_options: AICChatOptions = Field(default_factory=AICChatOptions)
     message_groups: list[AICMessageGroup]
     is_analysis_in_progress: bool = False
 
@@ -129,4 +130,4 @@ class Command(BaseModel):
 
 
 class ChatHeadlines(BaseModel):
-    headlines: list[ChatHeadline]
+    headlines: list[AICChatHeadline]

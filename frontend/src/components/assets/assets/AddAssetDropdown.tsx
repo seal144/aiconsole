@@ -1,16 +1,16 @@
 import { Icon } from '@/components/common/icons/Icon';
 import { cn } from '@/utils/common/cn';
-import { MATERIAL_CONTENT_TYPE_ICONS, getEditableObjectIcon } from '@/utils/assets/getEditableObjectIcon';
+import { MATERIAL_CONTENT_TYPE_ICONS, getAssetIcon } from '@/utils/assets/getAssetIcon';
 import { DropdownMenu, Trigger, Item, Content } from '@radix-ui/react-dropdown-menu';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
-const ChatIcon = getEditableObjectIcon('chat');
+const ChatIcon = getAssetIcon('chat');
 const MaterialNoteIcon = MATERIAL_CONTENT_TYPE_ICONS['static_text'];
 const MaterialDynamicNoteIcon = MATERIAL_CONTENT_TYPE_ICONS['dynamic_text'];
 const MaterialPythonAPIIcon = MATERIAL_CONTENT_TYPE_ICONS['api'];
-const AgentIcon = getEditableObjectIcon('agent');
+const AgentIcon = getAssetIcon('agent');
 
 export const AddAssetDropdown = () => {
   const [opened, setOpened] = useState(false);

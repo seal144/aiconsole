@@ -56,8 +56,6 @@ async def save_asset_to_fs(asset: Asset, old_asset_id: str) -> Asset:
     with (path / f"{asset.id}.toml").open("w", encoding="utf8", errors="replace") as file:
         # FIXME: preserve formatting and comments in the file using tomlkit
 
-        model_dump = asset.model_dump(exclude_none=True)
-
         def make_sure_starts_and_ends_with_newline(s: str):
             if not s.startswith("\n"):
                 s = "\n" + s
@@ -72,7 +70,7 @@ async def save_asset_to_fs(asset: Asset, old_asset_id: str) -> Asset:
         doc.append("version", tomlkit.string(asset.version))
         doc.append("usage", tomlkit.string(asset.usage))
         doc.append("usage_examples", tomlkit.item(asset.usage_examples))
-        doc.append("default_status", tomlkit.string(asset.default_status))
+        doc.append("enabled_by_default", tomlkit.item(asset.enabled_by_default))
 
         if isinstance(asset, Material):
             material: Material = asset

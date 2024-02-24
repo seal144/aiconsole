@@ -25,7 +25,7 @@ from aiconsole.core.assets.fs.delete_asset_from_fs import delete_asset_from_fs
 from aiconsole.core.assets.fs.move_asset_in_fs import move_asset_in_fs
 from aiconsole.core.assets.fs.project_asset_exists_fs import project_asset_exists_fs
 from aiconsole.core.assets.fs.save_asset_to_fs import save_asset_to_fs
-from aiconsole.core.assets.types import Asset, AssetLocation, AssetStatus, AssetType
+from aiconsole.core.assets.types import Asset, AssetLocation, AssetType
 from aiconsole.core.project import project
 from aiconsole.core.project.paths import get_project_assets_directory
 from aiconsole.core.settings.settings import settings
@@ -64,12 +64,12 @@ class Assets:
         """
         return list(assets[0] for assets in self._assets.values())
 
-    def assets_with_status(self, status: AssetStatus) -> list[Asset]:
+    def assets_with_enabled_flag_set_to(self, enabled: bool) -> list[Asset]:
         """
         Return all loaded assets with a specific status.
         """
         return [
-            assets[0] for assets in self._assets.values() if self.get_status(self.asset_type, assets[0].id) == status
+            assets[0] for assets in self._assets.values() if self.is_enabled(self.asset_type, assets[0].id) == enabled
         ]
 
     async def save_asset(self, asset: Asset, old_asset_id: str, create: bool):
@@ -159,31 +159,31 @@ class Assets:
         )
 
     @staticmethod
-    def get_status(asset_type: AssetType, id: str) -> AssetStatus:
+    def is_enabled(asset_type: AssetType, id: str) -> bool:
         s = settings().unified_settings
 
         if asset_type == AssetType.MATERIAL:
             if id in s.materials:
                 return s.materials[id]
             asset = project.get_project_materials().get_asset(id)
-            default_status = asset.default_status if asset else AssetStatus.ENABLED
+            default_status = asset.enabled_by_default if asset else True
             return default_status
         elif asset_type == AssetType.AGENT:
             if id in s.agents:
                 return s.agents[id]
             asset = project.get_project_agents().get_asset(id)
-            default_status = asset.default_status if asset else AssetStatus.ENABLED
+            default_status = asset.enabled_by_default if asset else True
             return default_status
 
         else:
             raise ValueError(f"Unknown asset type {asset_type}")
 
     @staticmethod
-    def set_status(asset_type: AssetType, id: str, status: AssetStatus, to_global: bool = False) -> None:
+    def set_enabled(asset_type: AssetType, id: str, enabled: bool, to_global: bool = False) -> None:
         if asset_type == AssetType.MATERIAL:
-            settings().save(PartialSettingsData(materials={id: status}), to_global=to_global)
+            settings().save(PartialSettingsData(materials={id: enabled}), to_global=to_global)
         elif asset_type == AssetType.AGENT:
-            settings().save(PartialSettingsData(agents={id: status}), to_global=to_global)
+            settings().save(PartialSettingsData(agents={id: enabled}), to_global=to_global)
         else:
             raise ValueError(f"Unknown asset type {asset_type}")
 
@@ -192,12 +192,12 @@ class Assets:
         if asset_type == AssetType.MATERIAL:
             partial_settings = PartialSettingsData(
                 materials_to_reset=[old_id],
-                materials={new_id: Assets.get_status(asset_type, old_id)},
+                materials={new_id: Assets.is_enabled(asset_type, old_id)},
             )
         elif asset_type == AssetType.AGENT:
             partial_settings = PartialSettingsData(
                 agents_to_reset=[old_id],
-                agents={new_id: Assets.get_status(asset_type, old_id)},
+                agents={new_id: Assets.is_enabled(asset_type, old_id)},
             )
         else:
             raise ValueError(f"Unknown asset type {asset_type}")

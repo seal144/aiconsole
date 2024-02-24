@@ -17,11 +17,11 @@
 import json
 import os
 
-from aiconsole.core.chat.types import Chat
+from aiconsole.core.chat.types import AICChat
 from aiconsole.core.project.paths import get_history_directory
 
 
-def save_chat_history(chat: Chat, scope: str = "default"):
+def save_chat_history(chat: AICChat, scope: str = "default"):
     history_directory = get_history_directory()
     file_path = history_directory / f"{chat.id}.json"
 

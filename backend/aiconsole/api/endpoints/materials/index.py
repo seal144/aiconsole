@@ -29,7 +29,7 @@ async def fetch_materials():
         [
             {
                 **material.model_dump(exclude_none=True),
-                "status": project.get_project_agents().get_status(AssetType.MATERIAL, material.id),
+                "status": project.get_project_agents().is_enabled(AssetType.MATERIAL, material.id),
             }
             for material in project.get_project_materials().all_assets()
         ]

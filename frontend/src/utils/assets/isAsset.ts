@@ -1,12 +1,11 @@
-import { EditableObject, EditableObjectType } from '@/types/assets/assetTypes';
-import { getEditableObjectType } from './getEditableObjectType';
+import { Asset, AssetType } from '@/types/assets/assetTypes';
+import { getAssetType } from './getAssetType';
 
-export function isAsset(editableObject?: EditableObject | EditableObjectType) {
+export function isAsset(editableObject?: Asset | AssetType) {
   if (!editableObject) {
     return false;
   }
 
-  const editableObjectType =
-    typeof editableObject === 'string' ? editableObject : getEditableObjectType(editableObject);
-  return editableObjectType === 'material' || editableObjectType === 'agent';
+  const assetType = typeof editableObject === 'string' ? editableObject : getAssetType(editableObject);
+  return assetType === 'material' || assetType === 'agent';
 }

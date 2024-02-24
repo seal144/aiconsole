@@ -140,7 +140,7 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
     setMaterialsOptions(
       materials
         ?.filter((material) => !chosenMaterials.includes(material))
-        .filter((item) => item.status === 'enabled') as Material[],
+        .filter((item) => item.enabled) as Material[],
     );
   }, [chat?.id, materials, chosenMaterials]);
 
@@ -191,9 +191,7 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
 
   const handleMaterialSelect = (material: Material) => {
     setChosenMaterials((prev) => [...prev, material]);
-    const filteredOptions = materialsOptions
-      .filter(({ id }) => id !== material.id)
-      .filter((item) => item.status === 'enabled');
+    const filteredOptions = materialsOptions.filter(({ id }) => id !== material.id).filter((item) => item.enabled);
     setMaterialsOptions(filteredOptions);
     debounceChatUpdate();
     setShowChatOptions(false);

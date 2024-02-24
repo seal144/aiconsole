@@ -25,7 +25,7 @@ from aiconsole.core.assets.materials.content_evaluation_context import (
 )
 from aiconsole.core.assets.materials.material import Material
 from aiconsole.core.assets.types import AssetLocation
-from aiconsole.core.chat.types import Chat
+from aiconsole.core.chat.types import AICChat
 from aiconsole.core.gpt.consts import SPEED_GPT_MODE
 
 router = APIRouter()
@@ -46,12 +46,16 @@ def create_user_agent():
 @router.post("/preview")
 async def materials_preview(material: Material):
     content_context = ContentEvaluationContext(
-        chat=Chat(
+        chat=AICChat(
             id="chat",
             name="",
+            usage="",
+            usage_examples=[],
+            defined_in=AssetLocation.PROJECT_DIR,
             last_modified=datetime.now(),
             title_edited=False,
             message_groups=[],
+            override=False,
         ),
         agent=create_user_agent(),
         gpt_mode=SPEED_GPT_MODE,

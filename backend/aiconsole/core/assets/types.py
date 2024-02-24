@@ -19,11 +19,6 @@ from enum import Enum
 from pydantic import BaseModel
 
 
-class EditableObject(BaseModel):
-    id: str
-    name: str
-
-
 class AssetLocation(str, Enum):
     AICONSOLE_CORE = "aiconsole"
     PROJECT_DIR = "project"
@@ -32,20 +27,17 @@ class AssetLocation(str, Enum):
 class AssetType(str, Enum):
     AGENT = "agent"
     MATERIAL = "material"
+    CHAT = "chat"
 
 
-class AssetStatus(str, Enum):
-    DISABLED = "disabled"
-    ENABLED = "enabled"
-    FORCED = "forced"  # Legacy support (for v. prior to 0.2.11)
-
-
-class Asset(EditableObject):
+class Asset(BaseModel):
+    id: str
+    name: str
     version: str = "0.0.1"
     usage: str
     usage_examples: list[str]
     defined_in: AssetLocation
     type: AssetType
-    default_status: AssetStatus = AssetStatus.ENABLED
-    status: AssetStatus = AssetStatus.ENABLED
+    enabled_by_default: bool = True
+    enabled: bool = True
     override: bool

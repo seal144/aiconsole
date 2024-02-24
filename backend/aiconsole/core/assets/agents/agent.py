@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aiconsole.core.assets.types import Asset, AssetStatus, AssetType
+from aiconsole.core.assets.types import Asset, AssetType
 from aiconsole.core.gpt.consts import QUALITY_GPT_MODE, GPTMode
 
 
@@ -24,7 +24,3 @@ class AICAgent(Asset):
 
     gpt_mode: GPTMode = QUALITY_GPT_MODE
     execution_mode: str = "aiconsole.core.chat.execution_modes.normal:execution_mode"
-
-
-class AgentWithStatus(AICAgent):
-    status: AssetStatus = AssetStatus.ENABLED

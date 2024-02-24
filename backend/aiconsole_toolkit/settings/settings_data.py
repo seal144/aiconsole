@@ -2,7 +2,6 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from aiconsole.core.assets.types import AssetStatus
 from aiconsole.core.gpt import consts
 from aiconsole.core.gpt.types import GPTModeConfig
 from aiconsole.core.users.types import UserProfile
@@ -14,8 +13,8 @@ class SettingsData(BaseModel):
     code_autorun: bool = False
     openai_api_key: str | None = None
     user_profile: UserProfile = UserProfile()
-    materials: dict[str, AssetStatus] = {}
-    agents: dict[str, AssetStatus] = {}
+    materials: dict[str, bool] = {}
+    agents: dict[str, bool] = {}
     gpt_modes: dict[consts.GPTMode, GPTModeConfig] = {
         consts.ANALYSIS_GPT_MODE: GPTModeConfig(
             max_tokens=consts.GPT_MODE_ANALYSIS_MAX_TOKENS,

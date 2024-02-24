@@ -18,9 +18,6 @@ import { z } from 'zod';
 
 export type AssetDefinedIn = 'aiconsole' | 'project';
 export const assetDefinedInOptions: AssetDefinedIn[] = ['aiconsole', 'project'];
-export const AssetStatusSchema = z.enum(['disabled', 'enabled', 'forced']);
-export type AssetStatus = z.infer<typeof AssetStatusSchema>;
-export const assetStatusOptions: AssetStatus[] = ['disabled', 'enabled', 'forced'];
 export type MaterialContentType = 'static_text' | 'dynamic_text' | 'api';
 export const materialContenTypeOptions: MaterialContentType[] = ['static_text', 'dynamic_text', 'api'];
 export type TabsValues = 'chats' | 'materials' | 'agents';
@@ -39,7 +36,7 @@ export type RenderedMaterial = {
 export const MaterialDefinitionSourceSchema = z.enum(['aiconsole', 'project']);
 export type MaterialDefinitionSource = z.infer<typeof MaterialDefinitionSourceSchema>;
 
-export const AssetTypeSchema = z.enum(['material', 'agent']);
+export const AssetTypeSchema = z.enum(['material', 'agent', 'chat']);
 
 export type AssetType = z.infer<typeof AssetTypeSchema>;
 
@@ -55,25 +52,20 @@ export const LanguageStrSchema = z.enum(['python', 'actionscript', 'react_ui']);
 
 export type LanguageStr = z.infer<typeof LanguageStrSchema>;
 
-export type EditableObjectType = 'material' | 'agent' | 'chat';
+export const AssetTypePluralSchema = z.enum(['materials', 'agents', 'chats']);
 
-export type EditableObjectTypePlural = 'materials' | 'agents' | 'chats';
+export type AssetTypePlural = z.infer<typeof AssetTypePluralSchema>;
 
-export const EditableObjectSchema = z.object({
+export const AssetSchema = z.object({
   id: z.string(),
   name: z.string(),
-});
-
-export type EditableObject = z.infer<typeof EditableObjectSchema>;
-
-export const AssetSchema = EditableObjectSchema.extend({
   version: z.string(),
+  defined_in: MaterialDefinitionSourceSchema,
+  type: AssetTypeSchema,
   usage: z.string(),
   usage_examples: z.array(z.string()),
-  defined_in: MaterialDefinitionSourceSchema,
-  type: z.enum(['material', 'agent', 'chat']),
-  default_status: AssetStatusSchema,
-  status: AssetStatusSchema,
+  enabled_by_default: z.boolean(),
+  enabled: z.boolean(),
   override: z.boolean(),
 });
 

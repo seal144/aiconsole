@@ -27,14 +27,10 @@ from aiconsole.api.endpoints.services import (
 from aiconsole.api.utils.asset_exists import asset_exists, asset_path
 from aiconsole.api.utils.asset_get import asset_get
 from aiconsole.api.utils.asset_status_change import asset_status_change
-from aiconsole.api.utils.status_change_post_body import StatusChangePostBody
+from aiconsole.api.utils.enabld_flag_change_post_body import EnabledFlagChangePostBody
 from aiconsole.core.assets.get_material_content_name import get_material_content_name
-from aiconsole.core.assets.materials.material import (
-    Material,
-    MaterialContentType,
-    MaterialWithStatus,
-)
-from aiconsole.core.assets.types import AssetLocation, AssetStatus, AssetType
+from aiconsole.core.assets.materials.material import Material, MaterialContentType
+from aiconsole.core.assets.types import AssetLocation, AssetType
 from aiconsole.core.project import project
 
 router = APIRouter()
@@ -124,13 +120,13 @@ async def get_material(request: Request, material_id: str):
         request,
         AssetType.MATERIAL,
         material_id,
-        lambda: MaterialWithStatus(
+        lambda: Material(
             id="new_" + get_material_content_name(type).lower(),
             name="New " + get_material_content_name(type),
             content_type=type,
             usage="",
             usage_examples=[],
-            status=AssetStatus.ENABLED,
+            enabled=True,
             defined_in=AssetLocation.PROJECT_DIR,
             override=False,
             content=get_default_content_for_type(type),
@@ -157,7 +153,7 @@ async def create_material(asset_id: str, material: Material, materials_service: 
 
 
 @router.post("/{material_id}/status-change")
-async def material_status_change(material_id: str, body: StatusChangePostBody):
+async def material_status_change(material_id: str, body: EnabledFlagChangePostBody):
     return await asset_status_change(AssetType.MATERIAL, material_id, body)
 
 

@@ -20,11 +20,12 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-from aiconsole.core.chat.types import Chat
+from aiconsole.core.assets.types import AssetLocation
+from aiconsole.core.chat.types import AICChat
 from aiconsole.core.project.paths import get_history_directory
 
 
-async def load_chat_history(id: str, project_path: Path | None = None) -> Chat:
+async def load_chat_history(id: str, project_path: Path | None = None) -> AICChat:
     history_directory = get_history_directory(project_path)
     file_path = history_directory / f"{id}.json"
 
@@ -132,16 +133,32 @@ async def load_chat_history(id: str, project_path: Path | None = None) -> Chat:
             if "last_modified" in data:
                 del data["last_modified"]
 
-            return Chat(
+            if "usage_examples" not in data:
+                data["usage_examples"] = []
+
+            if "usage" not in data:
+                data["usage"] = ""
+
+            if "defined_in" not in data:
+                data["defined_in"] = AssetLocation.PROJECT_DIR
+
+            if "override" not in data:
+                data["override"] = False
+
+            return AICChat(
                 id=id,
                 last_modified=datetime.fromtimestamp(os.path.getmtime(file_path)),
                 **data,
             )
     else:
-        return Chat(
+        return AICChat(
             id=id,
             name="",
+            usage="",
+            usage_examples=[],
+            defined_in=AssetLocation.PROJECT_DIR,
             title_edited=False,
             last_modified=datetime.now(),
             message_groups=[],
+            override=False,
         )

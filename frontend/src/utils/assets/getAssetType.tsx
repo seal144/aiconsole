@@ -14,11 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EditableObject, EditableObjectType, EditableObjectTypePlural } from '@/types/assets/assetTypes';
+import { Asset, AssetType, AssetTypePlural } from '@/types/assets/assetTypes';
 
-export function getEditableObjectType(
-  editableObject?: EditableObject | EditableObjectTypePlural,
-): EditableObjectType | undefined {
+export function getAssetType(editableObject?: Asset | AssetTypePlural): AssetType | undefined {
   if (typeof editableObject === 'string') {
     switch (editableObject) {
       case 'agents':

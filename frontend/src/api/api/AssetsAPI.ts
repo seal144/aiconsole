@@ -14,16 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  Asset,
-  MaterialDefinitionSource,
-  AssetStatus,
-  AssetType,
-  EditableObject,
-  EditableObjectType,
-  Material,
-  RenderedMaterial,
-} from '@/types/assets/assetTypes';
+import { MaterialDefinitionSource, AssetType, Material, RenderedMaterial, Asset } from '@/types/assets/assetTypes';
 import ky from 'ky';
 import { API_HOOKS, getBaseURL } from '../../store/useAPIStore';
 import { useWebSocketStore } from '../ws/useWebSocketStore';
@@ -39,31 +30,31 @@ const previewMaterial: (material: Material) => Promise<RenderedMaterial> = async
     })
     .json();
 
-async function fetchEditableObjects<T extends EditableObject>(editableObjectType: EditableObjectType): Promise<T[]> {
-  return ky.get(`${getBaseURL()}/api/${editableObjectType}s/`, { hooks: API_HOOKS }).json();
+async function fetchAssets<T extends Asset>(assetType: AssetType): Promise<T[]> {
+  return ky.get(`${getBaseURL()}/api/${assetType}s/`, { hooks: API_HOOKS }).json();
 }
 
-async function setAssetStatus(assetType: AssetType, id: string, status: AssetStatus) {
+async function setAssetEnabledFlag(assetType: AssetType, id: string, enabled: boolean) {
   return ky
     .post(`${getBaseURL()}/api/${assetType}s/${id}/status-change`, {
-      json: { status, to_global: false },
+      json: { enabled, to_global: false },
       hooks: API_HOOKS,
     })
     .json();
 }
 
-async function fetchEditableObject<T extends EditableObject>({
-  editableObjectType,
+async function fetchAsset<T extends Asset>({
+  assetType: assetType,
   id,
   location,
   type,
 }: {
-  editableObjectType: EditableObjectType;
+  assetType: AssetType;
   id: string;
   location?: MaterialDefinitionSource;
   type?: string;
 }): Promise<T> {
-  if (editableObjectType === 'chat') {
+  if (assetType === 'chat') {
     const response: ChatOpenedServerMessage = (await useWebSocketStore
       .getState()
       .sendMessageAndWaitForResponse(
@@ -81,7 +72,7 @@ async function fetchEditableObject<T extends EditableObject>({
   }
 
   return ky
-    .get(`${getBaseURL()}/api/${editableObjectType}s/${id}`, {
+    .get(`${getBaseURL()}/api/${assetType}s/${id}`, {
       searchParams: { location: location || '', type: type || '' },
       hooks: API_HOOKS,
     })
@@ -102,15 +93,11 @@ async function closeChat(id: string): Promise<ServerMessage> {
   return response;
 }
 
-async function doesEdibleExist(
-  editableObjectType: EditableObjectType,
-  id: string,
-  location?: MaterialDefinitionSource,
-) {
+async function doesEdibleExist(assetType: AssetType, id: string, location?: MaterialDefinitionSource) {
   try {
     // Attempt to fetch the object
     const response = await ky
-      .get(`${getBaseURL()}/api/${editableObjectType}s/${id}/exists`, {
+      .get(`${getBaseURL()}/api/${assetType}s/${id}/exists`, {
         searchParams: { location: location || '' },
       })
       .json<{ exists: boolean }>();
@@ -129,65 +116,61 @@ async function doesEdibleExist(
   }
 }
 
-async function saveNewEditableObject(editableObjectType: EditableObjectType, asset_id: string, asset: Asset) {
-  return await ky.post(`${getBaseURL()}/api/${editableObjectType}s/${asset_id}`, {
+async function saveNewAsset(assetType: AssetType, asset_id: string, asset: Asset) {
+  return await ky.post(`${getBaseURL()}/api/${assetType}s/${asset_id}`, {
     json: { ...asset },
     timeout: 60000,
     hooks: API_HOOKS,
   });
 }
 
-async function updateEditableObject(
-  editableObjectType: EditableObjectType,
-  editableObject: EditableObject,
-  originalId?: string,
-) {
+async function updateAsset(assetType: AssetType, editableObject: Asset, originalId?: string) {
   if (!originalId) {
     originalId = editableObject.id;
   }
-  console.log('fetchEditableObject', editableObjectType, editableObject, originalId);
+  console.log('fetchAsset', assetType, editableObject, originalId);
 
-  // if (editableObjectType === 'chat') {
+  // if (assetType === 'chat') {
   //   throw new Error('Chat cannot be updated');
   // }
 
-  return ky.patch(`${getBaseURL()}/api/${editableObjectType}s/${originalId}`, {
+  return ky.patch(`${getBaseURL()}/api/${assetType}s/${originalId}`, {
     json: { ...editableObject },
     timeout: 60000,
     hooks: API_HOOKS,
   });
 }
 
-async function deleteEditableObject(editableObjectType: EditableObjectType, id: string) {
-  return ky.delete(`${getBaseURL()}/api/${editableObjectType}s/${id}`, {
+async function deleteAsset(assetType: AssetType, id: string) {
+  return ky.delete(`${getBaseURL()}/api/${assetType}s/${id}`, {
     hooks: API_HOOKS,
   });
 }
 
-async function getPathForEditableObject(editableObjectType: EditableObjectType, id: string) {
+async function getPathForAsset(assetType: AssetType, id: string) {
   return (
     (await ky
-      .get(`${getBaseURL()}/api/${editableObjectType}s/${id}/path`, {
+      .get(`${getBaseURL()}/api/${assetType}s/${id}/path`, {
         hooks: API_HOOKS,
       })
       .json()) as { path: string }
   ).path;
 }
 
-async function setAgentAvatar(agentId: string, avatar: FormData) {
-  return ky.post(`${getBaseURL()}/api/agents/${agentId}/avatar`, { body: avatar, hooks: API_HOOKS });
+async function setAssetAvatar(assetType: AssetType, assetId: string, avatar: FormData) {
+  return ky.post(`${getBaseURL()}/api/${assetType}s/${assetId}/avatar`, { body: avatar, hooks: API_HOOKS });
 }
 
 export const AssetsAPI = {
-  deleteEditableObject,
-  fetchEditableObjects,
-  fetchEditableObject,
-  setAssetStatus,
+  deleteAsset,
+  fetchAssets,
+  fetchAsset,
+  setAssetEnabledFlag,
   doesEdibleExist,
   previewMaterial,
-  saveNewEditableObject,
-  updateEditableObject,
-  getPathForEditableObject,
+  saveNewAsset,
+  updateAsset,
+  getPathForAsset,
   closeChat,
-  setAgentAvatar,
+  setAssetAvatar,
 };

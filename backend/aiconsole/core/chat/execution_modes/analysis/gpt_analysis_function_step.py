@@ -20,7 +20,7 @@ from typing import cast
 from aiconsole.consts import DIRECTOR_MIN_TOKENS, DIRECTOR_PREFERRED_TOKENS
 from aiconsole.core.assets.agents.agent import AICAgent
 from aiconsole.core.assets.materials.material import Material
-from aiconsole.core.assets.types import AssetLocation, AssetStatus
+from aiconsole.core.assets.types import AssetLocation
 from aiconsole.core.chat.actor_id import ActorId
 from aiconsole.core.chat.chat_mutations import (
     SetActorIdMessageGroupMutation,
@@ -37,7 +37,7 @@ from aiconsole.core.chat.execution_modes.analysis.agents_to_choose_from import (
 from aiconsole.core.chat.execution_modes.analysis.create_plan_class import (
     create_plan_class,
 )
-from aiconsole.core.chat.types import Chat
+from aiconsole.core.chat.types import AICChat
 from aiconsole.core.gpt.consts import GPTMode
 from aiconsole.core.gpt.gpt_executor import GPTExecutor
 from aiconsole.core.gpt.request import GPTRequest
@@ -52,7 +52,7 @@ from aiconsole.core.project import project
 _log = logging.getLogger(__name__)
 
 
-def pick_agent(arguments, chat: Chat, available_agents: list[AICAgent]) -> AICAgent:
+def pick_agent(arguments, chat: AICChat, available_agents: list[AICAgent]) -> AICAgent:
     # Try support first
     default_agent = next((agent for agent in available_agents if agent.id == "assistant"), None)
 
@@ -94,13 +94,13 @@ def _get_relevant_materials(relevant_material_ids: list[str]) -> list[Material]:
     # Maximum of 5 materials
     relevant_materials = [
         cast(Material, k)
-        for k in project.get_project_materials().assets_with_status(AssetStatus.ENABLED)
+        for k in project.get_project_materials().assets_with_enabled_flag_set_to(True)
         if k.id in relevant_material_ids
     ][:5]
 
     relevant_materials += cast(
         list[Material],
-        project.get_project_materials().assets_with_status(AssetStatus.FORCED),
+        project.get_project_materials().assets_with_enabled_flag_set_to(True),
     )
 
     return relevant_materials
@@ -144,8 +144,7 @@ async def gpt_analysis_function_step(
     if chat_mutator.chat.chat_options.let_ai_add_extra_materials:
         available_materials = [
             *forced_materials,
-            *project.get_project_materials().assets_with_status(AssetStatus.FORCED),
-            *project.get_project_materials().assets_with_status(AssetStatus.ENABLED),
+            *project.get_project_materials().assets_with_enabled_flag_set_to(True),
         ]
 
     plan_class = create_plan_class(

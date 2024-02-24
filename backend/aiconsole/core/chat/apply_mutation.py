@@ -34,12 +34,12 @@ from aiconsole.core.chat.chat_mutations import (
     SetTaskMessageGroupMutation,
 )
 from aiconsole.core.chat.types import (
+    AICChat,
     AICMessage,
     AICMessageGroup,
     AICMessageLocation,
     AICToolCall,
     AICToolCallLocation,
-    Chat,
 )
 
 _log = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ _log = logging.getLogger(__name__)
 # Handlers
 
 
-def _handle_CreateMessageGroupMutation(chat: Chat, mutation: CreateMessageGroupMutation) -> None:
+def _handle_CreateMessageGroupMutation(chat: AICChat, mutation: CreateMessageGroupMutation) -> None:
     message_group = AICMessageGroup(
         id=mutation.message_group_id,
         actor_id=mutation.actor_id,
@@ -229,7 +229,7 @@ def _handle_SetIsSuccessfulToolCallMutation(chat, mutation: SetIsSuccessfulToolC
 # Utils
 
 
-def _get_message_group(chat: Chat, message_group_id: str) -> AICMessageGroup:
+def _get_message_group(chat: AICChat, message_group_id: str) -> AICMessageGroup:
     message_group = chat.get_message_group(message_group_id=message_group_id)
 
     if not message_group:
@@ -238,7 +238,7 @@ def _get_message_group(chat: Chat, message_group_id: str) -> AICMessageGroup:
     return message_group
 
 
-def _get_message_location(chat: Chat, message_id: str) -> AICMessageLocation:
+def _get_message_location(chat: AICChat, message_id: str) -> AICMessageLocation:
     message_location = chat.get_message_location(message_id=message_id)
 
     if not message_location:
@@ -247,7 +247,7 @@ def _get_message_location(chat: Chat, message_id: str) -> AICMessageLocation:
     return message_location
 
 
-def _get_tool_call_location(chat: Chat, tool_call_id: str) -> AICToolCallLocation:
+def _get_tool_call_location(chat: AICChat, tool_call_id: str) -> AICToolCallLocation:
     tool_call_location = chat.get_tool_call_location(tool_call_id=tool_call_id)
 
     if not tool_call_location:
@@ -256,7 +256,7 @@ def _get_tool_call_location(chat: Chat, tool_call_id: str) -> AICToolCallLocatio
     return tool_call_location
 
 
-MUTATION_HANDLERS: dict[str, Callable[[Chat, Any], None]] = {
+MUTATION_HANDLERS: dict[str, Callable[[AICChat, Any], None]] = {
     CreateMessageGroupMutation.__name__: _handle_CreateMessageGroupMutation,
     DeleteMessageGroupMutation.__name__: _handle_DeleteMessageGroupMutation,
     SetIsAnalysisInProgressMutation.__name__: _handle_SetIsAnalysisInProgressMutation,
@@ -290,7 +290,7 @@ MUTATION_HANDLERS: dict[str, Callable[[Chat, Any], None]] = {
 # Entry point
 
 
-def apply_mutation(chat: Chat, mutation: ChatMutation) -> None:
+def apply_mutation(chat: AICChat, mutation: ChatMutation) -> None:
     """
     KEEEP THIS IN SYNC WITH FRONTEND applyMutation!
 

@@ -14,39 +14,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Asset, AssetStatus, AssetType } from '@/types/assets/assetTypes';
+import { Asset, AssetType } from '@/types/assets/assetTypes';
 import SideBarItem from './SideBarItem';
 
-const getTitle = (status: AssetStatus, isAgentChosen: boolean, assetType: AssetType) => {
-  switch (status) {
-    case 'forced':
-      return 'User enforced';
-    case 'enabled':
+const getTitle = (enabled: boolean, isAgentChosen: boolean, assetType: AssetType) => {
+  switch (enabled) {
+    case true:
       return isAgentChosen && assetType === 'agent' ? 'Disabled' : 'Enabled';
-    case 'disabled':
+    case false:
       return 'Disabled';
   }
 };
 
-function groupAssetsByStatus(assets: Asset[]) {
-  const groupedAssets = new Map<AssetStatus, Asset[]>([
-    ['forced', []],
-    ['enabled', []],
-    ['disabled', []],
+function groupAssetsByEnabled(assets: Asset[]) {
+  const groupedAssets = new Map<boolean, Asset[]>([
+    [true, []],
+    [false, []],
   ]);
 
   assets.forEach((asset) => {
-    const { status } = asset;
-    const assets = groupedAssets.get(status) || [];
+    const { enabled } = asset;
+    const assets = groupedAssets.get(enabled) || [];
     const updatedAssets = [...assets, asset];
-    groupedAssets.set(status, updatedAssets);
+    groupedAssets.set(enabled, updatedAssets);
   });
 
   return [...groupedAssets.entries()];
 }
 
 export const AssetsSidebarTab = ({ assetType, assets }: { assetType: AssetType; assets: Asset[] }) => {
-  const groupedAssets = groupAssetsByStatus(assets);
+  const groupedAssets = groupAssetsByEnabled(assets);
   const hasForcedAssets = Boolean(groupedAssets[0][1].length);
 
   return (
@@ -56,10 +53,10 @@ export const AssetsSidebarTab = ({ assetType, assets }: { assetType: AssetType; 
 
         return (
           assets.length > 0 && (
-            <div key={status}>
+            <div key={status.toString()}>
               <h3 className="uppercase px-[9px] py-[5px] text-gray-400 text-[12px] leading-[18px]">{title}</h3>
               {assets.map((asset) => (
-                <SideBarItem key={asset.id} editableObject={asset} editableObjectType={assetType} />
+                <SideBarItem key={asset.id} editableObject={asset} assetType={assetType} />
               ))}
             </div>
           )

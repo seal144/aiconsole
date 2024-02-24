@@ -15,8 +15,7 @@
 // limitations under the License.
 
 import { AssetsAPI } from '@/api/api/AssetsAPI';
-import { Agent, Asset, AssetStatus, AssetType, Material } from '@/types/assets/assetTypes';
-import { canThereBeOnlyOneForcedAsset } from '@/utils/assets/canThereBeOnlyOneForcedAsset';
+import { Agent, Asset, AssetType, AssetTypePlural, Material } from '@/types/assets/assetTypes';
 import { create } from 'zustand';
 import { useEditablesStore } from '../useEditablesStore';
 
@@ -26,7 +25,7 @@ export type AssetStore = {
   getAsset: (assetType: AssetType, id: string) => Asset | undefined;
   setSelectedAsset: (asset?: Asset) => void;
   setLastSavedSelectedAsset: (asset?: Asset) => void;
-  setAssetStatus: (assetType: AssetType, id: string, status: AssetStatus) => Promise<void>;
+  setIsEnabledFlag: (assetType: AssetType, id: string, enabled: boolean) => Promise<void>;
 };
 
 export const useAssetStore = create<AssetStore>((set) => ({
@@ -49,10 +48,10 @@ export const useAssetStore = create<AssetStore>((set) => ({
           usage_examples: [],
           system: '',
           defined_in: 'aiconsole',
-          status: 'enabled',
+          enabled: true,
           gpt_mode: 'quality',
           execution_mode: 'aiconsole.core.chat.execution_modes.normal:execution_mode',
-          default_status: 'enabled',
+          enabled_by_default: true,
           override: false,
         };
 
@@ -71,10 +70,10 @@ export const useAssetStore = create<AssetStore>((set) => ({
           usage_examples: [],
           system: '',
           defined_in: 'project',
-          status: 'enabled',
+          enabled: true,
           gpt_mode: 'quality',
           execution_mode: 'aiconsole.core.chat.execution_modes.normal:execution_mode',
-          default_status: 'enabled',
+          enabled_by_default: true,
           override: false,
         };
 
@@ -98,10 +97,10 @@ export const useAssetStore = create<AssetStore>((set) => ({
           usage: '',
           usage_examples: [],
           defined_in: 'project',
-          status: 'enabled',
+          enabled: true,
           content: '',
           content_type: 'static_text',
-          default_status: 'enabled',
+          enabled_by_default: true,
           override: false,
         };
 
@@ -118,24 +117,18 @@ export const useAssetStore = create<AssetStore>((set) => ({
       selectedAsset: asset,
     });
   },
-  setAssetStatus: async (assetType: AssetType, id: string, status: AssetStatus) => {
-    const plural = (assetType + 's') as 'materials' | 'agents';
+  setIsEnabledFlag: async (assetType: AssetType, id: string, enabled: boolean) => {
+    const plural = (assetType + 's') as AssetTypePlural;
 
     useEditablesStore.setState((state) => ({
       [plural]: (state[plural] || []).map((asset) => {
         if (asset.id === id) {
-          asset.status = status;
-        } else {
-          if (canThereBeOnlyOneForcedAsset(assetType)) {
-            if (asset.status === 'forced') {
-              asset.status = 'enabled';
-            }
-          }
+          asset.enabled = enabled;
         }
         return asset;
       }),
     }));
 
-    await AssetsAPI.setAssetStatus(assetType, id, status);
+    await AssetsAPI.setAssetEnabledFlag(assetType, id, enabled);
   },
 }));

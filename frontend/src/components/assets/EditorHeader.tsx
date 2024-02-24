@@ -1,29 +1,29 @@
-import { EditableObject, EditableObjectType } from '@/types/assets/assetTypes';
-import { getEditableObjectIcon } from '@/utils/assets/getEditableObjectIcon';
+import { Asset, AssetType } from '@/types/assets/assetTypes';
+import { getAssetIcon } from '@/utils/assets/getAssetIcon';
 import { useState } from 'react';
-import InlineEditableObjectName from './InlineEditableObjectName';
 import { cn } from '@/utils/common/cn';
-import { getEditableObjectType } from '@/utils/assets/getEditableObjectType';
+import { getAssetType } from '@/utils/assets/getAssetType';
 import { Button } from '../common/Button';
 import { ArrowLeftToLine } from 'lucide-react';
 import { Icon } from '../common/icons/Icon';
 import { useNavigate } from 'react-router-dom';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
+import InlineAssetName from './InlineAssetName';
 
 interface EditorHeaderProps {
-  editable?: EditableObject;
+  editable?: Asset;
   onRename: (newName: string) => void;
   children?: React.ReactNode;
   isChanged?: boolean;
-  editableObjectType: EditableObjectType;
+  assetType: AssetType;
 }
 
-export function EditorHeader({ editable, onRename, children, isChanged, editableObjectType }: EditorHeaderProps) {
+export function EditorHeader({ editable, onRename, children, isChanged, assetType }: EditorHeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
 
-  const AssetIcon = getEditableObjectIcon(editable);
-  const editableType = getEditableObjectType(editable);
+  const AssetIcon = getAssetIcon(editable);
+  const editableType = getAssetType(editable);
   const lastUsedChat = useChatStore((state) => state.lastUsedChat);
 
   const goBack = () => {
@@ -38,7 +38,7 @@ export function EditorHeader({ editable, onRename, children, isChanged, editable
 
   return (
     <div className="flex border-b border-gray-600 w-full">
-      {editableObjectType !== 'chat' && lastUsedChat ? (
+      {assetType !== 'chat' && lastUsedChat ? (
         <Button
           variant="tertiary"
           classNames="py-0 px-[20px] border-0 border-r border-gray-600 rounded-none"
@@ -60,12 +60,12 @@ export function EditorHeader({ editable, onRename, children, isChanged, editable
           <div
             className={cn(
               'absolute bottom-[-20px] left-[15px] opacity-[0.3] blur-[10px]  h-[34px] w-[34px] group-hover:block',
-              editableObjectType === 'chat' && 'fill-chat bg-chat',
-              editableObjectType === 'agent' && 'fill-agent bg-agent',
-              editableObjectType === 'material' && 'fill-material bg-material',
+              assetType === 'chat' && 'fill-chat bg-chat',
+              assetType === 'agent' && 'fill-agent bg-agent',
+              assetType === 'material' && 'fill-material bg-material',
             )}
           />
-          <InlineEditableObjectName
+          <InlineAssetName
             editableObject={editable}
             onRename={onRename}
             isEditing={isEditing}
