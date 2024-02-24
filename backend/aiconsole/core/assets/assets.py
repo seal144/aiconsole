@@ -165,40 +165,19 @@ class Assets:
         if id in s.assets:
             return s.assets[id]
 
-        if asset_type == AssetType.MATERIAL:
-            asset = project.get_project_assets(AssetType.MATERIAL).get_asset(id)
-            default_status = asset.enabled_by_default if asset else True
-            return default_status
-        elif asset_type == AssetType.AGENT:
-            asset = project.get_project_assets(AssetType.AGENT).get_asset(id)
-            default_status = asset.enabled_by_default if asset else True
-            return default_status
-
-        else:
-            raise ValueError(f"Unknown asset type {asset_type}")
+        asset = project.get_project_assets(asset_type).get_asset(id)
+        default_status = asset.enabled_by_default if asset else True
+        return default_status
 
     @staticmethod
     def set_enabled(asset_type: AssetType, id: str, enabled: bool, to_global: bool = False) -> None:
-        if asset_type == AssetType.MATERIAL:
-            settings().save(PartialSettingsData(materials={id: enabled}), to_global=to_global)
-        elif asset_type == AssetType.AGENT:
-            settings().save(PartialSettingsData(agents={id: enabled}), to_global=to_global)
-        else:
-            raise ValueError(f"Unknown asset type {asset_type}")
+        settings().save(PartialSettingsData(assets={id: enabled}), to_global=to_global)
 
     @staticmethod
     def rename_asset(asset_type: AssetType, old_id: str, new_id: str):
-        if asset_type == AssetType.MATERIAL:
-            partial_settings = PartialSettingsData(
-                materials_to_reset=[old_id],
-                materials={new_id: Assets.is_enabled(asset_type, old_id)},
-            )
-        elif asset_type == AssetType.AGENT:
-            partial_settings = PartialSettingsData(
-                agents_to_reset=[old_id],
-                agents={new_id: Assets.is_enabled(asset_type, old_id)},
-            )
-        else:
-            raise ValueError(f"Unknown asset type {asset_type}")
+        partial_settings = PartialSettingsData(
+            assets_to_reset=[old_id],
+            assets={new_id: Assets.is_enabled(asset_type, old_id)},
+        )
 
         settings().save(partial_settings, to_global=False)
