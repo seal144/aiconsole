@@ -51,8 +51,41 @@ const ExamplePrompt: React.FC<ExamplePromptProps> = ({ asset, example, onSelecte
 };
 
 export const EmptyChat = () => {
-  const command = useChatStore((state) => state.commandHistory[state.commandIndex]);
+  const command = useChatStore((state) => state.commandHistory[useChatStore.getState().commandIndex]);
+  const chatOptions = useChatStore((state) => state.chatOptions);
+
+  function isExampleCurrentlyActive(asset: Asset, example: string) {
+    if (command !== example) {
+      return false;
+    }
+
+    console.log('asset', asset);
+    console.log('chatOptions', chatOptions);
+
+    if (asset.type === 'agent') {
+      if (chatOptions?.agentId !== asset.id) {
+        return false;
+      }
+    }
+
+    if (asset.type === 'material') {
+      if ((chatOptions?.materialsIds.length ?? 0) === 0 || chatOptions?.materialsIds[0] !== asset.id) {
+        return false;
+      }
+    }
+
+    if (!(chatOptions?.aiCanAddExtraMaterials ?? true)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  // Chat options
   const editCommand = useChatStore((state) => state.editCommand);
+  const setSelectedAgentId = useChatStore((state) => state.setSelectedAgentId);
+  const setSelectedMaterialsIds = useChatStore((state) => state.setSelectedMaterialsIds);
+  const setAICanAddExtraMaterials = useChatStore((state) => state.setAICanAddExtraMaterials);
 
   const assets = useEditablesStore((state) =>
     state.materials && state.agents ? [...state.materials, ...state.agents] : [],
@@ -87,16 +120,14 @@ export const EmptyChat = () => {
     }, 300);
   };
 
-  const setSelectedAgentId = useChatStore((state) => state.setSelectedAgentId);
-  const setSelectedMaterialsIds = useChatStore((state) => state.setSelectedMaterialsIds);
-
   const onSelected = (asset: Asset, example: string) => () => {
-    //if is already selected
-    if (command === example) {
+    //if is already selected, deselect
+    if (isExampleCurrentlyActive(asset, example)) {
       //deselect
       editCommand('');
       setSelectedAgentId('');
       setSelectedMaterialsIds([]);
+      setAICanAddExtraMaterials(false);
       return;
     }
 
@@ -113,29 +144,32 @@ export const EmptyChat = () => {
     }
 
     editCommand(example);
+    setAICanAddExtraMaterials(true);
   };
 
   return (
     <section className="flex flex-col container mx-auto px-6 py-[64px] pb-[40px] select-none flex-grow h-full w-full">
       <img src="chat-page-glow.png" alt="glow" className="absolute top-[100px] -z-[1] opacity-70" />
       <p className="text-lg text-gray-300 text-center mt-[100px] mb-[15px]">What can I help you with?</p>
-      <div className=" w-full flex flex-row gap-4 justify-center items-center">
-        <ExamplePrompt
-          asset={examplePrompts[0].asset}
-          example={examplePrompts[0].example}
-          onSelected={onSelected}
-          showExamples={showExamples}
-          isSelected={command === examplePrompts[0].example}
-        />
-        or
-        <ExamplePrompt
-          asset={examplePrompts[1].asset}
-          example={examplePrompts[1].example}
-          onSelected={onSelected}
-          showExamples={showExamples}
-          isSelected={command === examplePrompts[1].example}
-        />
-      </div>
+      {examplePrompts.length >= 2 && (
+        <div className=" w-full flex flex-row gap-4 justify-center items-center">
+          <ExamplePrompt
+            asset={examplePrompts[0].asset}
+            example={examplePrompts[0].example}
+            onSelected={onSelected}
+            showExamples={showExamples}
+            isSelected={isExampleCurrentlyActive(examplePrompts[0].asset, examplePrompts[0].example)}
+          />
+          or
+          <ExamplePrompt
+            asset={examplePrompts[1].asset}
+            example={examplePrompts[1].example}
+            onSelected={onSelected}
+            showExamples={showExamples}
+            isSelected={isExampleCurrentlyActive(examplePrompts[1].asset, examplePrompts[1].example)}
+          />
+        </div>
+      )}
       <div className="flex items-center justify-center">
         <button
           className="flex items-center justify-center cursor-pointer text-gray-300 hover:text-white mt-[20px] text-md"
