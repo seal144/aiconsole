@@ -45,10 +45,7 @@ async def load_chat_history(id: str, project_path: Path | None = None) -> AICCha
                                 "id": message["id"] if "id" in message else uuid.uuid4().hex,
                                 "role": message["role"] if "role" in message else "",
                                 "task": message["task"] if "task" in message and message["task"] else "",
-                                "actor_id": {
-                                    "type": "user" if message.get("agent_id", "") == "user" else "agent",
-                                    "id": message.get("agent_id", ""),
-                                },
+                                "agent_id": message["agent_id"] if "agent_id" in message else "",
                                 "materials_ids": (
                                     message["materials_ids"]
                                     if "materials_ids" in message and message["materials_ids"]
