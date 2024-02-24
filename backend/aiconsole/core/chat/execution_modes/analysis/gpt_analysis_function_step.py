@@ -91,19 +91,11 @@ def pick_agent(arguments, chat: AICChat, available_agents: list[AICAgent]) -> AI
 
 
 def _get_relevant_materials(relevant_material_ids: list[str]) -> list[Material]:
-    # Maximum of 5 materials
-    relevant_materials = [
+    return [
         cast(Material, k)
         for k in project.get_project_assets(AssetType.MATERIAL).assets_with_enabled_flag_set_to(True)
         if k.id in relevant_material_ids
-    ][:5]
-
-    relevant_materials += cast(
-        list[Material],
-        project.get_project_assets(AssetType.MATERIAL).assets_with_enabled_flag_set_to(True),
-    )
-
-    return relevant_materials
+    ]
 
 
 @dataclass
