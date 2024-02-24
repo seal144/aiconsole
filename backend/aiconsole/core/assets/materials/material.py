@@ -104,7 +104,7 @@ class Material(Asset):
     async def _handle_dynamic_text_content(self, context, header):
         try:
             source_code = compile(self.inlined_content, "<string>", "exec")
-            local_vars = {}
+            local_vars: dict = {}
             exec(source_code, local_vars)
             content_func = local_vars.get("content")
             if callable(content_func):

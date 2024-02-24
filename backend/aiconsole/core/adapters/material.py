@@ -51,7 +51,6 @@ class Adapter(Asset):
     id: str
     name: str
     version: str = "0.0.1"
-    defined_in: AssetLocation
 
     async def fetch_objects(self, type: AssetType) -> list[Asset]:
         return []
