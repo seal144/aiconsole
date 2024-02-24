@@ -45,7 +45,7 @@ const ExamplePrompt: React.FC<ExamplePromptProps> = ({ asset, example, onSelecte
       )}
       onClick={onSelected(asset, example)}
     >
-      <p className="text-white text-md mb-4 overflow-hidden line-clamp-2">{example}</p>
+      <p className="text-white text-md mb-4 overflow-hidden line-clamp-5">{example}</p>
     </div>
   );
 };
