@@ -60,31 +60,14 @@ def pick_agent(arguments, chat: AICChat, available_agents: list[AICAgent]) -> AI
     if not default_agent:
         default_agent = available_agents[0]
 
-    is_users_turn = arguments.is_users_turn
-
-    if is_users_turn:
-        picked_agent = AICAgent(
-            id="user",
-            name="User",
-            usage="When a human user needs to respond",
-            usage_examples=[],
-            system="",
-            defined_in=AssetLocation.AICONSOLE_CORE,
-            override=False,
-        )
-    else:
-        try:
-            picked_agent = next((agent for agent in available_agents if agent.id == arguments.agent_id))
-        except StopIteration:
-            picked_agent = None
+    try:
+        picked_agent = next((agent for agent in available_agents if agent.id == arguments.agent_id))
+    except StopIteration:
+        picked_agent = None
 
     _log.debug(f"Chosen agent: {picked_agent}")
 
     if not picked_agent:
-        picked_agent = default_agent
-
-    # If it turns out that the user must respond to him self, have the assistant drive the conversation
-    if is_users_turn and chat.message_groups and chat.message_groups[-1].role == "user":
         picked_agent = default_agent
 
     return picked_agent
@@ -103,7 +86,6 @@ class AnalysisResult:
     agent: AICAgent
     relevant_materials: list[Material]
     next_step: str
-    is_final_step: bool
 
 
 async def gpt_analysis_function_step(
@@ -133,7 +115,7 @@ async def gpt_analysis_function_step(
             if material[0].id in chat_mutator.chat.chat_options.materials_ids:
                 forced_materials.append(material[0])
 
-    if chat_mutator.chat.chat_options.let_ai_add_extra_materials:
+    if chat_mutator.chat.chat_options.ai_can_add_extra_materials:
         available_materials = [
             *forced_materials,
             *project.get_project_assets(AssetType.MATERIAL).assets_with_enabled_flag_set_to(True),
@@ -300,7 +282,6 @@ async def gpt_analysis_function_step(
             agent=picked_agent,
             relevant_materials=relevant_materials,
             next_step=plan.next_step,
-            is_final_step=plan.is_final_step,
         )
     finally:
         await chat_mutator.mutate(

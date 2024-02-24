@@ -15,7 +15,6 @@
 # limitations under the License.
 
 import logging
-from uuid import uuid4
 
 from aiconsole.api.websockets.connection_manager import connection_manager
 from aiconsole.api.websockets.server_messages import NotificationServerMessage
@@ -25,11 +24,7 @@ from aiconsole.core.assets.materials.content_evaluation_context import (
 )
 from aiconsole.core.assets.materials.material import Material
 from aiconsole.core.assets.materials.rendered_material import RenderedMaterial
-from aiconsole.core.chat.actor_id import ActorId
-from aiconsole.core.chat.chat_mutations import (
-    CreateMessageGroupMutation,
-    DeleteMessageGroupMutation,
-)
+from aiconsole.core.chat.chat_mutations import DeleteMessageGroupMutation
 from aiconsole.core.chat.chat_mutator import ChatMutator
 from aiconsole.core.chat.execution_modes.analysis.director import director_analyse
 from aiconsole.core.chat.execution_modes.execution_mode import ExecutionMode
@@ -93,34 +88,6 @@ async def _execution_mode_process(
             materials=analysis.relevant_materials,
             rendered_materials=rendered_materials,
         )
-
-        if not analysis.is_final_step:
-            # Repeat the process for the next step
-
-            message_group_id = str(uuid4())
-
-            if chat_mutator.chat.chat_options.materials_ids:
-                materials_ids = chat_mutator.chat.chat_options.materials_ids
-            else:
-                materials_ids = []
-
-            await chat_mutator.mutate(
-                CreateMessageGroupMutation(
-                    message_group_id=message_group_id,
-                    actor_id=ActorId(type="agent", id=agent.id),
-                    role="assistant",
-                    materials_ids=materials_ids,
-                    analysis="",
-                    task="",
-                )
-            )
-
-            await _execution_mode_process(
-                chat_mutator=chat_mutator,
-                agent=agent,
-                materials=[],
-                rendered_materials=[],
-            )
     else:
         # Delete the current message group
         await chat_mutator.mutate(DeleteMessageGroupMutation(message_group_id=last_message_group.id))

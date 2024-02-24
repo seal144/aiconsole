@@ -38,18 +38,6 @@ def create_plan_class(available_agents, available_materials):
             json_schema_extra={"type": "string"},
         )
 
-        is_final_step: bool = Field(
-            ...,
-            description="Whether this is the final step to be done by the agents, and after it, it will be the user's turn.",
-            json_schema_extra={"type": "boolean"},
-        )
-
-        is_users_turn: bool = Field(
-            ...,
-            description="Whether the initiative is on the user side or on assistant side.",
-            json_schema_extra={"type": "boolean"},
-        )
-
         agent_id: str = Field(
             description="Chosen agent to perform the next step.",
             json_schema_extra={"enum": [s.id for s in random.sample(available_agents, len(available_agents))]},
