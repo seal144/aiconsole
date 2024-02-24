@@ -38,8 +38,10 @@ const ExamplePrompt: React.FC<ExamplePromptProps> = ({ asset, example, onSelecte
     <div
       className={cn(
         !showExamples && 'opacity-0',
-        showExamples && isSelected ? 'border-2 border-secondary border-opacity-50' : 'border-2 border-transparent',
-        'w-1/3 m-2 p-6 h-40 cursor-pointer transition duration-300 ease-in-out transform hover:scale-105 hover:bg-gray-700 rounded-lg bg-gray-800 shadow-md flex flex-col justify-between',
+        showExamples && isSelected
+          ? 'border border-gray-400 bg-gray-600'
+          : 'border border-gray-600 bg-gray-800 hover:bg-gray-700 ',
+        'w-1/3 m-2 p-6 h-40 cursor-pointer transition duration-300 ease-in-out transform hover:scale-105 rounded-lg  shadow-md flex flex-col justify-between',
       )}
       onClick={onSelected(asset, example)}
     >
@@ -134,13 +136,15 @@ export const EmptyChat = () => {
           isSelected={command === examplePrompts[1].example}
         />
       </div>
-      <button
-        className="flex items-center justify-center cursor-pointer text-gray-300 hover:text-white mt-[20px] text-md"
-        onClick={refreshUsageExamples}
-      >
-        <span className="mr-2">More</span>
-        <Icon icon={RefreshCcw} width={16} height={16} />
-      </button>
+      <div className="flex items-center justify-center">
+        <button
+          className="flex items-center justify-center cursor-pointer text-gray-300 hover:text-white mt-[20px] text-md"
+          onClick={refreshUsageExamples}
+        >
+          <span className="mr-2">More</span>
+          <Icon icon={RefreshCcw} width={16} height={16} />
+        </button>
+      </div>
     </section>
   );
 };
