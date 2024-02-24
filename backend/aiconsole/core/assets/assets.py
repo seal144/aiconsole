@@ -162,16 +162,15 @@ class Assets:
     def is_enabled(asset_type: AssetType, id: str) -> bool:
         s = settings().unified_settings
 
+        if id in s.assets:
+            return s.assets[id]
+
         if asset_type == AssetType.MATERIAL:
-            if id in s.materials:
-                return s.materials[id]
-            asset = project.get_project_materials().get_asset(id)
+            asset = project.get_project_assets(AssetType.MATERIAL).get_asset(id)
             default_status = asset.enabled_by_default if asset else True
             return default_status
         elif asset_type == AssetType.AGENT:
-            if id in s.agents:
-                return s.agents[id]
-            asset = project.get_project_agents().get_asset(id)
+            asset = project.get_project_assets(AssetType.AGENT).get_asset(id)
             default_status = asset.enabled_by_default if asset else True
             return default_status
 

@@ -160,7 +160,7 @@ async def material_status_change(material_id: str, body: EnabledFlagChangePostBo
 @router.delete("/{material_id}")
 async def delete_material(material_id: str):
     try:
-        await project.get_project_materials().delete_asset(material_id)
+        await project.get_project_assets(AssetType.MATERIAL).delete_asset(material_id)
         return JSONResponse({"status": "ok"})
     except KeyError:
         raise HTTPException(status_code=404, detail="Material not found")

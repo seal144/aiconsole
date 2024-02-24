@@ -32,11 +32,11 @@ class _Assets:
 
 class Agents(_Assets):
     async def create_agent(self, agent_id: str, agent: AICAgent) -> None:
-        agents = project.get_project_agents()
+        agents = project.get_project_assets(AssetType.AGENT)
         await self._create(agents, agent_id, agent)
 
     async def partially_update_agent(self, agent_id: str, agent: AICAgent) -> None:
-        agents = project.get_project_agents()
+        agents = project.get_project_assets(AssetType.AGENT)
         await self._partially_update(agents, agent_id, agent)
 
     async def set_agent_avatar(self, agent_id: str, avatar: UploadFile) -> None:
@@ -48,9 +48,9 @@ class Agents(_Assets):
 
 class Materials(_Assets):
     async def create_material(self, material_id: str, material: Material) -> None:
-        materials = project.get_project_materials()
+        materials = project.get_project_assets(AssetType.MATERIAL)
         await self._create(materials, material_id, material)
 
     async def partially_update_material(self, material_id: str, material: Material) -> None:
-        materials = project.get_project_materials()
+        materials = project.get_project_assets(AssetType.MATERIAL)
         await self._partially_update(materials, material_id, material)

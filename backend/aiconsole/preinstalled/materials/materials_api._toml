@@ -44,7 +44,7 @@ def list_materials():
     ```
     ""\"
     return [{"id": material.id, "usage": material.usage} for material in
-            projects.get_project_materials().all_assets()]
+            projects.get_project_assets(AssetType.MATERIAL).all_assets()]
 
 def create_material(id: str, usage: str, content_type: str, content: str) -> str:
     ""\"
@@ -111,7 +111,7 @@ Today is {current_date_string}
         "api": "content_api",
     }[content_type]
     material.__setattr__(content_index, content)
-    projects.get_project_materials().save_material(material=material, new=True)
+    projects.get_project_assets(AssetType.MATERIAL).save_material(material=material, new=True)
 
     return material.id
 
@@ -123,7 +123,7 @@ def read_material(id: str):
     read_material("today")
     ```
     ""\"
-    path = os.path.join(projects.get_project_materials().user_directory, f'{id}.toml')
+    path = os.path.join(projects.get_project_assets(AssetType.MATERIAL).user_directory, f'{id}.toml')
 
     if not os.path.exists(path):
         raise Exception(f"Material with id {id} does not exist")

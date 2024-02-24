@@ -71,7 +71,7 @@ async def load_asset_from_fs(asset_type: AssetType, asset_id: str, location: Ass
         "usage": str(tomldoc["usage"]).strip(),
         "usage_examples": tomldoc.get("usage_examples", []),
         "enabled_by_default": tomldoc.get(
-            "enabled_by_default", str(tomldoc.get("default_status", "enabled")).strip() == "enabned"
+            "enabled_by_default", str(tomldoc.get("default_status", "enabled")).strip() == "enabled"
         ),
         "override": location == AssetLocation.PROJECT_DIR and (core_resource_path / f"{asset_id}.toml").exists(),
     }

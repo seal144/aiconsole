@@ -30,9 +30,9 @@ async def fetch_agents():
             *(
                 {
                     **agent.model_dump(exclude_none=True),
-                    "status": project.get_project_agents().is_enabled(AssetType.AGENT, agent.id),
+                    "status": project.get_project_assets(AssetType.AGENT).is_enabled(AssetType.AGENT, agent.id),
                 }
-                for agent in project.get_project_agents().all_assets()
+                for agent in project.get_project_assets(AssetType.AGENT).all_assets()
             )
         ]
     )

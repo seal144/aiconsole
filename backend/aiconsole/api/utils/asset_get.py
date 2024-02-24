@@ -19,9 +19,9 @@ async def asset_get(request, asset_type: AssetType, asset_id: str, new_asset: Ca
         return JSONResponse(asset.model_dump(exclude_none=True))
     else:
         if asset_type == AssetType.AGENT:
-            assets = project.get_project_agents()
+            assets = project.get_project_assets(AssetType.AGENT)
         elif asset_type == AssetType.MATERIAL:
-            assets = project.get_project_materials()
+            assets = project.get_project_assets(AssetType.MATERIAL)
         else:
             raise ValueError(f"Invalid asset type: {asset_type}")
 

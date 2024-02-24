@@ -35,15 +35,14 @@ from aiconsole.api.websockets.connection_manager import (
     connection_manager,
 )
 from aiconsole.api.websockets.do_process_chat import do_process_chat
-from aiconsole.api.websockets.render_materials import (
-    render_materials,
-)
+from aiconsole.api.websockets.render_materials import render_materials
 from aiconsole.api.websockets.server_messages import (
     ChatOpenedServerMessage,
     NotificationServerMessage,
     ResponseServerMessage,
 )
 from aiconsole.core.assets.agents.agent import AICAgent
+from aiconsole.core.assets.types import AssetType
 from aiconsole.core.chat.execution_modes.utils.import_and_validate_execution_mode import (
     import_and_validate_execution_mode,
 )
@@ -221,7 +220,9 @@ async def _handle_init_chat_mutation_ws_message(connection: AICConnection | None
 
 
 async def _handle_accept_code_ws_message(connection: AICConnection, json: dict):
-    events_to_sub: list[type[InternalEvent]] = [WaitForEnvEvent, ]
+    events_to_sub: list[type[InternalEvent]] = [
+        WaitForEnvEvent,
+    ]
 
     message = AcceptCodeClientMessage(**json)
 
@@ -258,7 +259,7 @@ async def _handle_accept_code_ws_message(connection: AICConnection, json: dict):
 
         agent_id = tool_call_location.message_group.actor_id.id
 
-        agent = project.get_project_agents().get_asset(agent_id)
+        agent = project.get_project_assets(AssetType.AGENT).get_asset(agent_id)
 
         if agent is None:
             raise Exception(f"Agent with id {agent_id} not found")

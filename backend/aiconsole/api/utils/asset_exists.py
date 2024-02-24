@@ -17,9 +17,9 @@ async def asset_exists(asset_type: AssetType, request: Request, asset_id: str):
         return JSONResponse({"exists": False})
     else:
         if asset_type == AssetType.AGENT:
-            assets = project.get_project_agents()
+            assets = project.get_project_assets(AssetType.AGENT)
         elif asset_type == AssetType.MATERIAL:
-            assets = project.get_project_materials()
+            assets = project.get_project_assets(AssetType.MATERIAL)
         else:
             raise ValueError(f"Invalid asset type: {asset_type}")
 
@@ -30,9 +30,9 @@ async def asset_exists(asset_type: AssetType, request: Request, asset_id: str):
 
 def asset_path(asset_type: AssetType, request: Request, asset_id: str):
     if asset_type == AssetType.AGENT:
-        asset = project.get_project_agents().get_asset(asset_id)
+        asset = project.get_project_assets(AssetType.AGENT).get_asset(asset_id)
     elif asset_type == AssetType.MATERIAL:
-        asset = project.get_project_materials().get_asset(asset_id)
+        asset = project.get_project_assets(AssetType.MATERIAL).get_asset(asset_id)
     else:
         raise ValueError(f"Invalid asset type: {asset_type}")
 

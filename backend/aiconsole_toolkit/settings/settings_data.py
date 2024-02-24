@@ -13,8 +13,7 @@ class SettingsData(BaseModel):
     code_autorun: bool = False
     openai_api_key: str | None = None
     user_profile: UserProfile = UserProfile()
-    materials: dict[str, bool] = {}
-    agents: dict[str, bool] = {}
+    assets: dict[str, bool] = {}
     gpt_modes: dict[consts.GPTMode, GPTModeConfig] = {
         consts.ANALYSIS_GPT_MODE: GPTModeConfig(
             max_tokens=consts.GPT_MODE_ANALYSIS_MAX_TOKENS,

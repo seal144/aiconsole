@@ -77,16 +77,18 @@ async def send_project_init(connection: AICConnection):
     )
 
 
-def get_project_materials() -> "assets.Assets":
-    if not _materials:
-        raise ValueError("Project materials are not initialized")
-    return _materials
+def get_project_assets(type: AssetType) -> "assets.Assets":
+    if type == AssetType.AGENT:
+        if not _agents:
+            raise ValueError("Project agents are not initialized")
+        return _agents
 
+    if type == AssetType.MATERIAL:
+        if not _materials:
+            raise ValueError("Project materials are not initialized")
+        return _materials
 
-def get_project_agents() -> "assets.Assets":
-    if not _agents:
-        raise ValueError("Project agents are not initialized")
-    return _agents
+    raise ValueError(f"Unknown asset type {type}")
 
 
 def is_project_initialized() -> bool:

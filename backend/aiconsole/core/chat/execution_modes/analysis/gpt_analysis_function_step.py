@@ -20,7 +20,7 @@ from typing import cast
 from aiconsole.consts import DIRECTOR_MIN_TOKENS, DIRECTOR_PREFERRED_TOKENS
 from aiconsole.core.assets.agents.agent import AICAgent
 from aiconsole.core.assets.materials.material import Material
-from aiconsole.core.assets.types import AssetLocation
+from aiconsole.core.assets.types import AssetLocation, AssetType
 from aiconsole.core.chat.actor_id import ActorId
 from aiconsole.core.chat.chat_mutations import (
     SetActorIdMessageGroupMutation,
@@ -94,13 +94,13 @@ def _get_relevant_materials(relevant_material_ids: list[str]) -> list[Material]:
     # Maximum of 5 materials
     relevant_materials = [
         cast(Material, k)
-        for k in project.get_project_materials().assets_with_enabled_flag_set_to(True)
+        for k in project.get_project_assets(AssetType.MATERIAL).assets_with_enabled_flag_set_to(True)
         if k.id in relevant_material_ids
     ][:5]
 
     relevant_materials += cast(
         list[Material],
-        project.get_project_materials().assets_with_enabled_flag_set_to(True),
+        project.get_project_assets(AssetType.MATERIAL).assets_with_enabled_flag_set_to(True),
     )
 
     return relevant_materials
@@ -137,14 +137,14 @@ async def gpt_analysis_function_step(
     available_materials = []
     forced_materials = []
     if chat_mutator.chat.chat_options.materials_ids:
-        for material in project.get_project_materials()._assets.values():
+        for material in project.get_project_assets(AssetType.MATERIAL)._assets.values():
             if material[0].id in chat_mutator.chat.chat_options.materials_ids:
                 forced_materials.append(material[0])
 
     if chat_mutator.chat.chat_options.let_ai_add_extra_materials:
         available_materials = [
             *forced_materials,
-            *project.get_project_materials().assets_with_enabled_flag_set_to(True),
+            *project.get_project_assets(AssetType.MATERIAL).assets_with_enabled_flag_set_to(True),
         ]
 
     plan_class = create_plan_class(
