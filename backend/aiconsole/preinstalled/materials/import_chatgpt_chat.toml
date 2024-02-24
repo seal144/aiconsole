@@ -1,4 +1,7 @@
 name = "Import ChatGPT Chat"
 usage = "When you have a ChatGPT link"
+usage_examples = [
+    "Import chat from link: https://chat.openai.com/share/435db21b-053d-4f6c-9e06-4844696ad542",
+]
 content_type = "api"
 content = "file://./import_chatgpt_chat.py"

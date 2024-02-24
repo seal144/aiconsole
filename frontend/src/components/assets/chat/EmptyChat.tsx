@@ -14,89 +14,133 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { Button } from '@/components/common/Button';
-import { ContextMenu, ContextMenuRef } from '@/components/common/ContextMenu';
-import { LeaveProjectDialog } from '@/components/common/LeaveProjectDialog';
+import { Icon } from '@/components/common/icons/Icon';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
 import { useEditablesStore } from '@/store/assets/useEditablesStore';
-import { useProjectStore } from '@/store/projects/useProjectStore';
-import { useProjectContextMenu } from '@/utils/projects/useProjectContextMenu';
-import { RefreshCcw } from 'lucide-react';
+import { Asset } from '@/types/assets/assetTypes';
 import { cn } from '@/utils/common/cn';
-import { Icon } from '@/components/common/icons/Icon';
+import { RefreshCcw } from 'lucide-react';
+
+const NUMBER_OF_DISPLAYED_EXAMPLES = 2;
+
+interface ExamplePromptProps {
+  asset: Asset;
+  example: string;
+  onSelected: (asset: Asset, example: string) => () => void;
+  showExamples: boolean;
+  isSelected: boolean;
+}
+
+const ExamplePrompt: React.FC<ExamplePromptProps> = ({ asset, example, onSelected, showExamples, isSelected }) => {
+  return (
+    <div
+      className={cn(
+        !showExamples && 'opacity-0',
+        showExamples && isSelected ? 'border-2 border-secondary border-opacity-50' : 'border-2 border-transparent',
+        'w-1/3 m-2 p-6 h-40 cursor-pointer transition duration-300 ease-in-out transform hover:scale-105 hover:bg-gray-700 rounded-lg bg-gray-800 shadow-md flex flex-col justify-between',
+      )}
+      onClick={onSelected(asset, example)}
+    >
+      <p className="text-white text-md mb-4 overflow-hidden line-clamp-2">{example}</p>
+    </div>
+  );
+};
 
 export const EmptyChat = () => {
-  const projectName = useProjectStore((state) => state.projectName);
-  const { menuItems, isDialogOpen, closeDialog } = useProjectContextMenu();
-  const triggerRef = useRef<ContextMenuRef>(null);
-  const submitCommand = useChatStore((state) => state.submitCommand);
+  const command = useChatStore((state) => state.commandHistory[state.commandIndex]);
+  const editCommand = useChatStore((state) => state.editCommand);
+
   const assets = useEditablesStore((state) =>
     state.materials && state.agents ? [...state.materials, ...state.agents] : [],
   );
   const [lastExamples, setLastExamples] = useState<string[]>([]);
-  const [refreshCounter, setRefreshCounter] = useState(0);
-
-  const numberOfDisplayedExamples = 4;
+  const [showExamples, setShowExamples] = useState(true);
+  const [examplesVersion, setExamplesVersion] = useState(0);
 
   const examplePrompts = useMemo(() => {
-    // Use lastExamples directly from the state
-    const usageExamples = assets
-      .map((m) => m.usage_examples)
-      .flat()
-      .filter((example) => !lastExamples.includes(example));
+    // Adjusting to include the full asset with its usage examples
+    const usageExamplesWithAsset = assets
+      .flatMap((asset) => asset.usage_examples.map((example) => ({ asset, example })))
+      .filter(({ example }) => !lastExamples.includes(example));
 
-    const randomExamples = usageExamples.sort(() => Math.random() - 0.5).slice(0, numberOfDisplayedExamples);
+    const randomExamplesWithAsset = usageExamplesWithAsset
+      .sort(() => Math.random() - 0.5)
+      .slice(0, NUMBER_OF_DISPLAYED_EXAMPLES);
 
-    return randomExamples;
+    return randomExamplesWithAsset;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshCounter]);
+  }, [examplesVersion]);
 
   useEffect(() => {
-    setLastExamples(examplePrompts);
+    setLastExamples(examplePrompts.map(({ example }) => example));
   }, [examplePrompts]);
 
-  const openContext = (event: MouseEvent) => {
-    if (triggerRef.current) {
-      triggerRef?.current.handleTriggerClick(event);
-    }
+  const refreshUsageExamples = () => {
+    setShowExamples(false);
+    setTimeout(() => {
+      setShowExamples(true);
+      setExamplesVersion((prev) => prev + 1);
+    }, 300);
   };
 
-  const refreshUsageExamples = () => {
-    setRefreshCounter((prevCounter) => prevCounter + 1);
+  const setSelectedAgentId = useChatStore((state) => state.setSelectedAgentId);
+  const setSelectedMaterialsIds = useChatStore((state) => state.setSelectedMaterialsIds);
+
+  const onSelected = (asset: Asset, example: string) => () => {
+    //if is already selected
+    if (command === example) {
+      //deselect
+      editCommand('');
+      setSelectedAgentId('');
+      setSelectedMaterialsIds([]);
+      return;
+    }
+
+    if (asset.type == 'agent') {
+      setSelectedAgentId(asset.id);
+    } else {
+      setSelectedAgentId('');
+    }
+
+    if (asset.type == 'material') {
+      setSelectedMaterialsIds([asset.id]);
+    } else {
+      setSelectedMaterialsIds([]);
+    }
+
+    editCommand(example);
   };
 
   return (
-    <section className="flex flex-col items-center justify-center container mx-auto px-6 py-[64px] pb-[40px] select-none flex-grow h-full w-full">
-      <img src="chat-page-glow.png" alt="glow" className="absolute top-[40px] -z-[1]" />
-      <p className="text-[16px] text-gray-300 text-center mb-[15px]">Welcome to the project</p>
-      <ContextMenu options={menuItems} ref={triggerRef}>
-        <h2
-          className="text-[36px] text-center font-black cursor-pointer uppercase text-white mb-[40px]"
-          onClick={openContext}
-        >
-          {projectName}
-        </h2>
-      </ContextMenu>
-
-      <div className="max-w-[700px] w-full flex flex-wrap justify-center items-center">
-        {examplePrompts.map((prompt, index) => (
-          <div key={index} className="w-1/2 p-2">
-            <Button classNames="w-full" variant="secondary" transparent onClick={() => submitCommand(prompt)}>
-              {prompt}
-            </Button>
-          </div>
-        ))}
+    <section className="flex flex-col container mx-auto px-6 py-[64px] pb-[40px] select-none flex-grow h-full w-full">
+      <img src="chat-page-glow.png" alt="glow" className="absolute top-[100px] -z-[1] opacity-70" />
+      <p className="text-lg text-gray-300 text-center mt-[100px] mb-[15px]">What can I help you with?</p>
+      <div className=" w-full flex flex-row gap-4 justify-center items-center">
+        <ExamplePrompt
+          asset={examplePrompts[0].asset}
+          example={examplePrompts[0].example}
+          onSelected={onSelected}
+          showExamples={showExamples}
+          isSelected={command === examplePrompts[0].example}
+        />
+        or
+        <ExamplePrompt
+          asset={examplePrompts[1].asset}
+          example={examplePrompts[1].example}
+          onSelected={onSelected}
+          showExamples={showExamples}
+          isSelected={command === examplePrompts[1].example}
+        />
       </div>
-      <Icon
-        icon={RefreshCcw}
-        width={16}
-        height={16}
-        className={cn(`cursor-pointer text-gray-300 hover:text-white mt-[20px]`)}
+      <button
+        className="flex items-center justify-center cursor-pointer text-gray-300 hover:text-white mt-[20px] text-md"
         onClick={refreshUsageExamples}
-      />
-      <LeaveProjectDialog onCancel={closeDialog} isOpen={isDialogOpen} />
+      >
+        <span className="mr-2">More</span>
+        <Icon icon={RefreshCcw} width={16} height={16} />
+      </button>
     </section>
   );
 };

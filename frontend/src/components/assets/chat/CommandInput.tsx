@@ -20,13 +20,11 @@ import { Icon } from '@/components/common/icons/Icon';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
 import { cn } from '@/utils/common/cn';
 import { LucideIcon, X } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import ChatOptions from '../assets/ChatOptions';
 import { useEditablesStore } from '@/store/assets/useEditablesStore';
 import { ActorAvatar } from './ActorAvatar';
-import { useDebounceCallback } from '@mantine/hooks';
-import { ChatAPI } from '@/api/api/ChatAPI';
 import { Material } from '@/types/assets/assetTypes';
 
 interface MessageInputProps {
@@ -39,7 +37,10 @@ interface MessageInputProps {
 export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: MessageInputProps) => {
   const ActionIcon = actionIcon;
   const [showChatOptions, setShowChatOptions] = useState(false);
-  const [selectedAgentId, setSelectedAgentId] = useState<string>('');
+
+  const setSelectedAgentId = useChatStore((state) => state.setSelectedAgentId);
+  const selectedAgentId = useChatStore((state) => state.chatOptions?.agentId);
+
   const command = useChatStore((state) => state.commandHistory[state.commandIndex]);
 
   const setCommand = useChatStore((state) => state.editCommand);
@@ -47,13 +48,17 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
   const promptDown = useChatStore((state) => state.historyDown);
   const chat = useChatStore((state) => state.chat);
   const agents = useEditablesStore((state) => state.agents);
-  const setChat = useChatStore((state) => state.setChat);
   const materials = useEditablesStore((state) => state.materials);
   const [materialsOptions, setMaterialsOptions] = useState<Material[]>([]);
-  const [chosenMaterials, setChosenMaterials] = useState<Material[]>([]);
-  const materialsIds = chosenMaterials.map((material) => material.id);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const chatOptionsInputRef = useRef<HTMLInputElement>(null);
+
+  const setSelectedMaterialIds = useChatStore((state) => state.setSelectedMaterialsIds);
+  const selectedMaterialIds = useChatStore((state) => state.chatOptions?.materialsIds || []);
+  const selectedMaterials = useMemo(
+    () => materials?.filter(({ id }) => selectedMaterialIds.includes(id)) || [],
+    [materials, selectedMaterialIds],
+  );
 
   const handleSendMessage = useCallback(
     async (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -98,17 +103,17 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
         }
 
         if (e.key === 'Backspace' && caretAtStart) {
-          if (chosenMaterials.length > 0) {
-            const newChosenMaterials = [...chosenMaterials];
+          if (selectedMaterialIds.length > 0) {
+            const newChosenMaterials = [...selectedMaterialIds];
             newChosenMaterials.pop();
-            setChosenMaterials(newChosenMaterials);
+            setSelectedMaterialIds(newChosenMaterials);
           } else {
             setSelectedAgentId('');
           }
         }
       }
     },
-    [handleSendMessage, promptDown, promptUp, chosenMaterials, setSelectedAgentId, setChosenMaterials],
+    [handleSendMessage, promptDown, promptUp, setSelectedAgentId, setSelectedMaterialIds, selectedMaterialIds],
   );
 
   // auto focus this text area on changes to chatId
@@ -119,53 +124,21 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
   }, [chat?.id]);
 
   useEffect(() => {
-    setSelectedAgentId('');
-    setChosenMaterials([]);
-  }, [chat?.id]);
-
-  useEffect(() => {
-    if (chat?.chat_options.agent_id) {
-      setSelectedAgentId(chat?.chat_options.agent_id);
-    }
-  }, [chat?.chat_options.agent_id, chat?.id]);
-
-  useEffect(() => {
     const filteredMaterials = materials?.filter(({ id }) => (chat?.chat_options.materials_ids || []).includes(id));
     if (filteredMaterials) {
-      setChosenMaterials(filteredMaterials);
+      setSelectedMaterialIds(filteredMaterials.map(({ id }) => id));
     }
-  }, [chat?.chat_options.materials_ids, materials, chat?.id]);
+  }, [chat?.chat_options.materials_ids, materials, chat?.id, setSelectedMaterialIds]);
 
   useEffect(() => {
     setMaterialsOptions(
       materials
-        ?.filter((material) => !chosenMaterials.includes(material))
+        ?.filter((material) => !selectedMaterialIds.includes(material.id))
         .filter((item) => item.enabled) as Material[],
     );
-  }, [chat?.id, materials, chosenMaterials]);
+  }, [chat?.id, materials, selectedMaterialIds]);
 
   const getAgent = (agentId: string) => agents.find((agent) => agent.id === agentId);
-
-  const debounceChatUpdate = useDebounceCallback(async () => {
-    try {
-      if (chat) {
-        ChatAPI.patchChatOptions(chat?.id, {
-          agent_id: selectedAgentId,
-          materials_ids: materialsIds,
-        });
-
-        setChat({
-          ...chat,
-          chat_options: {
-            agent_id: selectedAgentId,
-            materials_ids: materialsIds,
-          },
-        });
-      }
-    } catch (error) {
-      console.error('An error occurred while updating chat options:', error);
-    }
-  }, 500);
 
   const removeLastAt = () => {
     if (command.endsWith('@')) {
@@ -176,7 +149,6 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
 
   const onSelectAgentId = (id: string) => {
     setSelectedAgentId(id);
-    debounceChatUpdate();
     setShowChatOptions(false);
     removeLastAt();
     setTimeout(() => {
@@ -186,14 +158,12 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
 
   const removeAgentId = () => {
     setSelectedAgentId('');
-    debounceChatUpdate();
   };
 
   const handleMaterialSelect = (material: Material) => {
-    setChosenMaterials((prev) => [...prev, material]);
+    setSelectedMaterialIds([...selectedMaterialIds, material.id]);
     const filteredOptions = materialsOptions.filter(({ id }) => id !== material.id).filter((item) => item.enabled);
     setMaterialsOptions(filteredOptions);
-    debounceChatUpdate();
     setShowChatOptions(false);
     removeLastAt();
     setTimeout(() => {
@@ -202,10 +172,9 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
   };
 
   const removeSelectedMaterial = (id: string) => () => {
-    const material = chosenMaterials.find((material) => material.id === id) as Material;
-    setChosenMaterials((prev) => prev.filter(({ id }) => id !== material.id));
+    const material = selectedMaterials.find((material) => material.id === id) as Material;
+    setSelectedMaterialIds(selectedMaterialIds.filter((id) => id !== material.id).map((id) => id));
     setMaterialsOptions((prev) => [...prev, material].sort((a, b) => a.name.localeCompare(b.name)));
-    debounceChatUpdate();
   };
 
   const handleFocus = useCallback(() => {
@@ -226,7 +195,7 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
           />
         )}
         <div className="w-full overflow-y-auto border border-gray-500 bg-gray-800 hover:bg-gray-600 focus-within:bg-gray-600 focus-within:border-gray-400 transition duration-100 rounded-[8px] flex flex-col flex-grow resize-none">
-          {(selectedAgentId || chosenMaterials.length > 0) && (
+          {(selectedAgentId || selectedMaterialIds.length > 0) && (
             <div className="px-[20px] py-[12px] w-full flex flex-col gap-2">
               {selectedAgentId && (
                 <div className="w-full flex jusify-between items-center">
@@ -249,11 +218,11 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
                   />
                 </div>
               )}
-              {chosenMaterials.length > 0 && (
+              {selectedMaterialIds.length > 0 && (
                 <div className="flex gap-2">
                   <span className="text-gray-400 text-[14px]">Using:</span>
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 overflow-y-auto max-h-[52px]">
-                    {chosenMaterials.map((material) => (
+                    {selectedMaterials.map((material) => (
                       <div key={material.id} className="flex gap-1 items-center">
                         <span className="text-gray-300 text-[14px]">{material.name}</span>
                         <Icon

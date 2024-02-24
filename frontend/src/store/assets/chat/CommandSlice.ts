@@ -92,6 +92,12 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
   submitCommand: async (command: string) => {
     await get().stopWork();
 
+    while (get().chatOptionsSaveDebounceTimer) {
+      //Let's wait until any chat option modifiactions are saved
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      console.debug('Waiting for chatOptionsSaveDebounceTimer to be null');
+    }
+
     if (command.trim() !== '') {
       const chat = get().chat;
 

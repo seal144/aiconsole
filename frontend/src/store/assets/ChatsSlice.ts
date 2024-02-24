@@ -12,7 +12,6 @@ export type ChatsSlice = {
 export const createChatsSlice: StateCreator<EditablesStore, [], [], ChatsSlice> = (set) => ({
   chats: [],
   initChatHistory: async () => {
-    set({ chats: [] });
     if (!useProjectStore.getState().isProjectOpen) return;
     try {
       const chats: AICChatHeadline[] = await AssetsAPI.fetchAssets<AICChatHeadline>('chat');

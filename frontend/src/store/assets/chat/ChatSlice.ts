@@ -19,10 +19,15 @@ import { StateCreator } from 'zustand';
 import { AssetsAPI } from '@/api/api/AssetsAPI';
 import { AICChat } from '@/types/assets/chatTypes';
 import { useEditablesStore } from '../useEditablesStore';
-import { ChatStore } from './useChatStore';
+import { ChatStore, useChatStore } from './useChatStore';
+import { ChatAPI } from '@/api/api/ChatAPI';
 
 export type ChatSlice = {
   chat?: AICChat;
+  chatOptions?: {
+    agentId: string;
+    materialsIds: string[];
+  };
   lastUsedChat?: AICChat;
   isChatLoading: boolean;
   isChatOptionsExpanded: boolean;
@@ -31,20 +36,26 @@ export type ChatSlice = {
   renameChat: (newChat: AICChat) => Promise<void>;
   setIsChatLoading: (isLoading: boolean) => void;
   setIsChatOptionsExpanded: (isExpanded: boolean) => void;
+
+  setSelectedAgentId: (id: string) => void;
+  setSelectedMaterialsIds: (ids: string[]) => void;
+  chatOptionsSaveDebounceTimer: NodeJS.Timeout | null;
 };
 
 export const createChatSlice: StateCreator<ChatStore, [], [], ChatSlice> = (set, get) => ({
   isChatLoading: false,
   chat: undefined,
+  chatOptions: undefined,
   agent: undefined,
   lastUsedChat: undefined,
   isChatOptionsExpanded: true,
   materials: [],
+  chatOptionsSaveDebounceTimer: null,
   setLastUsedChat: (chat?: AICChat) => {
     set({ lastUsedChat: chat });
   },
   setChat: (chat: AICChat) => {
-    set({ chat });
+    set({ chat, chatOptions: { agentId: chat.chat_options.agent_id, materialsIds: chat.chat_options.materials_ids } });
   },
   renameChat: async (newChat: AICChat) => {
     await AssetsAPI.updateAsset('chat', newChat, newChat.id);
@@ -59,4 +70,55 @@ export const createChatSlice: StateCreator<ChatStore, [], [], ChatSlice> = (set,
   setIsChatOptionsExpanded: (isExpanded: boolean) => {
     set({ isChatOptionsExpanded: isExpanded });
   },
+  setSelectedAgentId: (id: string) => {
+    set((state) => {
+      const newState = {
+        chatOptions: {
+          agentId: id,
+          materialsIds: state.chatOptions?.materialsIds || [],
+        },
+      };
+      debounceChatOptionsUpdate(state.chat?.id, newState.chatOptions);
+      return newState;
+    });
+  },
+  setSelectedMaterialsIds: (ids: string[]) => {
+    set((state) => {
+      const newState = {
+        chatOptions: {
+          agentId: state.chatOptions?.agentId || '',
+          materialsIds: ids,
+        },
+      };
+      debounceChatOptionsUpdate(state.chat?.id, newState.chatOptions);
+      return newState;
+    });
+  },
 });
+
+const debounceChatOptionsUpdate = (
+  chatId: string | undefined,
+  chatOptions: { agentId: string; materialsIds: string[] },
+) => {
+  const debounceDelay = 500; // milliseconds
+
+  const timer = useChatStore.getState().chatOptionsSaveDebounceTimer;
+  if (timer) {
+    clearTimeout(timer);
+    useChatStore.setState({ chatOptionsSaveDebounceTimer: null });
+  }
+
+  useChatStore.setState({
+    chatOptionsSaveDebounceTimer: setTimeout(async () => {
+      if (chatId) {
+        // Assuming there's a method in ChatAPI to update chat options
+        await ChatAPI.setChatOptions(chatId, {
+          agent_id: chatOptions.agentId,
+          materials_ids: chatOptions.materialsIds,
+        });
+        console.debug(`Chat options updated for chatId: ${chatId} with options: ${JSON.stringify(chatOptions)}`);
+      }
+      useChatStore.setState({ chatOptionsSaveDebounceTimer: null });
+    }, debounceDelay),
+  });
+};
