@@ -40,6 +40,7 @@ ipykernel = "^6.29.2"
 matplotlib = "^3.8.2"
 virtualenv = "^20.25.1"
 aiofiles = "^23.2.1"
+types-aiofiles = "^23.2.0.20240106"
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.13.2"
