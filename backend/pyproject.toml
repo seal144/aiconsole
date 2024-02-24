@@ -39,6 +39,7 @@ jupyter-client = "^8.6.0"
 ipykernel = "^6.29.2"
 matplotlib = "^3.8.2"
 virtualenv = "^20.25.1"
+aiofiles = "^23.2.1"
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.13.2"

@@ -49,5 +49,5 @@ async def chat_options(chat_id: str, chat_odj: dict):
     chat = await load_chat_history(id=chat_id)
     if chat_odj.get("name"):
         chat.name = str(chat_odj.get("name"))
-        save_chat_history(chat, scope="name")
+        await save_chat_history(chat, scope="name")
     return Response(status_code=status.HTTP_200_OK)

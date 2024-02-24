@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from collections import defaultdict
+from collections import defaultdict, deque
 from typing import Callable, Coroutine
 
 from fastapi import HTTPException
@@ -63,7 +63,7 @@ async def acquire_lock(chat_id: str, request_id: str, skip_mutating_clients: boo
 
 
 async def _read_chat_outside_of_lock(chat_id: str):
-    _log.debug(f"Reading chat{chat_id}")
+    _log.debug(f"Reading chat {chat_id}")
     if chat_id not in chats:
         return await load_chat_history(chat_id)
 
@@ -73,7 +73,7 @@ async def _read_chat_outside_of_lock(chat_id: str):
 async def release_lock(chat_id: str, request_id: str) -> None:
     if chat_id in chats and chats[chat_id].lock_id == request_id:
         chats[chat_id].lock_id = None
-        save_chat_history(chats[chat_id], scope="message_groups")
+        await save_chat_history(chats[chat_id], scope="message_groups")
         del chats[chat_id]
         lock_events[chat_id].set()
 
@@ -115,7 +115,7 @@ class DefaultChatMutator(ChatMutator):
 
 
 # This lock is responsible for sequencing the mutations and reads on a given chat
-_waiting_mutations: dict[str, list[Coroutine]] = defaultdict(list)
+_waiting_mutations: dict[str, deque[Coroutine]] = defaultdict(deque)
 _running_mutations: dict[str, asyncio.Task | None] = defaultdict(lambda: None)
 _mutation_complete_events: dict[str, asyncio.Event] = defaultdict(asyncio.Event)
 
@@ -124,7 +124,7 @@ def _check_mutation_queue(chat_id: str):
     if _running_mutations[chat_id] is not None or not _waiting_mutations[chat_id]:
         return
 
-    h = _waiting_mutations[chat_id].pop(0)
+    h = _waiting_mutations[chat_id].popleft()
     task = asyncio.create_task(h)
     _running_mutations[chat_id] = task
 
@@ -140,7 +140,6 @@ def _check_mutation_queue(chat_id: str):
 class SequentialChatMutator(ChatMutator):
     def __init__(self, mutator: DefaultChatMutator):
         self.mutator = mutator
-        self._chat = None
 
     @property
     def chat(self) -> AICChat:

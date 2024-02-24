@@ -20,5 +20,5 @@ async def chat_options(chat_id: str, chat_options: Optional[PatchChatOptions] = 
     if chat_options:
         for field in chat_options.model_dump(exclude_unset=True):
             setattr(chat.chat_options, field, getattr(chat_options, field))
-        save_chat_history(chat, scope="chat_options")
+        await save_chat_history(chat, scope="chat_options")
     return Response(status_code=status.HTTP_200_OK)
