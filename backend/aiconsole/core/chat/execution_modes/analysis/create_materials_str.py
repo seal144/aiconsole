@@ -20,7 +20,7 @@ from aiconsole.core.assets.types import AssetType
 from aiconsole.core.project import project
 
 
-def create_materials_str(materials_ids: list | None, let_ai_add_extra_materials: bool) -> str:
+def create_materials_str(materials_ids: list | None, ai_can_add_extra_materials: bool) -> str:
     new_line = "\n"
 
     # We add forced becuase it may influence the choice of enabled materials
@@ -30,7 +30,7 @@ def create_materials_str(materials_ids: list | None, let_ai_add_extra_materials:
             if material[0].id in materials_ids:
                 available_materials.append(material[0])
 
-    if let_ai_add_extra_materials:
+    if ai_can_add_extra_materials:
         available_materials = [
             *available_materials,
             *project.get_project_assets(AssetType.MATERIAL).assets_with_enabled_flag_set_to(True),

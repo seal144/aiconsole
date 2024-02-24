@@ -22,7 +22,7 @@ import { cn } from '@/utils/common/cn';
 import { LucideIcon, X } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
-import ChatOptions from '../assets/ChatOptions';
+import ChatOptions from './ChatOptions';
 import { useEditablesStore } from '@/store/assets/useEditablesStore';
 import { ActorAvatar } from './ActorAvatar';
 import { Material } from '@/types/assets/assetTypes';
@@ -40,6 +40,9 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
 
   const setSelectedAgentId = useChatStore((state) => state.setSelectedAgentId);
   const selectedAgentId = useChatStore((state) => state.chatOptions?.agentId);
+
+  const setAICanAddExtraMaterials = useChatStore((state) => state.setAICanAddExtraMaterials);
+  const aiCanAddExtraMaterials = useChatStore((state) => state.chatOptions?.aiCanAddExtraMaterials);
 
   const command = useChatStore((state) => state.commandHistory[state.commandIndex]);
 
@@ -124,13 +127,6 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
   }, [chat?.id]);
 
   useEffect(() => {
-    const filteredMaterials = materials?.filter(({ id }) => (chat?.chat_options.materials_ids || []).includes(id));
-    if (filteredMaterials) {
-      setSelectedMaterialIds(filteredMaterials.map(({ id }) => id));
-    }
-  }, [chat?.chat_options.materials_ids, materials, chat?.id, setSelectedMaterialIds]);
-
-  useEffect(() => {
     setMaterialsOptions(
       materials
         ?.filter((material) => !selectedMaterialIds.includes(material.id))
@@ -181,6 +177,10 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
     setShowChatOptions(false);
   }, []);
 
+  const handleAnalysisClick = () => {
+    setAICanAddExtraMaterials(!aiCanAddExtraMaterials);
+  };
+
   return (
     <div className={cn(className, 'flex w-full flex-col px-4 py-[20px] bg-gray-900 z-50')}>
       <div className="flex items-end gap-[10px] max-w-[700px] w-full mx-auto relative">
@@ -194,53 +194,87 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
             textAreaRef={textAreaRef}
           />
         )}
-        <div className="w-full overflow-y-auto border border-gray-500 bg-gray-800 hover:bg-gray-600 focus-within:bg-gray-600 focus-within:border-gray-400 transition duration-100 rounded-[8px] flex flex-col flex-grow resize-none">
-          {(selectedAgentId || selectedMaterialIds.length > 0) && (
-            <div className="px-[20px] py-[12px] w-full flex flex-col gap-2">
-              {selectedAgentId && (
-                <div className="w-full flex jusify-between items-center">
-                  <div className="flex items-center gap-3 w-full">
-                    <ActorAvatar
-                      actorType="agent"
-                      actorId={selectedAgentId}
-                      title="test"
-                      type="extraSmall"
-                      className="!mb-0 !mt-0"
+        <div className="w-full overflow-y-auto border border-gray-500 focus-within:border-gray-400 transition duration-100 rounded-[8px] flex flex-col flex-grow resize-none">
+          {(selectedAgentId || selectedMaterialIds.length > 0 || !aiCanAddExtraMaterials) && (
+            <div className="bg-gray-600">
+              <div className="px-[20px] py-[12px] w-full flex flex-wrap gap-2 items-center">
+                <span className="text-gray-400 text-[14px]">Talking&nbsp;to</span>
+
+                {selectedAgentId ? (
+                  <>
+                    <div
+                      className="flex jusify-between items-center gap-2 bg-gray-700 px-[6px] py-[6px] rounded-[32px] cursor-pointer"
+                      onClick={removeAgentId}
+                    >
+                      <div className="flex items-center gap-1 w-full">
+                        <ActorAvatar
+                          actorType="agent"
+                          actorId={selectedAgentId}
+                          type="extraSmall"
+                          className="!mb-0 !mt-0"
+                        />
+
+                        <p className="text-[15px]">
+                          <span className="text-white">{selectedAgentId ? getAgent(selectedAgentId)?.name : '?'}</span>
+                        </p>
+
+                        {selectedAgentId && <Icon icon={X} className={cn('w-4 h-4 min-h-4 min-w-4 flex-shrink-0')} />}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <span title="AI will choose the agent">?</span>
+                )}
+                {selectedMaterials.length > 0 || aiCanAddExtraMaterials ? (
+                  <span className="text-gray-400 text-[14px]">using </span>
+                ) : null}
+                {selectedMaterials.map((material) => (
+                  <div
+                    key={material.id}
+                    onClick={removeSelectedMaterial(material.id)}
+                    className="flex gap-1 items-center bg-gray-700 px-[6px] py-[6px] rounded-[32px] cursor-pointer"
+                  >
+                    <span className="text-white text-[14px] pl-[4px]">{material.name}</span>
+                    <Icon
+                      icon={X}
+                      className={cn('w-4 h-4 min-h-4 min-w-4 flex-shrink-0 cursor-pointer text-gray-400')}
                     />
-                    <p className="text-[15px]">
-                      Talking to <span className="text-white">{getAgent(selectedAgentId)?.name}</span>
-                    </p>
                   </div>
-                  <Icon
-                    icon={X}
-                    className={cn('w-4 h-4 min-h-4 min-w-4 flex-shrink-0 cursor-pointer')}
-                    onClick={removeAgentId}
-                  />
-                </div>
-              )}
-              {selectedMaterialIds.length > 0 && (
-                <div className="flex gap-2">
-                  <span className="text-gray-400 text-[14px]">Using:</span>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 overflow-y-auto max-h-[52px]">
-                    {selectedMaterials.map((material) => (
-                      <div key={material.id} className="flex gap-1 items-center">
-                        <span className="text-gray-300 text-[14px]">{material.name}</span>
+                ))}
+                {aiCanAddExtraMaterials ? (
+                  <>
+                    <div
+                      onClick={handleAnalysisClick}
+                      title="Allows the AI to add more context to the conversation."
+                      className="flex gap-1 items-center bg-gray-700 px-[6px] py-[6px] rounded-[32px] cursor-pointer"
+                    >
+                      <span className="text-white text-[14px] pl-[4px]"> ...</span>
+                      {aiCanAddExtraMaterials && (
                         <Icon
                           icon={X}
                           className={cn('w-4 h-4 min-h-4 min-w-4 flex-shrink-0 cursor-pointer text-gray-400')}
-                          onClick={removeSelectedMaterial(material.id)}
                         />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span
+                      className="text-gray-400 text-[14px] cursor-pointer"
+                      title="No additonal context will be added to the conversation."
+                      onClick={handleAnalysisClick}
+                    >
+                      without extra materials.
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
           )}
 
           <TextareaAutosize
             ref={textAreaRef}
-            className="w-full bg-transparent text-[15px] text-white resize-none overflow-y-auto px-[20px] py-[12px] placeholder:text-gray-400 hover:placeholder:text-gray-300 focus:outline-none"
+            className="w-full bg-transparent text-[15px] text-white resize-none overflow-y-auto px-[20px] py-[12px] placeholder:text-gray-400 focus:outline-none"
             value={command}
             onChange={handleChange}
             onFocus={handleFocus}

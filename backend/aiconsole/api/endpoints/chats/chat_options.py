@@ -12,13 +12,21 @@ router = APIRouter()
 class PatchChatOptions(BaseModel):
     agent_id: Optional[str] = None
     materials_ids: Optional[list[str]] = None
+    ai_can_add_extra_materials: Optional[bool] = None
 
 
 @router.patch("/{chat_id}/chat_options")
-async def chat_options(chat_id: str, chat_options: Optional[PatchChatOptions] = None):
+async def chat_options(chat_id: str, chat_options: PatchChatOptions):
     chat = await load_chat_history(id=chat_id)
-    if chat_options:
-        for field in chat_options.model_dump(exclude_unset=True):
-            setattr(chat.chat_options, field, getattr(chat_options, field))
-        await save_chat_history(chat, scope="chat_options")
+
+    if chat_options.agent_id is not None:
+        chat.chat_options.agent_id = chat_options.agent_id
+
+    if chat_options.materials_ids is not None:
+        chat.chat_options.materials_ids = chat_options.materials_ids
+
+    if chat_options.ai_can_add_extra_materials is not None:
+        chat.chat_options.ai_can_add_extra_materials = chat_options.ai_can_add_extra_materials
+
+    await save_chat_history(chat, scope="chat_options")
     return Response(status_code=status.HTTP_200_OK)

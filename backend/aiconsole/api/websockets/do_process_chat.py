@@ -36,7 +36,7 @@ async def do_process_chat(chat_mutator: ChatMutator):
 
     agent = _director_agent
 
-    if chat_mutator.chat.chat_options.agent_id and not chat_mutator.chat.chat_options.let_ai_add_extra_materials:
+    if chat_mutator.chat.chat_options.agent_id and not chat_mutator.chat.chat_options.ai_can_add_extra_materials:
         for _agent in agents_to_choose_from(all=True):
             if _agent.id == chat_mutator.chat.chat_options.agent_id:
                 agent = _agent

@@ -40,7 +40,10 @@ const runCode = async ({
   });
 };
 
-const setChatOptions = (chatId: string, body: { agent_id: string; materials_ids: string[] }) =>
+const saveChatOptions = (
+  chatId: string,
+  body: { agent_id: string; materials_ids: string[]; ai_can_add_extra_materials: boolean },
+) =>
   ky.patch(`${getBaseURL()}/api/chats/${chatId}/chat_options`, {
     json: { ...body },
     timeout: 60000,
@@ -59,7 +62,7 @@ const saveCommandToHistory = (body: object) =>
   });
 
 export const ChatAPI = {
-  setChatOptions,
+  saveChatOptions,
   runCode,
   getCommandHistory,
   saveCommandToHistory,

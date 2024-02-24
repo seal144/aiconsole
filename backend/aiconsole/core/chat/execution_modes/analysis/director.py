@@ -105,7 +105,7 @@ async def director_analyse(chat_mutator: ChatMutator, message_group_id: str):
         agents=create_agents_str(agent_id=chat_mutator.chat.chat_options.agent_id),
         materials=create_materials_str(
             materials_ids=chat_mutator.chat.chat_options.materials_ids,
-            let_ai_add_extra_materials=chat_mutator.chat.chat_options.let_ai_add_extra_materials,
+            ai_can_add_extra_materials=chat_mutator.chat.chat_options.ai_can_add_extra_materials,
         ),
     )
 
@@ -113,7 +113,7 @@ async def director_analyse(chat_mutator: ChatMutator, message_group_id: str):
         agents=create_agents_str(agent_id=chat_mutator.chat.chat_options.agent_id),
         materials=create_materials_str(
             materials_ids=chat_mutator.chat.chat_options.materials_ids,
-            let_ai_add_extra_materials=chat_mutator.chat.chat_options.let_ai_add_extra_materials,
+            ai_can_add_extra_materials=chat_mutator.chat.chat_options.ai_can_add_extra_materials,
         ),
     )
 

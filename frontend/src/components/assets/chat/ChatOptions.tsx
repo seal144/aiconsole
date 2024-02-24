@@ -21,7 +21,7 @@ import { Icon } from '@/components/common/icons/Icon';
 import { useClickOutside } from '@/utils/common/useClickOutside';
 import { getAssetIcon } from '@/utils/assets/getAssetIcon';
 import { Agent, Material } from '@/types/assets/assetTypes';
-import { ActorAvatar } from '../chat/ActorAvatar';
+import { ActorAvatar } from './ActorAvatar';
 import clsx from 'clsx';
 
 type ChatOptionsProps = {
@@ -77,7 +77,7 @@ const ChatOptions = ({
     const inputValue = e.target.value;
     setInputValue(inputValue);
 
-    const regex = new RegExp(`^${inputValue}`, 'i');
+    const regex = new RegExp(`${inputValue}`, 'i');
     const filteredMaterialOptions = materialsOptions.filter((item) => regex.test(item.name));
     const filteredAgentOptions = agents.filter((item) => regex.test(item.name)).filter((item) => item.enabled);
     setFilteredAgentsOptions(filteredAgentOptions);

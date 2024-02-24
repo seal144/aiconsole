@@ -83,10 +83,7 @@ class AICToolCallLocation:
 class AICChatOptions(BaseModel):
     agent_id: Optional[str] = ""
     materials_ids: Optional[list[str]] = Field(default_factory=list)
-
-    @property
-    def let_ai_add_extra_materials(self):
-        return self.materials_ids == []
+    ai_can_add_extra_materials: Optional[bool] = True
 
     def is_default(self):
         return self.agent_id == "" and self.materials_ids == []

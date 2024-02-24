@@ -27,6 +27,7 @@ export type ChatSlice = {
   chatOptions?: {
     agentId: string;
     materialsIds: string[];
+    aiCanAddExtraMaterials: boolean;
   };
   lastUsedChat?: AICChat;
   isChatLoading: boolean;
@@ -39,6 +40,8 @@ export type ChatSlice = {
 
   setSelectedAgentId: (id: string) => void;
   setSelectedMaterialsIds: (ids: string[]) => void;
+  setAICanAddExtraMaterials: (aiCanAddExtraMaterials: boolean) => void;
+
   chatOptionsSaveDebounceTimer: NodeJS.Timeout | null;
 };
 
@@ -55,7 +58,14 @@ export const createChatSlice: StateCreator<ChatStore, [], [], ChatSlice> = (set,
     set({ lastUsedChat: chat });
   },
   setChat: (chat: AICChat) => {
-    set({ chat, chatOptions: { agentId: chat.chat_options.agent_id, materialsIds: chat.chat_options.materials_ids } });
+    set({
+      chat,
+      chatOptions: {
+        agentId: chat.chat_options.agent_id,
+        materialsIds: chat.chat_options.materials_ids,
+        aiCanAddExtraMaterials: chat.chat_options.ai_can_add_extra_materials,
+      },
+    });
   },
   renameChat: async (newChat: AICChat) => {
     await AssetsAPI.updateAsset('chat', newChat, newChat.id);
@@ -75,7 +85,8 @@ export const createChatSlice: StateCreator<ChatStore, [], [], ChatSlice> = (set,
       const newState = {
         chatOptions: {
           agentId: id,
-          materialsIds: state.chatOptions?.materialsIds || [],
+          materialsIds: state.chatOptions?.materialsIds ?? [],
+          aiCanAddExtraMaterials: state.chatOptions?.aiCanAddExtraMaterials ?? true,
         },
       };
       debounceChatOptionsUpdate(state.chat?.id, newState.chatOptions);
@@ -86,8 +97,22 @@ export const createChatSlice: StateCreator<ChatStore, [], [], ChatSlice> = (set,
     set((state) => {
       const newState = {
         chatOptions: {
-          agentId: state.chatOptions?.agentId || '',
+          agentId: state.chatOptions?.agentId ?? '',
           materialsIds: ids,
+          aiCanAddExtraMaterials: state.chatOptions?.aiCanAddExtraMaterials ?? true,
+        },
+      };
+      debounceChatOptionsUpdate(state.chat?.id, newState.chatOptions);
+      return newState;
+    });
+  },
+  setAICanAddExtraMaterials: (aiCanAddExtraMaterials: boolean) => {
+    set((state) => {
+      const newState = {
+        chatOptions: {
+          agentId: state.chatOptions?.agentId ?? '',
+          materialsIds: state.chatOptions?.materialsIds ?? [],
+          aiCanAddExtraMaterials,
         },
       };
       debounceChatOptionsUpdate(state.chat?.id, newState.chatOptions);
@@ -98,7 +123,7 @@ export const createChatSlice: StateCreator<ChatStore, [], [], ChatSlice> = (set,
 
 const debounceChatOptionsUpdate = (
   chatId: string | undefined,
-  chatOptions: { agentId: string; materialsIds: string[] },
+  chatOptions: { agentId: string; materialsIds: string[]; aiCanAddExtraMaterials: boolean },
 ) => {
   const debounceDelay = 500; // milliseconds
 
@@ -112,9 +137,10 @@ const debounceChatOptionsUpdate = (
     chatOptionsSaveDebounceTimer: setTimeout(async () => {
       if (chatId) {
         // Assuming there's a method in ChatAPI to update chat options
-        await ChatAPI.setChatOptions(chatId, {
+        await ChatAPI.saveChatOptions(chatId, {
           agent_id: chatOptions.agentId,
           materials_ids: chatOptions.materialsIds,
+          ai_can_add_extra_materials: chatOptions.aiCanAddExtraMaterials,
         });
         console.debug(`Chat options updated for chatId: ${chatId} with options: ${JSON.stringify(chatOptions)}`);
       }
