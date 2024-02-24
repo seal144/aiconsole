@@ -30,7 +30,7 @@ import { MoreVertical } from 'lucide-react';
 import { KeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 
-const SideBarItem = ({ assetType, editableObject }: { editableObject: Asset; assetType: AssetType }) => {
+const SideBarItem = ({ assetType, asset }: { asset: Asset; assetType: AssetType }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -48,39 +48,39 @@ const SideBarItem = ({ assetType, editableObject }: { editableObject: Asset; ass
   const { renameAsset } = useAssets(assetType);
   const menuItems = useAssetContextMenu({
     assetType: assetType,
-    asset: editableObject,
+    asset: asset,
     setIsEditing,
   });
 
-  const EditableIcon = getAssetIcon(editableObject);
+  const EditableIcon = getAssetIcon(asset);
 
-  const [inputText, setInputText] = useState(editableObject.name);
+  const [inputText, setInputText] = useState(asset.name);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isEditing) {
-      setInputText(editableObject.name);
+      setInputText(asset.name);
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
         }
       }, 0);
     }
-  }, [isEditing, editableObject.name, setIsEditing]);
+  }, [isEditing, asset.name, setIsEditing]);
 
   const hideInput = () => {
     setIsEditing(false);
   };
 
   const handleRename = async () => {
-    const previousObjectId = editableObject.id;
-    if (inputText === '' || editableObject.name === inputText) {
-      setInputText(editableObject.name);
+    const previousObjectId = asset.id;
+    if (inputText === '' || asset.name === inputText) {
+      setInputText(asset.name);
     } else {
       const newId = convertNameToId(inputText);
-      editableObject = {
-        ...editableObject,
+      asset = {
+        ...asset,
         id: newId,
         name: inputText,
       };
@@ -90,13 +90,13 @@ const SideBarItem = ({ assetType, editableObject }: { editableObject: Asset; ass
           assetType,
           id: previousObjectId,
         });
-        editableObject = { ...chat, name: inputText, title_edited: true } as AICChat;
-        await renameChat(editableObject as AICChat);
+        asset = { ...chat, name: inputText, title_edited: true } as AICChat;
+        await renameChat(asset as AICChat);
         if (location.pathname !== `/${assetType}s/${chat.id}`) {
           navigate(`/${assetType}s/${chat.id}`);
         }
       } else {
-        await renameAsset(previousObjectId, editableObject as Asset);
+        await renameAsset(previousObjectId, asset as Asset);
         if (location.pathname === `/${assetType}s/${previousObjectId}`) {
           navigate(`/${assetType}s/${newId}`);
         }
@@ -122,7 +122,7 @@ const SideBarItem = ({ assetType, editableObject }: { editableObject: Asset; ass
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (event.code === 'Escape') {
-      setInputText(editableObject.name);
+      setInputText(asset.name);
       hideInput();
       setBlockBlur(true);
     }
@@ -136,14 +136,13 @@ const SideBarItem = ({ assetType, editableObject }: { editableObject: Asset; ass
   let disabled = false;
 
   if (assetType === 'agent' || assetType === 'material') {
-    const asset: Asset = editableObject as Asset;
     disabled = !asset.enabled;
   }
 
   const triggerRef = useRef<ContextMenuRef>(null);
 
   const handleLinkClick = () => {
-    if (assetType === 'chat' && editableObject.id !== useChatStore.getState().chat?.id) {
+    if (assetType === 'chat' && asset.id !== useChatStore.getState().chat?.id) {
       setIsChatLoading(true);
     } else if (assetType !== 'chat') {
       setLastUsedChat(undefined);
@@ -180,7 +179,7 @@ const SideBarItem = ({ assetType, editableObject }: { editableObject: Asset; ass
                 },
               );
             }}
-            to={`/${assetType}s/${editableObject.id}`}
+            to={`/${assetType}s/${asset.id}`}
             onClick={handleLinkClick}
           >
             {({ isActive }) => (
@@ -206,7 +205,7 @@ const SideBarItem = ({ assetType, editableObject }: { editableObject: Asset; ass
                     autoFocus
                   />
                 ) : (
-                  <p className="text-[14px] leading-[18.2px] group-hover:text-white truncate">{editableObject.name}</p>
+                  <p className="text-[14px] leading-[18.2px] group-hover:text-white truncate">{asset.name}</p>
                 )}
                 <div className="flex gap-[10px] ml-auto items-center">
                   <Icon

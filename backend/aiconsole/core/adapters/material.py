@@ -31,7 +31,7 @@ Prototye Work in Progress
 
 Ideation of how an adapter for https://github.com/10clouds/aiconsole/issues/712
 
-This, and execution modes should be assets / editable objects
+This, and execution modes should be assets
 """
 
 

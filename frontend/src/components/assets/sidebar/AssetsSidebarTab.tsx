@@ -56,7 +56,7 @@ export const AssetsSidebarTab = ({ assetType, assets }: { assetType: AssetType; 
             <div key={status.toString()}>
               <h3 className="uppercase px-[9px] py-[5px] text-gray-400 text-[12px] leading-[18px]">{title}</h3>
               {assets.map((asset) => (
-                <SideBarItem key={asset.id} editableObject={asset} assetType={assetType} />
+                <SideBarItem key={asset.id} asset={asset} assetType={assetType} />
               ))}
             </div>
           )

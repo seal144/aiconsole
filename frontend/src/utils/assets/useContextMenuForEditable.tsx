@@ -30,36 +30,35 @@ export const DISABLED_CSS_CLASSES = 'max-w-[400px] truncate !text-gray-400 point
 
 const statusHelper = (
   enabled: boolean,
-  editableObject: Asset,
+  asset: Asset,
   assetType: AssetType,
 ): Omit<ContextMenuItem, 'type' | 'title'> => {
   const handleClick = (status: boolean) => () => {
-    useAssetStore.getState().setIsEnabledFlag(assetType, editableObject.id, status);
+    useAssetStore.getState().setIsEnabledFlag(assetType, asset.id, status);
   };
 
   const assetStatusIcon = (itemStatus: boolean) => {
-    if ((editableObject as Asset)?.enabled === itemStatus) {
+    if ((asset as Asset)?.enabled === itemStatus) {
       return RadioCheckedIcon;
     }
 
     return Circle;
   };
 
-  const activeItemClass = editableObject.enabled === enabled ? 'text-white' : 'text-gray-400';
+  const activeItemClass = asset.enabled === enabled ? 'text-white' : 'text-gray-400';
 
   return {
     className: activeItemClass,
     iconClassName: activeItemClass,
-    disabled: editableObject.enabled === enabled,
+    disabled: asset.enabled === enabled,
     icon: assetStatusIcon(enabled),
-    hidden: !editableObject,
-    action: editableObject.enabled === enabled ? noop : handleClick(enabled),
+    hidden: !asset,
+    action: asset.enabled === enabled ? noop : handleClick(enabled),
   };
 };
 
-const assetItems = (assetType: AssetType, editableObject: Asset): ContextMenuItems => {
+const assetItems = (assetType: AssetType, asset: Asset): ContextMenuItems => {
   if (assetType === 'chat') return [];
-  const asset = editableObject as Asset;
 
   return [
     { type: 'separator', key: 'usage-separator' },

@@ -16,9 +16,9 @@
 
 import { Asset, AssetType, AssetTypePlural } from '@/types/assets/assetTypes';
 
-export function getAssetType(editableObject?: Asset | AssetTypePlural): AssetType | undefined {
-  if (typeof editableObject === 'string') {
-    switch (editableObject) {
+export function getAssetType(asset?: Asset | AssetTypePlural): AssetType | undefined {
+  if (typeof asset === 'string') {
+    switch (asset) {
       case 'agents':
         return 'agent';
       case 'materials':
@@ -30,18 +30,18 @@ export function getAssetType(editableObject?: Asset | AssetTypePlural): AssetTyp
     }
   }
 
-  if (editableObject) {
+  if (asset) {
     // A bit hacky but effective way to distinguish between agent, materials and chats without introducing a new field
 
-    if ('system' in editableObject) {
+    if ('system' in asset) {
       return 'agent';
     }
 
-    if ('content_type' in editableObject) {
+    if ('content_type' in asset) {
       return 'material';
     }
 
-    if ('last_modified' in editableObject) {
+    if ('last_modified' in asset) {
       return 'chat';
     }
   }

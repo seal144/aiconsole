@@ -51,7 +51,7 @@ export const ChatsSidebarTab = () => {
                     {section.title}
                   </h3>
                   {section.headlines.map((chat) => (
-                    <SideBarItem key={chat.id} editableObject={chat} assetType="chat" />
+                    <SideBarItem key={chat.id} asset={chat} assetType="chat" />
                   ))}
                 </div>
               ),

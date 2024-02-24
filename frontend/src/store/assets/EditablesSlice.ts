@@ -33,7 +33,7 @@ export const createEditablesSlice: StateCreator<EditablesStore, [], [], Editable
     const assetTypePlural = (assetType + 's') as AssetTypePlural;
 
     set((state) => ({
-      [assetTypePlural]: (state[assetTypePlural] || []).filter((editableObject) => editableObject.id !== id),
+      [assetTypePlural]: (state[assetTypePlural] || []).filter((asset) => asset.id !== id),
     }));
   },
   canOpenFinderForEditable: (editable: Asset) => {

@@ -66,7 +66,7 @@ export function EditorHeader({ editable, onRename, children, isChanged, assetTyp
             )}
           />
           <InlineAssetName
-            editableObject={editable}
+            asset={editable}
             onRename={onRename}
             isEditing={isEditing}
             setIsEditing={setIsEditing}

@@ -24,16 +24,16 @@ export const MATERIAL_CONTENT_TYPE_ICONS = {
   api: Blocks,
 };
 
-export function getAssetIcon(editableObject?: Asset | AssetType) {
+export function getAssetIcon(asset?: Asset | AssetType) {
   let assetType;
   let contentType: MaterialContentType = 'static_text';
 
-  if (typeof editableObject === 'string') {
-    assetType = editableObject;
+  if (typeof asset === 'string') {
+    assetType = asset;
   } else {
-    assetType = getAssetType(editableObject);
+    assetType = getAssetType(asset);
     if (assetType === 'material') {
-      contentType = (editableObject as Material).content_type;
+      contentType = (asset as Material).content_type;
     }
   }
 

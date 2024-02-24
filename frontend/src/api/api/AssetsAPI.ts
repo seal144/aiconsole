@@ -124,18 +124,18 @@ async function saveNewAsset(assetType: AssetType, asset_id: string, asset: Asset
   });
 }
 
-async function updateAsset(assetType: AssetType, editableObject: Asset, originalId?: string) {
+async function updateAsset(assetType: AssetType, asset: Asset, originalId?: string) {
   if (!originalId) {
-    originalId = editableObject.id;
+    originalId = asset.id;
   }
-  console.log('fetchAsset', assetType, editableObject, originalId);
+  console.log('fetchAsset', assetType, asset, originalId);
 
   // if (assetType === 'chat') {
   //   throw new Error('Chat cannot be updated');
   // }
 
   return ky.patch(`${getBaseURL()}/api/${assetType}s/${originalId}`, {
-    json: { ...editableObject },
+    json: { ...asset },
     timeout: 60000,
     hooks: API_HOOKS,
   });
