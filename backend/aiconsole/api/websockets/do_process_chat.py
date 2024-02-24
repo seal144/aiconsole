@@ -65,10 +65,15 @@ async def do_process_chat(chat_mutator: ChatMutator):
     # Create a new message group for analysis
     message_group_id = str(uuid4())
 
+    visible_agent_id = agent.id
+
+    if chat_mutator.chat.chat_options.agent_id:
+        visible_agent_id = chat_mutator.chat.chat_options.agent_id
+
     await chat_mutator.mutate(
         CreateMessageGroupMutation(
             message_group_id=message_group_id,
-            actor_id=ActorId(type="agent", id=agent.id),
+            actor_id=ActorId(type="agent", id=visible_agent_id),
             role=role,
             materials_ids=materials_ids,
             analysis="",
