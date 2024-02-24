@@ -289,7 +289,6 @@ async def _handle_accept_code_ws_message(connection: AICConnection, json: dict):
 async def _handle_process_chat_ws_message(connection: AICConnection, json: dict):
     message = ProcessChatClientMessage(**json)
     try:
-
         chat_mutator = SequentialChatMutator(
             DefaultChatMutator(
                 chat_id=message.chat_id,

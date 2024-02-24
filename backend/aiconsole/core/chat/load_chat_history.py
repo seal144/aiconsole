@@ -13,12 +13,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import json
-import os
 import uuid
 from datetime import datetime
 from pathlib import Path
+
+import aiofiles
+import aiofiles.os as async_os
 
 from aiconsole.core.assets.types import AssetLocation
 from aiconsole.core.chat.types import AICChat
@@ -29,9 +30,9 @@ async def load_chat_history(id: str, project_path: Path | None = None) -> AICCha
     history_directory = get_history_directory(project_path)
     file_path = history_directory / f"{id}.json"
 
-    if file_path.exists():
-        with open(file_path, "r", encoding="utf8", errors="replace") as f:
-            data = json.load(f)
+    if await async_os.path.exists(file_path):
+        async with aiofiles.open(file_path, mode="r", encoding="utf8", errors="replace") as f:
+            data = json.loads(await f.read())
 
             # Convert old format
             if "message_groups" not in data or not data["message_groups"]:
@@ -44,7 +45,10 @@ async def load_chat_history(id: str, project_path: Path | None = None) -> AICCha
                                 "id": message["id"] if "id" in message else uuid.uuid4().hex,
                                 "role": message["role"] if "role" in message else "",
                                 "task": message["task"] if "task" in message and message["task"] else "",
-                                "agent_id": message["agent_id"] if "agent_id" in message else "",
+                                "actor_id": {
+                                    "type": "user" if message.get("agent_id", "") == "user" else "agent",
+                                    "id": message.get("agent_id", ""),
+                                },
                                 "materials_ids": (
                                     message["materials_ids"]
                                     if "materials_ids" in message and message["materials_ids"]
@@ -145,9 +149,12 @@ async def load_chat_history(id: str, project_path: Path | None = None) -> AICCha
             if "override" not in data:
                 data["override"] = False
 
+            stat = await async_os.stat(file_path)
+            last_modified = datetime.fromtimestamp(stat.st_mtime)
+
             return AICChat(
                 id=id,
-                last_modified=datetime.fromtimestamp(os.path.getmtime(file_path)),
+                last_modified=last_modified,
                 **data,
             )
     else:
