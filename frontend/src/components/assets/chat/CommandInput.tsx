@@ -18,14 +18,14 @@ import { Button } from '@/components/common/Button';
 import Tooltip from '@/components/common/Tooltip';
 import { Icon } from '@/components/common/icons/Icon';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
+import { Material } from '@/types/assets/assetTypes';
 import { cn } from '@/utils/common/cn';
-import { LucideIcon, X } from 'lucide-react';
+import { BanIcon, LucideIcon, X } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
-import ChatOptions from './ChatOptions';
-import { useAssetStore } from '@/store/assets/useAssetStore';
 import { ActorAvatar } from './ActorAvatar';
-import { Material } from '@/types/assets/assetTypes';
+import ChatOptions from './ChatOptions';
 
 interface MessageInputProps {
   actionIcon: LucideIcon | ((props: React.SVGProps<SVGSVGElement>) => JSX.Element);
@@ -211,7 +211,7 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
                 ) : (
                   <span title="AI will choose the agent">?</span>
                 )}
-                {selectedMaterials.length > 0 || aiCanAddExtraMaterials ? (
+                {selectedMaterials.length > 0 || !aiCanAddExtraMaterials ? (
                   <span className="text-gray-400 text-[14px]">using </span>
                 ) : null}
                 {selectedMaterials.map((material) => (
@@ -228,31 +228,26 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
                   </div>
                 ))}
                 {aiCanAddExtraMaterials ? (
-                  <>
-                    <div
-                      onClick={handleAnalysisClick}
-                      title="Allows the AI to add more context to the conversation."
-                      className="flex gap-1 items-center bg-gray-700 px-[6px] py-[6px] rounded-[32px] cursor-pointer"
-                    >
-                      <span className="text-white text-[14px] pl-[4px]"> ...</span>
-                      {aiCanAddExtraMaterials && (
-                        <Icon
-                          icon={X}
-                          className={cn('w-4 h-4 min-h-4 min-w-4 flex-shrink-0 cursor-pointer text-gray-400')}
-                        />
-                      )}
-                    </div>
-                  </>
+                  <div
+                    onClick={handleAnalysisClick}
+                    title="Allows the AI to add more context to the conversation."
+                    className="flex gap-1 items-center cursor-pointer"
+                  >
+                    <span className="text-gray-400  text-[14px]">and extra context</span>
+                  </div>
                 ) : (
-                  <>
-                    <span
-                      className="text-gray-400 text-[14px] cursor-pointer"
-                      title="No additonal context will be added to the conversation."
-                      onClick={handleAnalysisClick}
-                    >
-                      without extra materials.
-                    </span>
-                  </>
+                  <div
+                    onClick={handleAnalysisClick}
+                    title="No additonal context will be added to the conversation."
+                    className="flex gap-1 items-center bg-gray-700 px-[6px] py-[6px] rounded-[32px] cursor-pointer text-[14px] text-material pl-[8px]"
+                  >
+                    <Icon icon={BanIcon} className={cn('w-4 h-4 min-h-4 min-w-4 flex-shrink-0 cursor-pointer')} />
+                    No extra
+                    <Icon
+                      icon={X}
+                      className={cn('w-4 h-4 min-h-4 min-w-4 flex-shrink-0 cursor-pointer text-gray-400')}
+                    />
+                  </div>
                 )}
               </div>
             </div>
