@@ -42,11 +42,11 @@ export const AgentForm = ({
   agent,
   errors,
   setErrors,
-  avatarData,
+  avatarData: _avatarData,
   setAvatarData,
   isAvatarOverwritten,
   setIsAvatarOverwritten,
-  onRevert,
+  onRevert: _onRevert,
 }: AgentFormProps) => {
   const [executionMode, setExecutionMode] = useState('');
   const [customExecutionMode, setCustomExecutionMode] = useState('');
