@@ -104,6 +104,13 @@ export const ChatOpenedServerMessageSchema = BaseServerMessageSchema.extend({
 
 export type ChatOpenedServerMessage = z.infer<typeof ChatOpenedServerMessageSchema>;
 
+export const ChatClosedServerMessageSchema = BaseServerMessageSchema.extend({
+  type: z.literal('ChatClosedServerMessage'),
+  chat_id: z.string(),
+});
+
+export type ChatClosedServerMessage = z.infer<typeof ChatClosedServerMessageSchema>;
+
 export const ResponseServerMessageSchema = BaseServerMessageSchema.extend({
   request_id: z.string(),
   is_error: z.boolean(),
@@ -129,6 +136,7 @@ export const ServerMessageSchema = z.discriminatedUnion('type', [
   SettingsServerMessageSchema,
   NotifyAboutChatMutationServerMessageSchema,
   ChatOpenedServerMessageSchema,
+  ChatClosedServerMessageSchema,
   ResponseServerMessageSchema,
 ]);
 
