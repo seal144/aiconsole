@@ -33,10 +33,10 @@ import { useAssetStore } from '@/store/assets/useAssetStore';
 import { useToastsStore } from '@/store/common/useToastsStore';
 import { useProjectStore } from '@/store/projects/useProjectStore';
 import { useAPIStore } from '@/store/useAPIStore';
-import { AssetEditor } from './assets/assets/AssetEditor';
+import { AssetEditor } from './assets/AssetEditor';
 import { ChatPage } from './assets/chat/ChatPage';
-import SideBar from './assets/sidebar/SideBar';
-import { UI } from './assets/ui/Ui';
+import SideBar from './sidebar/SideBar';
+import { GenUIComponent } from './genui/GenUIComponent';
 import { Home } from './projects/Home';
 import { GlobalSettingsModal } from './settings/modal/GlobalSettingsModal';
 
@@ -152,7 +152,7 @@ export function Router() {
             <Route path="/" element={<Project />}>
               <Route path="assets/:id" element={<AssetPage />} />
               <Route path="assets/*" element={<Navigate to={`/asset/${uuid()}`} />} />
-              <Route path="genui" element={<UI />} />
+              <Route path="genui" element={<GenUIComponent />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Route>
           </>,

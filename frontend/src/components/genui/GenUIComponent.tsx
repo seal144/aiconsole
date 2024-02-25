@@ -2,8 +2,8 @@ import { createSandbox } from '@/utils/transpilation/createSandbox';
 import { transpileCode } from '@/utils/transpilation/transpileCode';
 import { useState, ReactNode, useCallback } from 'react';
 import { CodeInput } from '../assets/CodeInput';
-import { Button } from '../../common/Button';
-import { FormGroup } from '../../common/FormGroup';
+import { Button } from '../common/Button';
+import { FormGroup } from '../common/FormGroup';
 import { GenUIAPI } from '@/api/api/GenUIAPI';
 import { CodeEditorLabelContent } from '../assets/CodeEditorLabelContent';
 
@@ -19,7 +19,7 @@ const DEFAULT_CODE = `function Component() {
   );
 }`;
 
-export const UI = () => {
+export const GenUIComponent = () => {
   const [result, setResult] = useState<ReactNode | null>(null);
   const [prompt, setPrompt] = useState('Show a clock');
   const [code, setCode] = useState(DEFAULT_CODE);

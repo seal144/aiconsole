@@ -4,9 +4,9 @@ import { AssetsAPI } from '@/api/api/AssetsAPI';
 import { FormGroup } from '@/components/common/FormGroup';
 import { Material, RenderedMaterial } from '@/types/assets/assetTypes';
 import { MarkdownSupported } from '../MarkdownSupported';
-import { CodeEditorLabelContent } from './CodeEditorLabelContent';
-import { CodeInput } from './CodeInput';
-import { TextInput } from './TextInput';
+import { CodeEditorLabelContent } from '../CodeEditorLabelContent';
+import { CodeInput } from '../CodeInput';
+import { TextInput } from '../TextInput';
 import { useMaterialEditorContent } from './useMaterialEditorContent';
 import { useAssetStore } from '@/store/assets/useAssetStore';
 

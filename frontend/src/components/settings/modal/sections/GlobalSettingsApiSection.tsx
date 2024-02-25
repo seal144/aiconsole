@@ -17,7 +17,7 @@
 import type { Control } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 
-import { TextInput } from '@/components/assets/assets/TextInput';
+import { TextInput } from '@/components/assets/TextInput';
 import { GlobalSettingsFormData } from '@/forms/globalSettingsForm';
 
 interface GlobalSectionApiSectionProps {

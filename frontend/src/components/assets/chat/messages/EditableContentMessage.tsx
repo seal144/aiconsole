@@ -16,7 +16,7 @@
 
 import { useCallback, useState } from 'react';
 import { MessageControls } from './MessageControls';
-import { CodeInput } from '../../assets/CodeInput';
+import { CodeInput } from '../../CodeInput';
 import { cn } from '@/utils/common/cn';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
 
