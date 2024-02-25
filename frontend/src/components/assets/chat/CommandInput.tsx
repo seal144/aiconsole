@@ -233,7 +233,7 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
                     title="Allows the AI to add more context to the conversation."
                     className="flex gap-1 items-center cursor-pointer"
                   >
-                    <span className="text-gray-400  text-[14px]">and extra context</span>
+                    <span className="text-gray-400  text-[14px]">with extra context</span>
                   </div>
                 ) : (
                   <div

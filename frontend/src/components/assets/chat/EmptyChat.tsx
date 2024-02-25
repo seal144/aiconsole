@@ -37,15 +37,13 @@ const ExamplePrompt: React.FC<ExamplePromptProps> = ({ asset, example, onSelecte
   return (
     <div
       className={cn(
+        'bg-gray-600/10 w-1/3 m-2 p-6 h-40 cursor-pointer transition duration-300 ease-in-out transform hover:scale-105 rounded-lg flex flex-col justify-center items-center text-center',
         !showExamples && 'opacity-0',
-        showExamples && isSelected
-          ? 'border border-gray-400 bg-gray-600'
-          : 'border border-gray-600 bg-gray-800 hover:bg-gray-700 ',
-        'w-1/3 m-2 p-6 h-40 cursor-pointer transition duration-300 ease-in-out transform hover:scale-105 rounded-lg  shadow-md flex flex-col justify-between',
+        showExamples && isSelected ? 'bg-gray-600' : '',
       )}
       onClick={onSelected(asset, example)}
     >
-      <p className="text-white text-md mb-4 overflow-hidden line-clamp-5">{example}</p>
+      <p className="text-gray-100 text-md mb-4 overflow-hidden line-clamp-5">{example}</p>
     </div>
   );
 };
@@ -125,7 +123,7 @@ export const EmptyChat = () => {
       editCommand('');
       setSelectedAgentId('');
       setSelectedMaterialsIds([]);
-      setAICanAddExtraMaterials(false);
+      setAICanAddExtraMaterials(true);
       return;
     }
 
@@ -146,9 +144,9 @@ export const EmptyChat = () => {
   };
 
   return (
-    <section className="flex flex-col container mx-auto px-6 py-[64px] pb-[40px] select-none flex-grow h-full w-full">
+    <section className="flex flex-col container mx-auto px-6 py-[64px] pb-[40px] select-none flex-grow h-full w-ful text-gray-500 ">
       <img src="chat-page-glow.png" alt="glow" className="absolute top-[100px] -z-[1] opacity-70" />
-      <p className="text-lg text-gray-300 text-center mt-[100px] mb-[15px]">What can I help you with?</p>
+      <p className="text-md text-center mt-[100px] mb-[15px]">What can I help you with?</p>
       {examplePrompts.length >= 2 && (
         <div className=" w-full flex flex-row gap-4 justify-center items-center">
           <ExamplePrompt
@@ -170,7 +168,7 @@ export const EmptyChat = () => {
       )}
       <div className="flex items-center justify-center">
         <button
-          className="flex items-center justify-center cursor-pointer text-gray-300 hover:text-white mt-[20px] text-md"
+          className="flex items-center justify-center cursor-pointer hover:text-white mt-[20px] text-md"
           onClick={refreshUsageExamples}
         >
           <span className="mr-2">More</span>
