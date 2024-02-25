@@ -18,7 +18,7 @@ import logging
 from pydantic import Field
 
 from aiconsole.core.assets.agents.agent import AICAgent
-from aiconsole.core.assets.materials.material import Material
+from aiconsole.core.assets.materials.material import AICMaterial
 from aiconsole.core.assets.materials.rendered_material import RenderedMaterial
 from aiconsole.core.chat.chat_mutator import ChatMutator
 from aiconsole.core.chat.execution_modes.execution_mode import ExecutionMode
@@ -72,7 +72,7 @@ class applescript_tool(CodeTask):
 async def _execution_mode_process(
     chat_mutator: ChatMutator,
     agent: AICAgent,
-    materials: list[Material],
+    materials: list[AICMaterial],
     rendered_materials: list[RenderedMaterial],
 ):
     # Assumes an existing message group that was created for us
@@ -103,7 +103,7 @@ async def _execution_mode_process(
 async def _check_for_all_code_executed(
     tool_call_location: AICToolCallLocation,
     agent: AICAgent,
-    materials: list[Material],
+    materials: list[AICMaterial],
     rendered_materials: list[RenderedMaterial],
     chat_mutator: ChatMutator,
 ):
@@ -130,7 +130,7 @@ async def _execution_mode_accept_code(
     chat_mutator: ChatMutator,
     tool_call_id: str,
     agent: AICAgent,
-    materials: list[Material],
+    materials: list[AICMaterial],
     rendered_materials: list[RenderedMaterial],
 ):
     tool_call_location = chat_mutator.chat.get_tool_call_location(tool_call_id)

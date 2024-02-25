@@ -16,7 +16,7 @@
 import asyncio
 from typing import AsyncGenerator, cast
 
-from aiconsole.core.assets.materials.material import Material
+from aiconsole.core.assets.materials.material import AICMaterial
 from aiconsole.core.code_running.code_interpreters.base_code_interpreter import (
     BaseCodeInterpreter,
 )
@@ -30,7 +30,7 @@ _global_code_running_lock = asyncio.Lock()
 
 
 async def run_in_code_interpreter(
-    language: str, chat_id: str, code: str, materials: list[Material]
+    language: str, chat_id: str, code: str, materials: list[AICMaterial]
 ) -> AsyncGenerator[str, None]:
     async with _global_code_running_lock:
         interpreter = await get_code_interpreter(language, chat_id)

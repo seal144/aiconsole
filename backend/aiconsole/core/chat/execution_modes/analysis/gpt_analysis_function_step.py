@@ -20,7 +20,7 @@ from typing import cast
 
 from aiconsole.consts import DIRECTOR_MIN_TOKENS, DIRECTOR_PREFERRED_TOKENS
 from aiconsole.core.assets.agents.agent import AICAgent
-from aiconsole.core.assets.materials.material import Material
+from aiconsole.core.assets.materials.material import AICMaterial
 from aiconsole.core.assets.types import AssetLocation, AssetType
 from aiconsole.core.chat.actor_id import ActorId
 from aiconsole.core.chat.chat_mutations import (
@@ -74,9 +74,9 @@ def pick_agent(arguments, chat: AICChat, available_agents: list[AICAgent]) -> AI
     return picked_agent
 
 
-def _get_relevant_materials(relevant_material_ids: list[str]) -> list[Material]:
+def _get_relevant_materials(relevant_material_ids: list[str]) -> list[AICMaterial]:
     return [
-        cast(Material, k)
+        cast(AICMaterial, k)
         for k in project.get_project_assets().assets_with_enabled_flag_set_to(True)
         if k.id in relevant_material_ids
     ]
@@ -85,7 +85,7 @@ def _get_relevant_materials(relevant_material_ids: list[str]) -> list[Material]:
 @dataclass
 class AnalysisResult:
     agent: AICAgent
-    relevant_materials: list[Material]
+    relevant_materials: list[AICMaterial]
     next_step: str
 
 

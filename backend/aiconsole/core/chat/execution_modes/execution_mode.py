@@ -1,7 +1,7 @@
 from typing import Protocol
 
 from aiconsole.core.assets.agents.agent import AICAgent
-from aiconsole.core.assets.materials.material import Material
+from aiconsole.core.assets.materials.material import AICMaterial
 from aiconsole.core.assets.materials.rendered_material import RenderedMaterial
 from aiconsole.core.chat.chat_mutator import ChatMutator
 
@@ -11,7 +11,7 @@ class ProcessChatDataProtocol(Protocol):
         self,
         chat_mutator: ChatMutator,
         agent: AICAgent,
-        materials: list[Material],
+        materials: list[AICMaterial],
         rendered_materials: list[RenderedMaterial],
     ) -> None:  # fmt: off
         ...
@@ -23,7 +23,7 @@ class AcceptCodeDataProtocol(Protocol):
         chat_mutator: ChatMutator,
         tool_call_id: str,
         agent: AICAgent,
-        materials: list[Material],
+        materials: list[AICMaterial],
         rendered_materials: list[RenderedMaterial],
     ) -> None:  # fmt: off
         ...
@@ -37,7 +37,7 @@ class FetchDataProtocol(Protocol):
 def process_chat_not_supported(
     chat_mutator: ChatMutator,
     agent: AICAgent,
-    materials: list[Material],
+    materials: list[AICMaterial],
     rendered_materials: list[RenderedMaterial],
 ):
     raise NotImplementedError("process chat is not supported")
@@ -47,7 +47,7 @@ def accept_code_not_supported(
     chat_mutator: ChatMutator,
     tool_call_id: str,
     agent: AICAgent,
-    materials: list[Material],
+    materials: list[AICMaterial],
     rendered_materials: list[RenderedMaterial],
 ):
     raise NotImplementedError("accept code is not supported")

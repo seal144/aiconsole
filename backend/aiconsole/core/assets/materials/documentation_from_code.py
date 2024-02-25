@@ -20,12 +20,12 @@ import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from aiconsole.core.assets.materials.material import Material
+    from aiconsole.core.assets.materials.material import AICMaterial
 
 _log = logging.getLogger(__name__)
 
 
-def documentation_from_code(material: "Material", source: str):
+def documentation_from_code(material: "AICMaterial", source: str):
     """
     Creates content of a material from a python material file.
     """

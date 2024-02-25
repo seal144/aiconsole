@@ -19,7 +19,7 @@ from uuid import uuid4
 from pydantic import Field
 
 from aiconsole.core.assets.agents.agent import AICAgent
-from aiconsole.core.assets.materials.material import Material
+from aiconsole.core.assets.materials.material import AICMaterial
 from aiconsole.core.assets.materials.rendered_material import RenderedMaterial
 from aiconsole.core.chat.chat_mutations import CreateMessageMutation
 from aiconsole.core.chat.chat_mutator import ChatMutator
@@ -73,7 +73,7 @@ async def show_prototype_warning(chat_mutator):
 async def _execution_mode_process(
     chat_mutator: ChatMutator,
     agent: AICAgent,
-    materials: list[Material],
+    materials: list[AICMaterial],
     rendered_materials: list[RenderedMaterial],
 ):
     system_message = create_full_prompt_with_materials(

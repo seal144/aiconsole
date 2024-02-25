@@ -22,7 +22,7 @@ from aiconsole.core.assets.agents.agent import AICAgent
 from aiconsole.core.assets.materials.content_evaluation_context import (
     ContentEvaluationContext,
 )
-from aiconsole.core.assets.materials.material import Material
+from aiconsole.core.assets.materials.material import AICMaterial
 from aiconsole.core.assets.materials.rendered_material import RenderedMaterial
 from aiconsole.core.chat.chat_mutations import DeleteMessageGroupMutation
 from aiconsole.core.chat.chat_mutator import ChatMutator
@@ -38,7 +38,7 @@ _log = logging.getLogger(__name__)
 async def _execution_mode_process(
     chat_mutator: ChatMutator,
     agent: AICAgent,
-    materials: list[Material],
+    materials: list[AICMaterial],
     rendered_materials: list[RenderedMaterial],
 ):
     _log.debug("execution_mode_director")

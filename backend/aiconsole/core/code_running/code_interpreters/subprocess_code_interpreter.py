@@ -41,7 +41,7 @@ import time
 import traceback
 from typing import AsyncGenerator
 
-from aiconsole.core.assets.materials.material import Material
+from aiconsole.core.assets.materials.material import AICMaterial
 
 from .base_code_interpreter import BaseCodeInterpreter
 
@@ -64,7 +64,7 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
     def line_postprocessor(self, line):
         return line
 
-    def preprocess_code(self, code, materials: list[Material]):
+    def preprocess_code(self, code, materials: list[AICMaterial]):
         """
         This needs to insert an end_of_execution marker of some kind,
         which can be detected by detect_end_of_execution.
@@ -108,7 +108,7 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
             daemon=True,
         ).start()
 
-    async def run(self, code: str, materials: list[Material]) -> AsyncGenerator[str, None]:
+    async def run(self, code: str, materials: list[AICMaterial]) -> AsyncGenerator[str, None]:
         retry_count = 0
         max_retries = 3
 

@@ -23,7 +23,7 @@ from aiconsole.core.assets.agents.agent import AICAgent
 from aiconsole.core.assets.materials.content_evaluation_context import (
     ContentEvaluationContext,
 )
-from aiconsole.core.assets.materials.material import Material
+from aiconsole.core.assets.materials.material import AICMaterial
 from aiconsole.core.assets.types import AssetLocation
 from aiconsole.core.chat.types import AICChat
 from aiconsole.core.gpt.consts import SPEED_GPT_MODE
@@ -45,7 +45,7 @@ def create_user_agent():
 
 
 @router.post("/preview")
-async def materials_preview(material: Material):
+async def materials_preview(material: AICMaterial):
     content_context = ContentEvaluationContext(
         chat=AICChat(
             id="chat",

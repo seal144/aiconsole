@@ -42,7 +42,7 @@ class MaterialContentType(str, Enum):
     API = "api"
 
 
-class Material(Asset):
+class AICMaterial(Asset):
     type: AssetType = AssetType.MATERIAL
     id: str
     name: str

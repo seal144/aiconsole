@@ -39,7 +39,7 @@ from aiconsole.core.assets.agents.agent import AICAgent
 from aiconsole.core.assets.assets import Assets
 from aiconsole.core.assets.fs.exceptions import UserIsAnInvalidAgentIdError
 from aiconsole.core.assets.get_material_content_name import get_material_content_name
-from aiconsole.core.assets.materials.material import Material, MaterialContentType
+from aiconsole.core.assets.materials.material import AICMaterial, MaterialContentType
 from aiconsole.core.assets.types import Asset, AssetLocation, AssetType
 from aiconsole.core.chat.load_chat_history import load_chat_history
 from aiconsole.core.chat.save_chat_history import save_chat_history
@@ -54,7 +54,7 @@ from aiconsole.core.project.project import is_project_initialized
 
 router = APIRouter()
 
-DeserializableAsset = AICAgent | Material | AICChat
+DeserializableAsset = AICAgent | AICMaterial | AICChat
 
 
 @router.get("/{asset_id}")
@@ -92,7 +92,7 @@ async def get_asset(request: Request, asset_id: str):
 
             content_type = MaterialContentType(content_type_raw)
 
-            asset = Material(
+            asset = AICMaterial(
                 id="new_" + get_material_content_name(content_type).lower(),
                 name="New " + get_material_content_name(content_type),
                 content_type=content_type,

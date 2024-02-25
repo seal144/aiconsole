@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from typing import AsyncGenerator, Protocol
 
-from aiconsole.core.assets.materials.material import Material
+from aiconsole.core.assets.materials.material import AICMaterial
 from aiconsole.core.code_running.virtual_env.create_dedicated_venv import (
     WaitForEnvEvent,
 )
@@ -33,7 +33,7 @@ class BaseCodeInterpreter(Protocol):
     async def initialize(self):  # fmt: off
         ...
 
-    def run(self, code: str, materials: list[Material]) -> AsyncGenerator[str, None]:  # fmt: off
+    def run(self, code: str, materials: list[AICMaterial]) -> AsyncGenerator[str, None]:  # fmt: off
         """Raises CodeExecutionError"""
         ...
 

@@ -1,4 +1,4 @@
-from aiconsole.core.assets.materials.material import Material
+from aiconsole.core.assets.materials.material import AICMaterial
 from aiconsole.core.chat.chat_mutations import (
     AppendToOutputToolCallMutation,
     SetIsExecutingToolCallMutation,
@@ -14,7 +14,7 @@ from aiconsole.core.code_running.run_code import run_in_code_interpreter
 
 async def run_code(
     chat_mutator: ChatMutator,
-    materials: list[Material],
+    materials: list[AICMaterial],
     tool_call_id,
 ):
     tool_call_location = chat_mutator.chat.get_tool_call_location(tool_call_id)

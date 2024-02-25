@@ -23,7 +23,7 @@ import rtoml
 
 from aiconsole.core.assets.agents.agent import AICAgent
 from aiconsole.core.assets.fs.exceptions import UserIsAnInvalidAgentIdError
-from aiconsole.core.assets.materials.material import Material, MaterialContentType
+from aiconsole.core.assets.materials.material import AICMaterial, MaterialContentType
 from aiconsole.core.assets.types import Asset, AssetLocation, AssetType
 from aiconsole.core.gpt.consts import GPTMode
 from aiconsole.core.project.paths import (
@@ -82,7 +82,7 @@ async def load_asset_from_fs(asset_type: AssetType, asset_id: str, location: Ass
     }
 
     if asset_type == AssetType.MATERIAL:
-        material = Material(
+        material = AICMaterial(
             **params,
             content_type=MaterialContentType(str(tomldoc["content_type"]).strip()),
         )

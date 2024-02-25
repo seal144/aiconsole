@@ -21,7 +21,7 @@ from uuid import uuid4
 from aiconsole.api.websockets.connection_manager import connection_manager
 from aiconsole.api.websockets.server_messages import ErrorServerMessage
 from aiconsole.core.assets.agents.agent import AICAgent
-from aiconsole.core.assets.materials.material import Material
+from aiconsole.core.assets.materials.material import AICMaterial
 from aiconsole.core.assets.materials.rendered_material import RenderedMaterial
 from aiconsole.core.chat.chat_mutations import (
     AppendToContentMessageMutation,
@@ -44,7 +44,7 @@ from aiconsole.core.code_running.run_code import (
 async def _execution_mode_process(
     chat_mutator: ChatMutator,
     agent: AICAgent,
-    materials: list[Material],
+    materials: list[AICMaterial],
     rendered_materials: list[RenderedMaterial],
 ):
     message_id = str(uuid4())

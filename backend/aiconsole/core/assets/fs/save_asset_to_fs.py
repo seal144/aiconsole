@@ -21,7 +21,7 @@ import tomlkit
 from aiconsole.core.assets.agents.agent import AICAgent
 from aiconsole.core.assets.fs.exceptions import UserIsAnInvalidAgentIdError
 from aiconsole.core.assets.fs.load_asset_from_fs import load_asset_from_fs
-from aiconsole.core.assets.materials.material import Material, MaterialContentType
+from aiconsole.core.assets.materials.material import AICMaterial, MaterialContentType
 from aiconsole.core.assets.types import Asset
 from aiconsole.core.project.paths import (
     get_core_assets_directory,
@@ -75,8 +75,8 @@ async def save_asset_to_fs(asset: Asset, old_asset_id: str) -> Asset:
         doc.append("usage_examples", tomlkit.item(asset.usage_examples))
         doc.append("enabled_by_default", tomlkit.item(asset.enabled_by_default))
 
-        if isinstance(asset, Material):
-            material: Material = asset
+        if isinstance(asset, AICMaterial):
+            material: AICMaterial = asset
 
             doc.append("content_type", tomlkit.string(asset.content_type))
 

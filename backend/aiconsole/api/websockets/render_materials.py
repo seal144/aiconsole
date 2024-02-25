@@ -7,7 +7,10 @@ from aiconsole.core.assets.agents.agent import AICAgent
 from aiconsole.core.assets.materials.content_evaluation_context import (
     ContentEvaluationContext,
 )
-from aiconsole.core.assets.materials.material import Material, MaterialRenderErrorEvent
+from aiconsole.core.assets.materials.material import (
+    AICMaterial,
+    MaterialRenderErrorEvent,
+)
 from aiconsole.core.assets.materials.rendered_material import RenderedMaterial
 from aiconsole.core.chat.types import AICChat
 from aiconsole.core.project import project
@@ -16,7 +19,7 @@ from aiconsole.utils.events import InternalEvent, internal_events
 
 @dataclass
 class MaterialsAndRenderedMaterials:
-    materials: list[Material]
+    materials: list[AICMaterial]
     rendered_materials: list[RenderedMaterial]
 
 
@@ -42,7 +45,7 @@ async def render_materials(
             )
 
         relevant_materials = [
-            cast(Material, project.get_project_assets().get_asset(material_id)) for material_id in materials_ids
+            cast(AICMaterial, project.get_project_assets().get_asset(material_id)) for material_id in materials_ids
         ]
 
         content_context = ContentEvaluationContext(

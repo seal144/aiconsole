@@ -44,7 +44,7 @@ from typing import Any, AsyncGenerator
 from jupyter_client.asynchronous.client import AsyncKernelClient
 from jupyter_client.manager import AsyncKernelManager
 
-from aiconsole.core.assets.materials.material import Material
+from aiconsole.core.assets.materials.material import AICMaterial
 from aiconsole.core.code_running.code_interpreters.base_code_interpreter import (
     BaseCodeInterpreter,
     CodeExecutionError,
@@ -110,7 +110,7 @@ matplotlib.use('{backend}')
         self.kc.stop_channels()
         await self.km.shutdown_kernel()
 
-    async def run(self, code: str, materials: list[Material]) -> AsyncGenerator[str, None]:
+    async def run(self, code: str, materials: list[AICMaterial]) -> AsyncGenerator[str, None]:
         self.finish_flag = False
         self.has_error = False
 
@@ -248,7 +248,7 @@ matplotlib.use('{backend}')
         self.finish_flag = True
 
 
-def preprocess_python(code: str, materials: list[Material]):
+def preprocess_python(code: str, materials: list[AICMaterial]):
     # If a line starts with "!" then it's a shell command, we need to wrap it appropriately
     code = "\n".join(
         [

@@ -17,7 +17,7 @@
 from pydantic import BaseModel
 
 from aiconsole.core.assets.agents.agent import AICAgent
-from aiconsole.core.assets.materials.material import Material
+from aiconsole.core.assets.materials.material import AICMaterial
 from aiconsole.core.chat.types import AICChat
 from aiconsole.core.gpt.consts import GPTMode
 
@@ -26,4 +26,4 @@ class ContentEvaluationContext(BaseModel):
     chat: AICChat
     agent: AICAgent
     gpt_mode: GPTMode
-    relevant_materials: list["Material"]
+    relevant_materials: list["AICMaterial"]
