@@ -28,7 +28,7 @@ import { AICChat } from '@/types/assets/chatTypes';
 import { useAssetContextMenu } from '@/utils/assets/useContextMenuForEditable';
 import { cn } from '@/utils/common/cn';
 import { ArrowDown, ReplyIcon, Square } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { unstable_useBlocker as useBlocker, useParams, useSearchParams } from 'react-router-dom';
 import ScrollToBottom, { useAnimating, useScrollToBottom, useSticky } from 'react-scroll-to-bottom';
 import { v4 as uuidv4 } from 'uuid';
@@ -101,6 +101,21 @@ export function ChatPage() {
 
   const { reset, proceed, state: blockerState } = blocker || {};
 
+  const [showSpinner, setShowSpinner] = useState(false);
+
+  useEffect(() => {
+    setShowSpinner(false);
+
+    let timer: NodeJS.Timeout;
+    if (!chat) {
+      timer = setTimeout(() => {
+        setShowSpinner(true);
+      }, 500);
+    }
+
+    return () => clearTimeout(timer); // Cleanup the timer when the component unmounts or the dependencies change
+  }, [loadingMessages, chat, isProjectLoading]); // Add dependencies that trigger the spinner
+
   useEffect(() => {
     const stopEvent = (e: Event) => {
       e.preventDefault();
@@ -172,11 +187,7 @@ export function ChatPage() {
   const isProcessesAreNotRunning = !isExecutionRunning && !isAnalysisRunning;
 
   if (!chat) {
-    return (
-      <div className="flex flex-1 justify-center items-center">
-        <Spinner />
-      </div>
-    );
+    return <div className="flex flex-1 justify-center items-center">{showSpinner && <Spinner />}</div>;
   }
 
   const handleRename = async (newName: string) => {
