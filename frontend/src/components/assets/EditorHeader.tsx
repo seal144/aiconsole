@@ -28,7 +28,7 @@ export function EditorHeader({ editable, onRename, children, isChanged, assetTyp
 
   const goBack = () => {
     if (lastUsedChat) {
-      navigate(`/chats/${lastUsedChat.id}`);
+      navigate(`/assets/${lastUsedChat.id}`);
     }
   };
 

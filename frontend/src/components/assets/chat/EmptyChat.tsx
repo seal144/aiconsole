@@ -18,7 +18,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { Icon } from '@/components/common/icons/Icon';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
-import { useEditablesStore } from '@/store/assets/useEditablesStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 import { Asset } from '@/types/assets/assetTypes';
 import { cn } from '@/utils/common/cn';
 import { RefreshCcw } from 'lucide-react';
@@ -87,9 +87,7 @@ export const EmptyChat = () => {
   const setSelectedMaterialsIds = useChatStore((state) => state.setSelectedMaterialsIds);
   const setAICanAddExtraMaterials = useChatStore((state) => state.setAICanAddExtraMaterials);
 
-  const assets = useEditablesStore((state) =>
-    state.materials && state.agents ? [...state.materials, ...state.agents] : [],
-  );
+  const assets = useAssetStore((state) => state.assets);
   const [lastExamples, setLastExamples] = useState<string[]>([]);
   const [showExamples, setShowExamples] = useState(true);
   const [examplesVersion, setExamplesVersion] = useState(0);

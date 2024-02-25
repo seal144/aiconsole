@@ -1,9 +1,9 @@
 import { useChatStore } from '@/store/assets/chat/useChatStore';
-import { useAssetStore } from '@/store/assets/asset/useAssetStore';
 import { AICChat } from '@/types/assets/chatTypes';
 import { getAssetType } from './getAssetType';
 import { useCallback } from 'react';
 import { Asset } from '@/types/assets/assetTypes';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 
 export function useSelectedAsset(): [Asset | undefined, (editable: Asset) => void] {
   const chat = useChatStore((state) => state.chat);

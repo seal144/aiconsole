@@ -40,6 +40,7 @@ def create_user_agent():
         system="",
         defined_in=AssetLocation.AICONSOLE_CORE,
         override=False,
+        last_modified=datetime.now(),
     )
 
 

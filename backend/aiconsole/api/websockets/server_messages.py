@@ -55,7 +55,6 @@ class ProjectLoadingServerMessage(BaseServerMessage):
 
 class AssetsUpdatedServerMessage(BaseServerMessage):
     initial: bool
-    asset_type: AssetType
     count: int
 
 

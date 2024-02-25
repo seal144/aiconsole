@@ -14,24 +14,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MaterialDefinitionSource, AssetType, Material, RenderedMaterial, Asset } from '@/types/assets/assetTypes';
+import { MaterialDefinitionSource, AssetType, RenderedMaterial, Asset } from '@/types/assets/assetTypes';
 import ky from 'ky';
 import { API_HOOKS, getBaseURL } from '../../store/useAPIStore';
 import { useWebSocketStore } from '../ws/useWebSocketStore';
 import { ChatOpenedServerMessage, ServerMessage } from '../ws/serverMessages';
 import { v4 as uuidv4 } from 'uuid';
 
-const previewMaterial: (material: Material) => Promise<RenderedMaterial> = async (material: Material) =>
+const previewMaterial: (asset: Asset) => Promise<RenderedMaterial> = async (asset: Asset) =>
   ky
-    .post(`${getBaseURL()}/api/materials/preview`, {
-      json: { ...material },
+    .post(`${getBaseURL()}/api/assets/preview`, {
+      json: { ...asset },
       timeout: 60000,
       hooks: API_HOOKS,
     })
     .json();
 
-async function fetchAssets<T extends Asset>(assetType: AssetType): Promise<T[]> {
-  return ky.get(`${getBaseURL()}/api/${assetType}s/`, { hooks: API_HOOKS }).json();
+async function fetchAssets<T extends Asset>(): Promise<T[]> {
+  return ky.get(`${getBaseURL()}/api/assets/`, { hooks: API_HOOKS }).json();
 }
 
 async function setAssetEnabledFlag(assetType: AssetType, id: string, enabled: boolean) {
@@ -44,15 +44,15 @@ async function setAssetEnabledFlag(assetType: AssetType, id: string, enabled: bo
 }
 
 async function fetchAsset<T extends Asset>({
-  assetType: assetType,
+  assetType,
   id,
   location,
-  type,
+  contentType,
 }: {
   assetType: AssetType;
   id: string;
   location?: MaterialDefinitionSource;
-  type?: string;
+  contentType?: string;
 }): Promise<T> {
   if (assetType === 'chat') {
     const response: ChatOpenedServerMessage = (await useWebSocketStore
@@ -72,8 +72,8 @@ async function fetchAsset<T extends Asset>({
   }
 
   return ky
-    .get(`${getBaseURL()}/api/${assetType}s/${id}`, {
-      searchParams: { location: location || '', type: type || '' },
+    .get(`${getBaseURL()}/api/assets/${id}`, {
+      searchParams: { location: location || '', type: assetType || '', content_type: contentType || '' },
       hooks: API_HOOKS,
     })
     .json() as Promise<T>;
@@ -93,11 +93,11 @@ async function closeChat(id: string): Promise<ServerMessage> {
   return response;
 }
 
-async function doesEdibleExist(assetType: AssetType, id: string, location?: MaterialDefinitionSource) {
+async function doesEdibleExist(id: string, location?: MaterialDefinitionSource) {
   try {
     // Attempt to fetch the object
     const response = await ky
-      .get(`${getBaseURL()}/api/${assetType}s/${id}/exists`, {
+      .get(`${getBaseURL()}/api/assets/${id}/exists`, {
         searchParams: { location: location || '' },
       })
       .json<{ exists: boolean }>();
@@ -116,8 +116,8 @@ async function doesEdibleExist(assetType: AssetType, id: string, location?: Mate
   }
 }
 
-async function saveNewAsset(assetType: AssetType, asset_id: string, asset: Asset) {
-  return await ky.post(`${getBaseURL()}/api/${assetType}s/${asset_id}`, {
+async function saveNewAsset(asset_id: string, asset: Asset) {
+  return await ky.post(`${getBaseURL()}/api/assets/${asset_id}`, {
     json: { ...asset },
     timeout: 60000,
     hooks: API_HOOKS,
@@ -128,7 +128,6 @@ async function updateAsset(assetType: AssetType, asset: Asset, originalId?: stri
   if (!originalId) {
     originalId = asset.id;
   }
-  console.log('fetchAsset', assetType, asset, originalId);
 
   // if (assetType === 'chat') {
   //   throw new Error('Chat cannot be updated');
@@ -141,8 +140,8 @@ async function updateAsset(assetType: AssetType, asset: Asset, originalId?: stri
   });
 }
 
-async function deleteAsset(assetType: AssetType, id: string) {
-  return ky.delete(`${getBaseURL()}/api/${assetType}s/${id}`, {
+async function deleteAsset(id: string) {
+  return ky.delete(`${getBaseURL()}/api/assets/${id}`, {
     hooks: API_HOOKS,
   });
 }

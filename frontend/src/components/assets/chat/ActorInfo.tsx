@@ -18,7 +18,7 @@
 import { useRef, MouseEvent, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { useEditablesStore } from '@/store/assets/useEditablesStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 import { useUserContextMenu } from '@/utils/common/useUserContextMenu';
 import { useAssetContextMenu } from '@/utils/assets/useContextMenuForEditable';
 import { ActorAvatar } from './ActorAvatar';
@@ -37,8 +37,8 @@ function AgentInfoMaterialLink({
   isLoaded: boolean;
   isRunning: boolean;
 }) {
-  const materials = useEditablesStore((state) => state.materials) || [];
-  const material = materials.find((m) => m.id === materialId);
+  const assets = useAssetStore((state) => state.assets) || [];
+  const material = assets.find((m) => m.id === materialId);
   const menuItems = useAssetContextMenu({ assetType: 'material', asset: material });
 
   return (
@@ -75,7 +75,7 @@ export function ActorInfo({
   const [isLoaded, setIsLoaded] = useState(false);
   const isAnalysisRunning = useChatStore((state) => state.chat?.is_analysis_in_progress);
   const isExecutionRunning = useChatStore((state) => state.isExecutionRunning());
-  const agents = useEditablesStore((state) => state.agents) || [];
+  const agents = useAssetStore((state) => state.assets) || [];
   const agent = agents.find((m) => m.id === actorId.id);
   const userMenuItems = useUserContextMenu();
 
@@ -92,6 +92,7 @@ export function ActorInfo({
       enabled_by_default: false,
       enabled: true,
       override: false,
+      last_modified: new Date().toISOString(),
     },
   });
 

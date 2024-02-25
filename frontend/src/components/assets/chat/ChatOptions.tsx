@@ -14,20 +14,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { useChatStore } from '@/store/assets/chat/useChatStore';
-import { useEditablesStore } from '@/store/assets/useEditablesStore';
 import { Icon } from '@/components/common/icons/Icon';
-import { useClickOutside } from '@/utils/common/useClickOutside';
+import { useChatStore } from '@/store/assets/chat/useChatStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
+import { Asset, Material } from '@/types/assets/assetTypes';
 import { getAssetIcon } from '@/utils/assets/getAssetIcon';
-import { Agent, Material } from '@/types/assets/assetTypes';
-import { ActorAvatar } from './ActorAvatar';
+import { useClickOutside } from '@/utils/common/useClickOutside';
 import clsx from 'clsx';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ActorAvatar } from './ActorAvatar';
 
 type ChatOptionsProps = {
   onSelectAgentId: (id: string) => void;
   handleMaterialSelect: (material: Material) => void;
-  materialsOptions: Material[];
   setShowChatOptions: React.Dispatch<React.SetStateAction<boolean>>;
   inputRef: React.RefObject<HTMLInputElement>;
   textAreaRef: React.RefObject<HTMLTextAreaElement>;
@@ -42,28 +41,31 @@ const MaterialIcon = ({ option }: { option: Material }) => {
 const ChatOptions = ({
   onSelectAgentId,
   handleMaterialSelect,
-  materialsOptions,
   setShowChatOptions,
   inputRef,
   textAreaRef,
 }: ChatOptionsProps) => {
+  const chatOptions = useChatStore((state) => state.chatOptions);
   const chat = useChatStore((state) => state.chat);
-  const agents = useEditablesStore((state) => state.agents);
+  const assets = useAssetStore((state) => state.assets) as Asset[];
   const [inputValue, setInputValue] = useState('');
-  const [filteredMaterialsOptions, setFilteredMaterialsOptions] = useState<Material[]>([]);
-  const [filteredAgentsOptions, setFilteredAgentsOptions] = useState<Agent[]>(agents);
+  const [filteredAssetsOptions, setFilteredAssetsOptions] = useState<Asset[]>(assets);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const isChatLoading = useChatStore((state) => state.isChatLoading);
   const [focusedIndex, setFocusedIndex] = useState(0);
 
   useEffect(() => {
-    setFilteredMaterialsOptions(materialsOptions);
-  }, [materialsOptions]);
+    const regex = new RegExp(`${inputValue}`, 'i');
+    const filteredMaterialOptions = assets
+      .filter((item) => regex.test(item.name))
+      .filter((item) => item.enabled)
+      .filter((item) => item.type !== 'chat')
+      .filter((item) => !chatOptions?.materialsIds.includes(item.id))
+      .filter((item) => item.id !== chatOptions?.agentId);
 
-  useEffect(() => {
-    const filtredAgents = agents.filter((item) => item.enabled);
-    setFilteredAgentsOptions(filtredAgents);
-  }, [agents]);
+    console.log('filteredMaterialOptions', filteredMaterialOptions);
+    setFilteredAssetsOptions(filteredMaterialOptions);
+  }, [assets, inputValue, chatOptions]);
 
   useEffect(() => {
     if (focusedIndex >= 0) {
@@ -76,16 +78,10 @@ const ChatOptions = ({
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     setInputValue(inputValue);
-
-    const regex = new RegExp(`${inputValue}`, 'i');
-    const filteredMaterialOptions = materialsOptions.filter((item) => regex.test(item.name));
-    const filteredAgentOptions = agents.filter((item) => regex.test(item.name)).filter((item) => item.enabled);
-    setFilteredAgentsOptions(filteredAgentOptions);
-    setFilteredMaterialsOptions(filteredMaterialOptions);
   };
 
   const handleKeydown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const itemCount = filteredAgentsOptions.length + filteredMaterialsOptions.length;
+    const itemCount = filteredAssetsOptions.length;
     if ((e.nativeEvent.key === 'Backspace' && inputValue === '') || e.nativeEvent.key === 'Escape') {
       setShowChatOptions(false);
       setFocusedIndex(0);
@@ -121,7 +117,7 @@ const ChatOptions = ({
     if (e.key === 'Enter') {
       e.preventDefault();
       e.stopPropagation();
-      const currentOption = options[focusedIndex];
+      const currentOption = filteredAssetsOptions[focusedIndex];
       if (currentOption) {
         currentOption.type === 'agent'
           ? onSelectAgentId(currentOption.id)
@@ -150,8 +146,6 @@ const ChatOptions = ({
     return;
   }
 
-  const options = [...filteredAgentsOptions, ...filteredMaterialsOptions];
-
   return (
     <div
       style={{ width: 'calc(100% - 60px)', bottom: 'calc(100% + 8px)' }}
@@ -172,10 +166,10 @@ const ChatOptions = ({
           ref={inputRef}
         />
         <ul className="options-list max-h-[266px] overflow-y-auto" onKeyDown={handleListKeyDown} tabIndex={0}>
-          {options.length === 0 ? (
+          {filteredAssetsOptions.length === 0 ? (
             <p className="text-sm p-2 text-gray-400">There is no agent or material with this name.</p>
           ) : (
-            options
+            filteredAssetsOptions
               .sort((a, b) => a.name.localeCompare(b.name))
               .map((option) => {
                 return (
@@ -183,7 +177,7 @@ const ChatOptions = ({
                     <button
                       className={clsx(
                         'w-full overflow-hidden px-2 py-2.5 flex items-center cursor-pointer hover:bg-gray-600 rounded-[8px] max-h-[44px] gap-2 group focus:outline-none',
-                        focusedIndex === options.indexOf(option) && 'bg-gray-600',
+                        focusedIndex === filteredAssetsOptions.indexOf(option) && 'bg-gray-600',
                       )}
                       onClick={() =>
                         option.type === 'agent' ? onSelectAgentId(option.id) : handleMaterialSelect(option as Material)

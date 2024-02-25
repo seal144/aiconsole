@@ -67,6 +67,7 @@ export const AssetSchema = z.object({
   enabled_by_default: z.boolean(),
   enabled: z.boolean(),
   override: z.boolean(),
+  last_modified: z.string(),
 });
 
 export type Asset = z.infer<typeof AssetSchema>;

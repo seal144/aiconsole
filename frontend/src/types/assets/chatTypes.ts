@@ -43,9 +43,7 @@ export const AICMessageGroupSchema = z.object({
 
 export type AICMessageGroup = z.infer<typeof AICMessageGroupSchema>;
 
-export const AICChatHeadlineSchema = AssetSchema.extend({
-  last_modified: z.string(),
-});
+export const AICChatHeadlineSchema = AssetSchema.extend({});
 
 export type AICChatHeadline = z.infer<typeof AICChatHeadlineSchema>;
 
@@ -58,7 +56,6 @@ const AICChatOptionsSchema = z.object({
 export const AICChatSchema = AssetSchema.extend({
   lock_id: z.string().optional(),
   title_edited: z.boolean(),
-  last_modified: z.string(),
   chat_options: AICChatOptionsSchema,
   message_groups: z.array(AICMessageGroupSchema),
   is_analysis_in_progress: z.boolean(),

@@ -16,7 +16,7 @@
 
 import { create } from 'zustand';
 
-import { useEditablesStore } from '@/store/assets/useEditablesStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 import { ProjectsAPI } from '../../api/api/ProjectsAPI';
 import { useChatStore } from '../assets/chat/useChatStore';
 import { useSettingsStore } from '../settings/useSettingsStore';
@@ -54,14 +54,10 @@ export const useProjectStore = create<ProjectSlice>((set, _) => ({
       isProjectSwitchFetching: false,
     }));
 
-    await Promise.all([useChatStore.getState().initCommandHistory(), useEditablesStore.getState().initChatHistory()]);
+    await Promise.all([useChatStore.getState().initCommandHistory()]);
 
     if (initial) {
-      await Promise.all([
-        useEditablesStore.getState().initAgents(),
-        useEditablesStore.getState().initMaterials(),
-        useSettingsStore.getState().initSettings(),
-      ]);
+      await Promise.all([useAssetStore.getState().initAssets(), useSettingsStore.getState().initSettings()]);
     }
   },
   onProjectClosed: async () => {

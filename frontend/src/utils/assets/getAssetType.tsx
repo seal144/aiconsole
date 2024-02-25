@@ -31,19 +31,7 @@ export function getAssetType(asset?: Asset | AssetTypePlural): AssetType | undef
   }
 
   if (asset) {
-    // A bit hacky but effective way to distinguish between agent, materials and chats without introducing a new field
-
-    if ('system' in asset) {
-      return 'agent';
-    }
-
-    if ('content_type' in asset) {
-      return 'material';
-    }
-
-    if ('last_modified' in asset) {
-      return 'chat';
-    }
+    return asset.type;
   }
 
   return undefined;

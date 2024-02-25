@@ -17,10 +17,11 @@
 
 from fastapi import APIRouter
 
-from . import index, material, preview
+from . import asset, chat_options, index, preview
 
 router = APIRouter()
 
 router.include_router(preview.router)
-router.include_router(material.router)
+router.include_router(chat_options.router)
+router.include_router(asset.router)
 router.include_router(index.router)

@@ -15,6 +15,7 @@
 # limitations under the License.
 import datetime
 import logging
+from collections import defaultdict
 
 import watchdog.events
 import watchdog.observers
@@ -40,17 +41,18 @@ class Assets:
     # Currently there can be only 1 overriden element
     _assets: dict[str, list[Asset]]
 
-    def __init__(self, asset_type: AssetType):
+    def __init__(self):
         self._suppress_notification_until: datetime.datetime | None = None
-        self.asset_type = asset_type
         self._assets = {}
 
         self.observer = watchdog.observers.Observer()
 
-        get_project_assets_directory(asset_type).mkdir(parents=True, exist_ok=True)
+        for asset_type in [AssetType.AGENT, AssetType.MATERIAL, AssetType.CHAT]:
+            get_project_assets_directory(asset_type).mkdir(parents=True, exist_ok=True)
+
         self.observer.schedule(
             BatchingWatchDogHandler(self.reload),
-            get_project_assets_directory(asset_type),
+            ".",  # get_project_assets_directory(asset_type),
             recursive=True,
         )
         self.observer.start()
@@ -62,22 +64,20 @@ class Assets:
         """
         Return all loaded assets.
         """
-        return list(assets[0] for assets in self._assets.values())
+        return list(assets[0] for assets in self._assets.values() if assets)
 
     def assets_with_enabled_flag_set_to(self, enabled: bool) -> list[Asset]:
         """
         Return all loaded assets with a specific status.
         """
-        return [
-            assets[0] for assets in self._assets.values() if self.is_enabled(self.asset_type, assets[0].id) == enabled
-        ]
+        return [assets[0] for assets in self._assets.values() if self.is_enabled(assets[0].id) == enabled]
 
     async def save_asset(self, asset: Asset, old_asset_id: str, create: bool):
         if asset.defined_in != AssetLocation.PROJECT_DIR and not create:
             raise Exception("Cannot save asset not defined in project.")
 
-        exists_in_project = project_asset_exists_fs(self.asset_type, asset.id)
-        old_exists = project_asset_exists_fs(self.asset_type, old_asset_id)
+        exists_in_project = project_asset_exists_fs(asset.type, asset.id)
+        old_exists = project_asset_exists_fs(asset.type, old_asset_id)
 
         if create and exists_in_project:
             create = False
@@ -112,12 +112,12 @@ class Assets:
         return rename
 
     async def delete_asset(self, asset_id):
-        self._assets[asset_id].pop(0)
+        asset = self._assets[asset_id].pop(0)
 
         if len(self._assets[asset_id]) == 0:
             del self._assets[asset_id]
 
-        delete_asset_from_fs(self.asset_type, asset_id)
+        delete_asset_from_fs(asset.type, asset_id)
 
         self._suppress_notification()
 
@@ -140,9 +140,14 @@ class Assets:
     async def reload(self, initial: bool = False):
         from aiconsole.core.assets.load_all_assets import load_all_assets
 
-        _log.info(f"Reloading {self.asset_type}s ...")
+        _log.info("Reloading assets ...")
 
-        self._assets = await load_all_assets(self.asset_type)
+        li: dict[str, list[Asset]] = defaultdict(list)
+        for asset_type in [AssetType.AGENT, AssetType.MATERIAL, AssetType.CHAT]:
+            d = await load_all_assets(asset_type)
+            for k, v in d.items():
+                li[k].extend(v)
+        self._assets = li
 
         await connection_manager().send_to_all(
             AssetsUpdatedServerMessage(
@@ -153,31 +158,30 @@ class Assets:
                         or self._suppress_notification_until < datetime.datetime.now()
                     )
                 ),
-                asset_type=self.asset_type,
                 count=len(self._assets),
             )
         )
 
     @staticmethod
-    def is_enabled(asset_type: AssetType, id: str) -> bool:
+    def is_enabled(id: str) -> bool:
         s = settings().unified_settings
 
         if id in s.assets:
             return s.assets[id]
 
-        asset = project.get_project_assets(asset_type).get_asset(id)
+        asset = project.get_project_assets().get_asset(id)
         default_status = asset.enabled_by_default if asset else True
         return default_status
 
     @staticmethod
-    def set_enabled(asset_type: AssetType, id: str, enabled: bool, to_global: bool = False) -> None:
+    def set_enabled(id: str, enabled: bool, to_global: bool = False) -> None:
         settings().save(PartialSettingsData(assets={id: enabled}), to_global=to_global)
 
     @staticmethod
     def rename_asset(asset_type: AssetType, old_id: str, new_id: str):
         partial_settings = PartialSettingsData(
             assets_to_reset=[old_id],
-            assets={new_id: Assets.is_enabled(asset_type, old_id)},
+            assets={new_id: Assets.is_enabled(old_id)},
         )
 
         settings().save(partial_settings, to_global=False)

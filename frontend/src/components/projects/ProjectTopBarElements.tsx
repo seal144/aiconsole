@@ -19,7 +19,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { useProjectStore } from '@/store/projects/useProjectStore';
 import { useProjectContextMenu } from '@/utils/projects/useProjectContextMenu';
-import { AddAssetDropdown } from '../assets/assets/AddAssetDropdown';
 import { ContextMenu } from '../common/ContextMenu';
 import { LeaveProjectDialog } from '../common/LeaveProjectDialog';
 
@@ -37,14 +36,14 @@ export function ProjectTopBarElements() {
           </button>
           <ContextMenu options={menuItems}>
             <Link
-              to={`/chats/${uuidv4()}`}
+              to={`/assets/new?type=chat`}
               className="h-11 text-grey-300 font-bold  text-lg text-gray-400 hover:animate-pulse cursor-pointer flex gap-2 items-center mr-[32px] uppercase"
             >
               {projectName}
             </Link>
           </ContextMenu>
         </div>
-        <AddAssetDropdown />
+
         {/* <Link
           to={`/genui`}
           className="h-11 text-lg text-gray-400 hover:animate-pulse cursor-pointer flex gap-2 items-center mr-[32px] uppercase"

@@ -15,19 +15,18 @@
 // limitations under the License.
 
 import { AssetsAPI } from '@/api/api/AssetsAPI';
+import { EmptyChat } from '@/components/assets/chat/EmptyChat';
+import { MessageGroup } from '@/components/assets/chat/MessageGroup';
 import AlertDialog from '@/components/common/AlertDialog';
 import { ContextMenu } from '@/components/common/ContextMenu';
 import { QuestionMarkIcon } from '@/components/common/icons/QuestionMarkIcon';
 import { SendRotated } from '@/components/common/icons/SendRotated';
-import { EmptyChat } from '@/components/assets/chat/EmptyChat';
-import { MessageGroup } from '@/components/assets/chat/MessageGroup';
-import { useToastsStore } from '@/store/common/useToastsStore';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
-import { useEditablesStore } from '@/store/assets/useEditablesStore';
+import { useToastsStore } from '@/store/common/useToastsStore';
 import { useProjectStore } from '@/store/projects/useProjectStore';
 import { AICChat } from '@/types/assets/chatTypes';
-import { cn } from '@/utils/common/cn';
 import { useAssetContextMenu } from '@/utils/assets/useContextMenuForEditable';
+import { cn } from '@/utils/common/cn';
 import { ArrowDown, ReplyIcon, Square } from 'lucide-react';
 import { useEffect } from 'react';
 import { unstable_useBlocker as useBlocker, useParams, useSearchParams } from 'react-router-dom';
@@ -87,7 +86,6 @@ export function ChatPage() {
   const loadingMessages = useChatStore((state) => state.loadingMessages);
   const isAnalysisRunning = useChatStore((state) => state.chat?.is_analysis_in_progress);
   const isExecutionRunning = useChatStore((state) => state.isExecutionRunning());
-  const initChatHistory = useEditablesStore((state) => state.initChatHistory);
   const submitCommand = useChatStore((state) => state.submitCommand);
   const stopWork = useChatStore((state) => state.stopWork);
   const newCommand = useChatStore((state) => state.newCommand);
@@ -172,12 +170,6 @@ export function ChatPage() {
   }, [stopWork]); //Initentional trigger when chat_id changes
 
   const isProcessesAreNotRunning = !isExecutionRunning && !isAnalysisRunning;
-
-  useEffect(() => {
-    if (hasAnyCommandInput || chat?.message_groups.length === 0) {
-      initChatHistory();
-    }
-  }, [chat?.message_groups.length, hasAnyCommandInput, initChatHistory]);
 
   if (!chat) {
     return (

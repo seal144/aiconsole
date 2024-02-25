@@ -14,9 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 
 
 class AssetLocation(str, Enum):
@@ -41,3 +42,8 @@ class Asset(BaseModel):
     enabled_by_default: bool = True
     enabled: bool = True
     override: bool
+    last_modified: datetime
+
+    @field_serializer("last_modified")
+    def serialize_dt(self, dt: datetime, _info):
+        return dt.isoformat()

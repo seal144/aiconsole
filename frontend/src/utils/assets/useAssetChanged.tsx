@@ -1,4 +1,4 @@
-import { useAssetStore } from '@/store/assets/asset/useAssetStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 import { Asset } from '@/types/assets/assetTypes';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';

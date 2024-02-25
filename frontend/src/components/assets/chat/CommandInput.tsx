@@ -23,7 +23,7 @@ import { LucideIcon, X } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import ChatOptions from './ChatOptions';
-import { useEditablesStore } from '@/store/assets/useEditablesStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 import { ActorAvatar } from './ActorAvatar';
 import { Material } from '@/types/assets/assetTypes';
 
@@ -50,17 +50,15 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
   const promptUp = useChatStore((state) => state.historyUp);
   const promptDown = useChatStore((state) => state.historyDown);
   const chat = useChatStore((state) => state.chat);
-  const agents = useEditablesStore((state) => state.agents);
-  const materials = useEditablesStore((state) => state.materials);
-  const [materialsOptions, setMaterialsOptions] = useState<Material[]>([]);
+  const assets = useAssetStore((state) => state.assets);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const chatOptionsInputRef = useRef<HTMLInputElement>(null);
 
   const setSelectedMaterialIds = useChatStore((state) => state.setSelectedMaterialsIds);
   const selectedMaterialIds = useChatStore((state) => state.chatOptions?.materialsIds || []);
   const selectedMaterials = useMemo(
-    () => materials?.filter(({ id }) => selectedMaterialIds.includes(id)) || [],
-    [materials, selectedMaterialIds],
+    () => assets?.filter(({ id }) => selectedMaterialIds.includes(id)) || [],
+    [assets, selectedMaterialIds],
   );
 
   const handleSendMessage = useCallback(
@@ -126,15 +124,7 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
     }
   }, [chat?.id]);
 
-  useEffect(() => {
-    setMaterialsOptions(
-      materials
-        ?.filter((material) => !selectedMaterialIds.includes(material.id))
-        .filter((item) => item.enabled) as Material[],
-    );
-  }, [chat?.id, materials, selectedMaterialIds]);
-
-  const getAgent = (agentId: string) => agents.find((agent) => agent.id === agentId);
+  const getAgent = (agentId: string) => assets.find((agent) => agent.id === agentId);
 
   const removeLastAt = () => {
     if (command.endsWith('@')) {
@@ -158,8 +148,6 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
 
   const handleMaterialSelect = (material: Material) => {
     setSelectedMaterialIds([...selectedMaterialIds, material.id]);
-    const filteredOptions = materialsOptions.filter(({ id }) => id !== material.id).filter((item) => item.enabled);
-    setMaterialsOptions(filteredOptions);
     setShowChatOptions(false);
     removeLastAt();
     setTimeout(() => {
@@ -170,7 +158,6 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
   const removeSelectedMaterial = (id: string) => () => {
     const material = selectedMaterials.find((material) => material.id === id) as Material;
     setSelectedMaterialIds(selectedMaterialIds.filter((id) => id !== material.id).map((id) => id));
-    setMaterialsOptions((prev) => [...prev, material].sort((a, b) => a.name.localeCompare(b.name)));
   };
 
   const handleFocus = useCallback(() => {
@@ -189,7 +176,6 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
             onSelectAgentId={onSelectAgentId}
             handleMaterialSelect={handleMaterialSelect}
             setShowChatOptions={setShowChatOptions}
-            materialsOptions={materialsOptions}
             inputRef={chatOptionsInputRef}
             textAreaRef={textAreaRef}
           />

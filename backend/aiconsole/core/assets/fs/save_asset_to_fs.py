@@ -36,6 +36,9 @@ async def save_asset_to_fs(asset: Asset, old_asset_id: str) -> Asset:
         if asset.id == _USER_AGENT_ID:
             raise UserIsAnInvalidAgentIdError()
 
+    if asset.id == "new":
+        raise ValueError("Cannot save asset with id 'new'")
+
     path = get_project_assets_directory(asset.type)
 
     try:

@@ -1,18 +1,17 @@
-import { useEditablesStore } from '@/store/assets/useEditablesStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 import { Asset, AssetType } from '@/types/assets/assetTypes';
 import { isAsset } from './isAsset';
-import { useAssetStore } from '@/store/assets/asset/useAssetStore';
 import { AssetsAPI } from '@/api/api/AssetsAPI';
 import { useSelectedAsset } from './useSelectedAsset';
 
 export function useDeleteAssetWithUserInteraction(assetType: AssetType) {
-  const deleteAsset = useEditablesStore((state) => state.deleteAsset);
+  const deleteAsset = useAssetStore((state) => state.deleteAsset);
   const setSelectedAsset = useAssetStore((state) => state.setSelectedAsset);
   const setLastSavedSelectedAsset = useAssetStore((state) => state.setLastSavedSelectedAsset);
   const [editable] = useSelectedAsset();
 
   async function handleDelete(id: string) {
-    await deleteAsset(assetType, id);
+    await deleteAsset(id);
 
     if (editable?.id === id) {
       if (isAsset(assetType) && (editable as Asset).override) {

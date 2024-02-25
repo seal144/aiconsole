@@ -31,7 +31,6 @@ from aiconsole.api.websockets.server_messages import (
     ProjectLoadingServerMessage,
     ProjectOpenedServerMessage,
 )
-from aiconsole.core.assets.types import AssetType
 from aiconsole.core.code_running.run_code import reset_code_interpreters
 from aiconsole.core.code_running.virtual_env.create_dedicated_venv import (
     create_dedicated_venv,
@@ -43,26 +42,20 @@ if TYPE_CHECKING:
     from aiconsole.core.assets import assets
 
 
-_materials: "assets.Assets | None" = None
-_agents: "assets.Assets | None" = None
+_assets: "assets.Assets | None" = None
 _project_initialized = False
 
 
 async def _clear_project():
-    global _materials
-    global _agents
+    global _assets
     global _project_initialized
 
-    if _materials:
-        _materials.stop()
-
-    if _agents:
-        _agents.stop()
+    if _assets:
+        _assets.stop()
 
     reset_code_interpreters()
 
-    _materials = None
-    _agents = None
+    _assets = None
     _project_initialized = False
 
 
@@ -77,18 +70,10 @@ async def send_project_init(connection: AICConnection):
     )
 
 
-def get_project_assets(type: AssetType) -> "assets.Assets":
-    if type == AssetType.AGENT:
-        if not _agents:
-            raise ValueError("Project agents are not initialized")
-        return _agents
-
-    if type == AssetType.MATERIAL:
-        if not _materials:
-            raise ValueError("Project materials are not initialized")
-        return _materials
-
-    raise ValueError(f"Unknown asset type {type}")
+def get_project_assets() -> "assets.Assets":
+    if not _assets:
+        raise ValueError("Project materials are not initialized")
+    return _assets
 
 
 def is_project_initialized() -> bool:
@@ -114,8 +99,7 @@ async def reinitialize_project():
 
     await connection_manager().send_to_all(ProjectLoadingServerMessage())
 
-    global _materials
-    global _agents
+    global _assets
     global _project_initialized
 
     await _clear_project()
@@ -126,8 +110,7 @@ async def reinitialize_project():
 
     await add_to_recent_projects(project_dir)
 
-    _agents = assets.Assets(asset_type=AssetType.AGENT)
-    _materials = assets.Assets(asset_type=AssetType.MATERIAL)
+    _assets = assets.Assets()
 
     settings().configure(SettingsFileStorage(project_path=get_project_directory_safe()))
 
@@ -135,8 +118,7 @@ async def reinitialize_project():
         ProjectOpenedServerMessage(path=str(get_project_directory()), name=get_project_name())
     )
 
-    await _materials.reload(initial=True)
-    await _agents.reload(initial=True)
+    await _assets.reload(initial=True)
 
 
 async def choose_project(path: Path, background_tasks: BackgroundTasks):

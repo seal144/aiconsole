@@ -1,4 +1,4 @@
-import { useAssetStore } from '@/store/assets/asset/useAssetStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 import { useSettingsStore } from '@/store/settings/useSettingsStore';
 import { useAPIStore } from '@/store/useAPIStore';
 import { cn } from '@/utils/common/cn';
@@ -13,7 +13,7 @@ interface ActorAvatarProps {
 
 export function ActorAvatar({ actorId, title, type, className, actorType }: ActorAvatarProps) {
   const getBaseURL = useAPIStore((state) => state.getBaseURL);
-  const agent = useAssetStore((state) => state.getAsset('agent', actorId || ''));
+  const agent = useAssetStore((state) => state.getAsset(actorId || ''));
   const userAvatarUrl = useSettingsStore((state) => state.userAvatarUrl) || undefined;
 
   let src: string | undefined = '';

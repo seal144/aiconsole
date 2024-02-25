@@ -1,4 +1,4 @@
-import { useAssetStore } from '@/store/assets/asset/useAssetStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 import { MaterialContentType, Material } from '@/types/assets/assetTypes';
 
 interface MaterialConfig {

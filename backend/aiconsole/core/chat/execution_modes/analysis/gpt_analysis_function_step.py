@@ -15,6 +15,7 @@
 # limitations under the License.
 import logging
 from dataclasses import dataclass
+from datetime import datetime
 from typing import cast
 
 from aiconsole.consts import DIRECTOR_MIN_TOKENS, DIRECTOR_PREFERRED_TOKENS
@@ -76,7 +77,7 @@ def pick_agent(arguments, chat: AICChat, available_agents: list[AICAgent]) -> AI
 def _get_relevant_materials(relevant_material_ids: list[str]) -> list[Material]:
     return [
         cast(Material, k)
-        for k in project.get_project_assets(AssetType.MATERIAL).assets_with_enabled_flag_set_to(True)
+        for k in project.get_project_assets().assets_with_enabled_flag_set_to(True)
         if k.id in relevant_material_ids
     ]
 
@@ -111,14 +112,18 @@ async def gpt_analysis_function_step(
     available_materials = []
     forced_materials = []
     if chat_mutator.chat.chat_options.materials_ids:
-        for material in project.get_project_assets(AssetType.MATERIAL)._assets.values():
+        for material in project.get_project_assets()._assets.values():
             if material[0].id in chat_mutator.chat.chat_options.materials_ids:
                 forced_materials.append(material[0])
 
     if chat_mutator.chat.chat_options.ai_can_add_extra_materials:
         available_materials = [
             *forced_materials,
-            *project.get_project_assets(AssetType.MATERIAL).assets_with_enabled_flag_set_to(True),
+            *[
+                asset
+                for asset in project.get_project_assets().assets_with_enabled_flag_set_to(True)
+                if asset.type == AssetType.MATERIAL
+            ],
         ]
 
     plan_class = create_plan_class(
@@ -131,6 +136,7 @@ async def gpt_analysis_function_step(
                 system="",
                 defined_in=AssetLocation.AICONSOLE_CORE,
                 override=False,
+                last_modified=datetime.now(),
             ),
             *possible_agent_choices,
         ],

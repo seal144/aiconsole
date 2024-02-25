@@ -16,7 +16,9 @@
 
 import logging
 import os
+from datetime import datetime
 
+import aiofiles.os as async_os
 import rtoml
 
 from aiconsole.core.assets.agents.agent import AICAgent
@@ -63,6 +65,8 @@ async def load_asset_from_fs(asset_type: AssetType, asset_id: str, location: Ass
 
     asset_id = os.path.splitext(os.path.basename(path))[0]
 
+    stat = await async_os.stat(path)
+
     params = {
         "id": asset_id,
         "name": str(tomldoc.get("name", asset_id)).strip(),
@@ -74,6 +78,7 @@ async def load_asset_from_fs(asset_type: AssetType, asset_id: str, location: Ass
             "enabled_by_default", str(tomldoc.get("default_status", "enabled")).strip() == "enabled"
         ),
         "override": location == AssetLocation.PROJECT_DIR and (core_resource_path / f"{asset_id}.toml").exists(),
+        "last_modified": datetime.fromtimestamp(stat.st_mtime),
     }
 
     if asset_type == AssetType.MATERIAL:

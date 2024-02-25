@@ -21,7 +21,6 @@ import AlertDialog from '@/components/common/AlertDialog';
 import { Button } from '@/components/common/Button';
 import { Icon } from '@/components/common/icons/Icon';
 import { useToastsStore } from '@/store/common/useToastsStore';
-import { useAssetStore } from '@/store/assets/asset/useAssetStore';
 import { Agent, Asset, AssetType, Material } from '@/types/assets/assetTypes';
 import { cn } from '@/utils/common/cn';
 import { localStorageTyped } from '@/utils/common/localStorage';
@@ -38,6 +37,7 @@ import { AssetInfoBar } from './AssetInfoBar';
 import { MaterialForm } from './MaterialForm';
 import { ErrorObject, checkErrors } from './TextInput';
 import { useAssetEditor } from './useAssetEditor';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 
 const { setItem } = localStorageTyped<boolean>('isAssetChanged');
 
@@ -144,7 +144,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
     }
 
     if (asset && isSystemAsset && wasAssetChangedInitially) {
-      AssetsAPI.doesEdibleExist(assetType, asset?.id, 'aiconsole').then((exists) => {
+      AssetsAPI.doesEdibleExist(asset?.id, 'aiconsole').then((exists) => {
         setHasCore(exists);
         setSelectedAsset({ ...asset, defined_in: 'project', override: exists } as Asset);
         // setLastSavedSelectedAsset(undefined);
@@ -167,7 +167,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
 
     if (lastSavedAsset === undefined) {
       if (!asset.override && isNew) {
-        await AssetsAPI.saveNewAsset(assetType, asset.id, asset);
+        await AssetsAPI.saveNewAsset(asset.id, asset);
         await updateStatusIfNecessary();
 
         showToast({

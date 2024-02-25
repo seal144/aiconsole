@@ -9,7 +9,6 @@ from aiconsole.core.assets.materials.content_evaluation_context import (
 )
 from aiconsole.core.assets.materials.material import Material, MaterialRenderErrorEvent
 from aiconsole.core.assets.materials.rendered_material import RenderedMaterial
-from aiconsole.core.assets.types import AssetType
 from aiconsole.core.chat.types import AICChat
 from aiconsole.core.project import project
 from aiconsole.utils.events import InternalEvent, internal_events
@@ -43,8 +42,7 @@ async def render_materials(
             )
 
         relevant_materials = [
-            cast(Material, project.get_project_assets(AssetType.MATERIAL).get_asset(material_id))
-            for material_id in materials_ids
+            cast(Material, project.get_project_assets().get_asset(material_id)) for material_id in materials_ids
         ]
 
         content_context = ContentEvaluationContext(

@@ -42,7 +42,6 @@ from aiconsole.api.websockets.server_messages import (
     ResponseServerMessage,
 )
 from aiconsole.core.assets.agents.agent import AICAgent
-from aiconsole.core.assets.types import AssetType
 from aiconsole.core.chat.execution_modes.utils.import_and_validate_execution_mode import (
     import_and_validate_execution_mode,
 )
@@ -259,7 +258,7 @@ async def _handle_accept_code_ws_message(connection: AICConnection, json: dict):
 
         agent_id = tool_call_location.message_group.actor_id.id
 
-        agent = project.get_project_assets(AssetType.AGENT).get_asset(agent_id)
+        agent = project.get_project_assets().get_asset(agent_id)
 
         if agent is None:
             raise Exception(f"Agent with id {agent_id} not found")

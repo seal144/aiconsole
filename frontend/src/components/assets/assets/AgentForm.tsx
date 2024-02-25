@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { FormGroup } from '@/components/common/FormGroup';
 import { Select } from '@/components/common/Select';
-import { useAssetStore } from '@/store/assets/asset/useAssetStore';
 import { Agent, Asset } from '@/types/assets/assetTypes';
 import { useEffect, useMemo, useState } from 'react';
 import { CodeInput } from './CodeInput';
@@ -10,6 +9,7 @@ import { ErrorObject, TextInput } from './TextInput';
 import { MarkdownSupported } from '../MarkdownSupported';
 import ImageUploader from '@/components/common/ImageUploader';
 import { useAPIStore } from '@/store/useAPIStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 
 const executionModes = [
   {

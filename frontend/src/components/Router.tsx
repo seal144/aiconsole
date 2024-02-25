@@ -22,35 +22,31 @@ import {
   Outlet,
   Route,
   RouterProvider,
-  useMatch,
+  useParams,
+  useSearchParams,
 } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 
 import { TopBar } from '@/components/common/TopBar';
 import { ProjectTopBarElements } from '@/components/projects/ProjectTopBarElements';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 import { useToastsStore } from '@/store/common/useToastsStore';
 import { useProjectStore } from '@/store/projects/useProjectStore';
 import { useAPIStore } from '@/store/useAPIStore';
 import { AssetEditor } from './assets/assets/AssetEditor';
 import { ChatPage } from './assets/chat/ChatPage';
 import SideBar from './assets/sidebar/SideBar';
+import { UI } from './assets/ui/Ui';
 import { Home } from './projects/Home';
 import { GlobalSettingsModal } from './settings/modal/GlobalSettingsModal';
-import { UI } from './assets/ui/Ui';
 
 function Project() {
   const isProjectOpen = useProjectStore((state) => state.isProjectOpen);
   const isProjectLoading = useProjectStore((state) => state.isProjectLoading);
 
-  const isChat = useMatch('/chats/*');
-  const isMaterial = useMatch('/materials/*');
-  const isAgent = useMatch('/agents/*');
-
   if (!isProjectOpen && !isProjectLoading) {
     return <Navigate to="/" />;
   }
-
-  const initialTab = isChat ? 'chats' : isMaterial ? 'materials' : isAgent ? 'agents' : 'chats';
 
   return (
     <div className="App flex flex-col h-screen fixed top-0 left-0 bottom-0 right-0 bg-gray-900 text-stone-400">
@@ -59,7 +55,7 @@ function Project() {
         <ProjectTopBarElements />
       </TopBar>
       <div className="flex flex-row h-full overflow-y-auto">
-        <SideBar initialTab={initialTab} />
+        <SideBar />
         <Outlet />
       </div>
     </div>
@@ -71,7 +67,7 @@ function NoProject() {
   const isProjectLoading = useProjectStore((state) => state.isProjectLoading);
 
   if (isProjectOpen && !isProjectLoading) {
-    return <Navigate to={`/chats/${uuid()}`} />;
+    return <Navigate to={`/assets/new?type=chat`} />;
   }
 
   return <Outlet />;
@@ -83,6 +79,43 @@ const HomeRoute = () => (
     <GlobalSettingsModal />
   </>
 );
+
+const AssetPage = () => {
+  const params = useParams();
+  const [searchParams] = useSearchParams();
+  const type = searchParams.get('type') || '';
+  const id = params.id || '';
+
+  const asset = useAssetStore((state) => (id === 'new' ? state.newAssetFromParams(searchParams) : state.getAsset(id)));
+
+  if (id === 'new') {
+    if (type === 'chat') {
+      return <ChatPage />;
+    }
+
+    if (type === 'agent') {
+      return <AssetEditor assetType={'agent'} />;
+    }
+
+    if (type === 'material') {
+      return <AssetEditor assetType={'material'} />;
+    }
+  } else {
+    if (asset?.type === 'chat') {
+      return <ChatPage />;
+    }
+
+    if (asset?.type === 'agent') {
+      return <AssetEditor assetType={'agent'} />;
+    }
+
+    if (asset?.type === 'material') {
+      return <AssetEditor assetType={'material'} />;
+    }
+  }
+
+  return <></>;
+};
 
 export function Router() {
   const port = useAPIStore((state) => state.port);
@@ -117,13 +150,9 @@ export function Router() {
               <Route index element={<HomeRoute />} />
             </Route>
             <Route path="/" element={<Project />}>
-              <Route path="chats/:id" element={<ChatPage />} />
+              <Route path="assets/:id" element={<AssetPage />} />
+              <Route path="assets/*" element={<Navigate to={`/asset/${uuid()}`} />} />
               <Route path="genui" element={<UI />} />
-              <Route path="chats/*" element={<Navigate to={`/chats/${uuid()}`} />} />
-              <Route path="materials/:id" element={<AssetEditor assetType={'material'} />} />
-              <Route path="materials/*" element={<></>} />
-              <Route path="agents/:id" element={<AssetEditor assetType={'agent'} />} />
-              <Route path="agents/*" element={<></>} />
               <Route path="*" element={<Navigate to="/" />} />
             </Route>
           </>,

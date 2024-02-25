@@ -18,7 +18,7 @@ import { StateCreator } from 'zustand';
 
 import { AssetsAPI } from '@/api/api/AssetsAPI';
 import { AICChat } from '@/types/assets/chatTypes';
-import { useEditablesStore } from '../useEditablesStore';
+import { useAssetStore } from '../useAssetStore';
 import { ChatStore, useChatStore } from './useChatStore';
 import { ChatAPI } from '@/api/api/ChatAPI';
 
@@ -72,7 +72,7 @@ export const createChatSlice: StateCreator<ChatStore, [], [], ChatSlice> = (set,
     get().setChat(newChat);
 
     //If it's chat we need to reload chat history because there is no autoreload on change for chats
-    useEditablesStore.getState().initChatHistory();
+    useAssetStore.getState().initAssets();
   },
   setIsChatLoading: (isLoading: boolean) => {
     set({ isChatLoading: isLoading });

@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 
 import { AssetsAPI } from '@/api/api/AssetsAPI';
-import { useAssetStore } from '@/store/assets/asset/useAssetStore';
 import { Asset, AssetType } from '@/types/assets/assetTypes';
 import { useToastsStore } from '@/store/common/useToastsStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 
 export const useAssets = (assetType: AssetType) => {
   const asset = useAssetStore((state) => state.selectedAsset);

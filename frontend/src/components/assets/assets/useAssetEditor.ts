@@ -1,5 +1,5 @@
 import { AssetsAPI } from '@/api/api/AssetsAPI';
-import { useAssetStore } from '@/store/assets/asset/useAssetStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 import { Asset, AssetType } from '@/types/assets/assetTypes';
 import { convertNameToId } from '@/utils/assets/convertNameToId';
 import { useAssetChanged } from '@/utils/assets/useAssetChanged';
@@ -32,9 +32,9 @@ export const useAssetEditor = (assetType: AssetType) => {
       });
     } else {
       //For id === 'new' This will get a default new asset
-      const raw_type = searchParams.get('type');
-      const type = raw_type ? raw_type : undefined;
-      AssetsAPI.fetchAsset<Asset>({ assetType, id, type }).then((editable) => {
+      const rawContentType = searchParams.get('content_type');
+      const contentType = rawContentType ? rawContentType : undefined;
+      AssetsAPI.fetchAsset<Asset>({ assetType, id, contentType: contentType }).then((editable) => {
         setLastSavedSelectedAsset(id !== 'new' ? editable : undefined); // for new assets, lastSavedAsset is undefined
         setSelectedAsset(editable);
       });

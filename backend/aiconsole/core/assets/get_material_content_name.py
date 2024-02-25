@@ -7,6 +7,6 @@ def get_material_content_name(content_type: MaterialContentType):
     elif content_type == "dynamic_text":
         return "Dynamic Note"
     elif content_type == "api":
-        return "Python API"
+        return "Connection"
     else:
         return "Material"

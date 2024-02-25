@@ -15,9 +15,10 @@
 # limitations under the License.
 
 
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
-from aiconsole.api.endpoints.chats.chat import router
+router = APIRouter()
 
 """
 import logging

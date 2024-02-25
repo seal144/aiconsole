@@ -27,6 +27,9 @@ from aiconsole.core.project.paths import get_history_directory
 
 
 async def load_chat_history(id: str, project_path: Path | None = None) -> AICChat:
+    if id == "new":
+        raise ValueError("Cannot load chat with id 'new'")
+
     history_directory = get_history_directory(project_path)
     file_path = history_directory / f"{id}.json"
 
@@ -157,7 +160,7 @@ async def load_chat_history(id: str, project_path: Path | None = None) -> AICCha
     else:
         return AICChat(
             id=id,
-            name="",
+            name="New Chat",
             usage="",
             usage_examples=[],
             defined_in=AssetLocation.PROJECT_DIR,

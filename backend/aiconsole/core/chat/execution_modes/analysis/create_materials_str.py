@@ -26,14 +26,18 @@ def create_materials_str(materials_ids: list | None, ai_can_add_extra_materials:
     # We add forced becuase it may influence the choice of enabled materials
     available_materials = []
     if materials_ids:
-        for material in project.get_project_assets(AssetType.MATERIAL)._assets.values():
+        for material in project.get_project_assets()._assets.values():
             if material[0].id in materials_ids:
                 available_materials.append(material[0])
 
     if ai_can_add_extra_materials:
         available_materials = [
             *available_materials,
-            *project.get_project_assets(AssetType.MATERIAL).assets_with_enabled_flag_set_to(True),
+            *[
+                asset
+                for asset in project.get_project_assets().assets_with_enabled_flag_set_to(True)
+                if asset.type == AssetType.MATERIAL
+            ],
         ]
 
     random_materials = (

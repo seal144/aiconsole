@@ -14,25 +14,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
-from aiconsole.core.assets.types import AssetType
 from aiconsole.core.project import project
+
+_log = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
 @router.get("/")
-async def fetch_agents():
+async def fetch_assets():
+    assets = []
+
+    assets.extend(project.get_project_assets().all_assets())
+
     return JSONResponse(
         [
             *(
                 {
-                    **agent.model_dump(exclude_none=True),
-                    "enabled": project.get_project_assets(AssetType.AGENT).is_enabled(AssetType.AGENT, agent.id),
+                    **asset.model_dump(exclude_none=True),
+                    "enabled": project.get_project_assets().is_enabled(asset.id),
                 }
-                for agent in project.get_project_assets(AssetType.AGENT).all_assets()
+                for asset in assets
             )
         ]
     )

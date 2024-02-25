@@ -1,7 +1,7 @@
 import { useChatStore } from '../../store/assets/chat/useChatStore';
 import { useSettingsStore } from '../../store/settings/useSettingsStore';
 import { useProjectStore } from '@/store/projects/useProjectStore';
-import { useEditablesStore } from '@/store/assets/useEditablesStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 import { useToastsStore } from '@/store/common/useToastsStore';
 import { ServerMessage } from './serverMessages';
 import { applyMutation } from './chat/applyMutation';
@@ -58,31 +58,17 @@ export async function handleServerMessage(message: ServerMessage) {
       useProjectStore.getState().onProjectLoading();
       break;
     case 'AssetsUpdatedServerMessage':
-      if (message.asset_type === 'agent') {
-        useEditablesStore.getState().initAgents();
-        if (!message.initial) {
-          showToast({
-            title: 'Agents updated',
-            message: `Loaded ${message.count} agents.`,
-          });
-        }
-      }
-
-      if (message.asset_type === 'material') {
-        useEditablesStore.getState().initMaterials();
-        if (!message.initial) {
-          showToast({
-            title: 'Materials updated',
-            message: `Loaded ${message.count} materials.`,
-          });
-        }
+      useAssetStore.getState().initAssets();
+      if (!message.initial) {
+        showToast({
+          title: 'Assets updated',
+          message: `Loaded ${message.count} assets.`,
+        });
       }
       break;
-
     case 'SettingsServerMessage':
       useSettingsStore.getState().initSettings();
-      useEditablesStore.getState().initMaterials();
-      useEditablesStore.getState().initAgents();
+      useAssetStore.getState().initAssets();
       if (!message.initial) {
         showToast({
           title: 'Settings updated',

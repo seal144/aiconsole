@@ -24,7 +24,14 @@ def delete_asset_from_fs(asset_type: AssetType, id):
     """
     Delete a specific agent. Need to delete the agent file and the agent avatar file.
     """
-    extensions = [".toml", ".jpeg", ".jpg", ".png", ".gif", ".SVG"]
+
+    if asset_type == AssetType.AGENT:
+        extensions = [".toml", ".jpeg", ".jpg", ".png", ".gif", ".SVG"]
+    elif asset_type == AssetType.CHAT:
+        extensions = [".json"]
+    elif asset_type == AssetType.MATERIAL:
+        extensions = [".toml"]
+
     # check if the file exists in project directory
     for extension in extensions:
         asset_file_path = get_project_assets_directory(asset_type) / f"{id}{extension}"

@@ -16,7 +16,7 @@
 
 import { MaterialContentType } from '@/types/assets/assetTypes';
 
-export type MaterialContentNames = 'Note' | 'Dynamic Note' | 'Material' | 'Python API' | 'Agent';
+export type MaterialContentNames = 'Note' | 'Dynamic Note' | 'Material' | 'Connection' | 'Agent';
 
 export function getMaterialContentName(contentType?: MaterialContentType): MaterialContentNames {
   switch (contentType) {
@@ -25,7 +25,7 @@ export function getMaterialContentName(contentType?: MaterialContentType): Mater
     case 'dynamic_text':
       return 'Dynamic Note';
     case 'api':
-      return 'Python API';
+      return 'Connection';
     default:
       return 'Material';
   }

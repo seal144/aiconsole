@@ -14,7 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useAssetStore } from '@/store/assets/asset/useAssetStore';
 import { Circle, Copy, Edit, File, FolderOpenIcon, Trash, Undo2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,7 +21,7 @@ import { useDeleteAssetWithUserInteraction } from './useDeleteAssetWithUserInter
 import { useMemo } from 'react';
 import { RadioCheckedIcon } from '@/components/common/icons/RadioCheckedIcon';
 import { noop } from '../common/noop';
-import { useEditablesStore } from '@/store/assets/useEditablesStore';
+import { useAssetStore } from '@/store/assets/useAssetStore';
 import { ContextMenuItem, ContextMenuItems } from '@/types/common/contextMenu';
 import { Asset, AssetType } from '@/types/assets/assetTypes';
 
@@ -93,8 +92,8 @@ export function useAssetContextMenu({
   const navigate = useNavigate();
   const location = useLocation();
   const handleDelete = useDeleteAssetWithUserInteraction(assetType);
-  const canOpenFinderForEditable = useEditablesStore((state) => state.canOpenFinderForEditable);
-  const openFinderForEditable = useEditablesStore((state) => state.openFinderForEditable);
+  const canOpenFinderForEditable = useAssetStore((state) => state.canOpenFinderForEditable);
+  const openFinderForEditable = useAssetStore((state) => state.openFinderForEditable);
 
   const hasDelete = useMemo(
     () => (assetType === 'chat' ? true : (asset as Asset)?.defined_in === 'project'),

@@ -15,10 +15,9 @@
 # limitations under the License.
 
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, field_serializer
+from pydantic import BaseModel, Field
 
 from aiconsole.core.assets.types import Asset, AssetType
 from aiconsole.core.chat.actor_id import ActorId
@@ -60,11 +59,6 @@ class AICMessageGroup(BaseModel):
 
 class AICChatHeadline(Asset):
     type: AssetType = AssetType.CHAT
-    last_modified: datetime
-
-    @field_serializer("last_modified")
-    def serialize_dt(self, dt: datetime, _info):
-        return dt.isoformat()
 
 
 @dataclass

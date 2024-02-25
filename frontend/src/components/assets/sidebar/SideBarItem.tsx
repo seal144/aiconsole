@@ -19,7 +19,6 @@ import { ContextMenu, ContextMenuRef } from '@/components/common/ContextMenu';
 import { Icon } from '@/components/common/icons/Icon';
 import { useToastsStore } from '@/store/common/useToastsStore';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
-import { Asset, AssetType } from '@/types/assets/assetTypes';
 import { AICChat } from '@/types/assets/chatTypes';
 import { cn } from '@/utils/common/cn';
 import { convertNameToId } from '@/utils/assets/convertNameToId';
@@ -29,8 +28,9 @@ import { useAssetContextMenu } from '@/utils/assets/useContextMenuForEditable';
 import { MoreVertical } from 'lucide-react';
 import { KeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Asset } from '@/types/assets/assetTypes';
 
-const SideBarItem = ({ assetType, asset }: { asset: Asset; assetType: AssetType }) => {
+const SideBarItem = ({ asset }: { asset: Asset }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -45,9 +45,9 @@ const SideBarItem = ({ assetType, asset }: { asset: Asset; assetType: AssetType 
 
   const showToast = useToastsStore((state) => state.showToast);
 
-  const { renameAsset } = useAssets(assetType);
+  const { renameAsset } = useAssets(asset.type);
   const menuItems = useAssetContextMenu({
-    assetType: assetType,
+    assetType: asset.type,
     asset: asset,
     setIsEditing,
   });
@@ -85,25 +85,25 @@ const SideBarItem = ({ assetType, asset }: { asset: Asset; assetType: AssetType 
         name: inputText,
       };
 
-      if (assetType === 'chat') {
+      if (asset.type === 'chat') {
         const chat = await AssetsAPI.fetchAsset<AICChat>({
-          assetType,
+          assetType: asset.type,
           id: previousObjectId,
         });
         asset = { ...chat, name: inputText, title_edited: true } as AICChat;
         await renameChat(asset as AICChat);
-        if (location.pathname !== `/${assetType}s/${chat.id}`) {
-          navigate(`/${assetType}s/${chat.id}`);
+        if (location.pathname !== `/assets/${chat.id}`) {
+          navigate(`/assets/${chat.id}`);
         }
       } else {
         await renameAsset(previousObjectId, asset as Asset);
-        if (location.pathname === `/${assetType}s/${previousObjectId}`) {
-          navigate(`/${assetType}s/${newId}`);
+        if (location.pathname === `/${asset.type}s/${previousObjectId}`) {
+          navigate(`/assets/${newId}`);
         }
       }
       showToast({
         title: 'Overwritten',
-        message: `The ${assetType} has been successfully overwritten.`,
+        message: `The ${asset.type} has been successfully overwritten.`,
         variant: 'success',
       });
     }
@@ -135,16 +135,16 @@ const SideBarItem = ({ assetType, asset }: { asset: Asset; assetType: AssetType 
 
   let disabled = false;
 
-  if (assetType === 'agent' || assetType === 'material') {
+  if (asset.type === 'agent' || asset.type === 'material') {
     disabled = !asset.enabled;
   }
 
   const triggerRef = useRef<ContextMenuRef>(null);
 
   const handleLinkClick = () => {
-    if (assetType === 'chat' && asset.id !== useChatStore.getState().chat?.id) {
+    if (asset.type === 'chat' && asset.id !== useChatStore.getState().chat?.id) {
       setIsChatLoading(true);
-    } else if (assetType !== 'chat') {
+    } else if (asset.type !== 'chat') {
       setLastUsedChat(undefined);
     }
   };
@@ -165,8 +165,8 @@ const SideBarItem = ({ assetType, asset }: { asset: Asset; assetType: AssetType 
       <div className="max-w-[295px] mb-[5px]">
         <div
           className={cn(
-            false && assetType === 'agent' && 'text-agent',
-            false && assetType === 'material' && 'text-material',
+            false && asset.type === 'agent' && 'text-agent',
+            false && asset.type === 'material' && 'text-material',
             disabled && 'opacity-50',
           )}
         >
@@ -179,7 +179,7 @@ const SideBarItem = ({ assetType, asset }: { asset: Asset; assetType: AssetType 
                 },
               );
             }}
-            to={`/${assetType}s/${asset.id}`}
+            to={`/assets/${asset.id}`}
             onClick={handleLinkClick}
           >
             {({ isActive }) => (
@@ -188,9 +188,9 @@ const SideBarItem = ({ assetType, asset }: { asset: Asset; assetType: AssetType 
                   icon={EditableIcon}
                   className={cn(
                     'min-w-[24px] min-h-[24px] w-[24px] h-[24px]',
-                    assetType === 'chat' && 'text-chat',
-                    assetType === 'agent' && 'text-agent',
-                    assetType === 'material' && 'text-material',
+                    asset.type === 'chat' && 'text-chat',
+                    asset.type === 'agent' && 'text-agent',
+                    asset.type === 'material' && 'text-material',
                   )}
                 />
                 {/* TODO: add validation for empty input value */}
@@ -222,9 +222,9 @@ const SideBarItem = ({ assetType, asset }: { asset: Asset; assetType: AssetType 
                 <div
                   className={cn(
                     'absolute bottom-[-15px] hidden left-[0px] opacity-[0.3] blur-[10px]  h-[34px] w-[34px] group-hover:block',
-                    assetType === 'chat' && 'fill-chat bg-chat',
-                    assetType === 'agent' && 'fill-agent bg-agent',
-                    assetType === 'material' && 'fill-material bg-material',
+                    asset.type === 'chat' && 'fill-chat bg-chat',
+                    asset.type === 'agent' && 'fill-agent bg-agent',
+                    asset.type === 'material' && 'fill-material bg-material',
                     {
                       block: isActive,
                     },

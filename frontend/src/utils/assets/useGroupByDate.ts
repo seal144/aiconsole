@@ -14,55 +14,63 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { isToday, isYesterday, sub } from 'date-fns';
 import { useEffect, useState } from 'react';
-import { sub, isYesterday, isToday, isWithinInterval } from 'date-fns';
 
-import { AICChatHeadline } from '@/types/assets/chatTypes';
+import { Asset } from '@/types/assets/assetTypes';
 
-type Groups = {
-  today: AICChatHeadline[];
-  yesterday: AICChatHeadline[];
-  previous7Days: AICChatHeadline[];
-  older: AICChatHeadline[];
-};
-
-const useGroupByDate = (data: AICChatHeadline[]) => {
-  const [groupedData, setGroupedData] = useState<Groups>({
-    today: [],
-    yesterday: [],
-    previous7Days: [],
-    older: [],
-  });
+const useGroupByDate = (data: Asset[]) => {
+  const [groupedData, setGroupedData] = useState<{ title: string; test: (d: Date) => boolean; assets: Asset[] }[]>([]);
 
   useEffect(() => {
-    const groups: Groups = {
-      today: [],
-      yesterday: [],
-      previous7Days: [],
-      older: [],
-    };
+    data.sort((a, b) => {
+      return new Date(b.last_modified).getTime() - new Date(a.last_modified).getTime();
+    });
+
+    const now = new Date();
+
+    const groupDefinitions: { title: string; test: (d: Date) => boolean; assets: Asset[] }[] = [
+      { title: 'Today', test: (d: Date) => isToday(d), assets: [] },
+      { title: 'Yesterday', test: (d: Date) => isYesterday(d), assets: [] },
+
+      // previous 5 days
+      /*...[...Array(5)].map((_, index) => {
+        const day = sub(new Date(), { days: index + 2 }); // Starting from the day before yesterday
+        const dayOfWeek = day.toLocaleString('default', { weekday: 'long' });
+        return {
+          title: dayOfWeek,
+          test: (d: Date) => isSameDay(d, day),
+          assets: [],
+        };
+      }),*/
+
+      // last 20 months
+      ...[...Array(20)].map((_, index) => {
+        const month = sub(new Date(), { months: index });
+
+        const sameYear = month.getFullYear() === now.getFullYear();
+
+        return {
+          title: `${month.toLocaleString('default', { month: 'long' })}${sameYear ? '' : ` ${month.getFullYear()}`}`,
+          test: (d: Date) => d.getMonth() === month.getMonth() && d.getFullYear() === month.getFullYear(),
+          assets: [],
+        };
+      }),
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      { title: 'Older', test: (_d: Date) => true, assets: [] },
+    ];
 
     data.forEach((item) => {
-      const itemDate = new Date(item.last_modified);
-      const isToDay = isToday(itemDate);
-      const isYesterDay = isYesterday(itemDate);
-      const isWithinAWeek = isWithinInterval(itemDate, {
-        start: sub(itemDate, { days: 7 }),
-        end: itemDate,
-      });
-
-      if (isToDay) {
-        groups.today.push(item);
-      } else if (isYesterDay) {
-        groups.yesterday.push(item);
-      } else if (isWithinAWeek) {
-        groups.previous7Days.push(item);
-      } else {
-        groups.older.push(item);
+      for (const { test, assets } of groupDefinitions) {
+        if (test(new Date(item.last_modified))) {
+          assets.push(item);
+          return;
+        }
       }
     });
 
-    setGroupedData(groups);
+    setGroupedData(groupDefinitions);
   }, [data]);
 
   return groupedData;

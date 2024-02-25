@@ -29,6 +29,8 @@ def list_possible_historic_chat_ids(project_path: Path | None = None):
         # Sort the files based on modification time (descending order)
         files = sorted(files, key=lambda entry: os.path.getmtime(entry.path), reverse=True)
 
-        return [file.name.split(".")[0] for file in files]
+        ids = [file.name.split(".")[0] for file in files]
+
+        return ids
     else:
         return []

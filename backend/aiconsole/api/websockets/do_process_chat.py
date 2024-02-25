@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from uuid import uuid4
 
 from aiconsole.api.websockets.render_materials import render_materials
@@ -28,6 +29,7 @@ _director_agent = AICAgent(
     defined_in=AssetLocation.AICONSOLE_CORE,
     override=False,
     system="",
+    last_modified=datetime.now(),
 )
 
 

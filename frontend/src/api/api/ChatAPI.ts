@@ -44,7 +44,7 @@ const saveChatOptions = (
   chatId: string,
   body: { agent_id: string; materials_ids: string[]; ai_can_add_extra_materials: boolean },
 ) =>
-  ky.patch(`${getBaseURL()}/api/chats/${chatId}/chat_options`, {
+  ky.patch(`${getBaseURL()}/api/assets/${chatId}/chat_options`, {
     json: { ...body },
     timeout: 60000,
     hooks: API_HOOKS,

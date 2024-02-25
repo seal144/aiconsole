@@ -16,7 +16,6 @@
 
 import { z } from 'zod';
 import { AICChatSchema } from '@/types/assets/chatTypes';
-import { AssetTypeSchema } from '@/types/assets/assetTypes';
 import { ChatMutationSchema } from './chat/chatMutations';
 
 export const BaseServerMessageSchema = z.object({});
@@ -77,7 +76,6 @@ export type ProjectLoadingServerMessage = z.infer<typeof ProjectLoadingServerMes
 export const AssetsUpdatedServerMessageSchema = BaseServerMessageSchema.extend({
   type: z.literal('AssetsUpdatedServerMessage'),
   initial: z.boolean(),
-  asset_type: AssetTypeSchema, // Assuming Asset is an enum
   count: z.number(),
 });
 
