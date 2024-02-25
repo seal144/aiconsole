@@ -127,16 +127,16 @@ export function useAssetContextMenu({
         icon: Copy,
         title: 'Duplicate',
         action: () => {
-          navigate(`/${assetType}s/${assetType === 'chat' ? uuidv4() : 'new'}?copy=${asset.id}`);
+          navigate(`/assets/${assetType === 'chat' ? uuidv4() : 'new'}?copy=${asset.id}`);
         },
       },
       {
         type: 'item',
         icon: File,
         title: 'Open',
-        hidden: location.pathname === `/${assetType}s/${asset.id}`,
+        hidden: location.pathname === `/assets/${asset.id}`,
         action: () => {
-          navigate(`/${assetType}s/${asset.id}`);
+          navigate(`/assets/${asset.id}`);
         },
       },
       {

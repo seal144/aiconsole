@@ -22,7 +22,7 @@ export function useDeleteAssetWithUserInteraction(assetType: AssetType) {
       } else {
         //const navigate = useNavigate();
         //This causes the asset list to be fully reloaded, and is probably not really needed:
-        //navigate(`/${assetType}s`);
+        //navigate(`/assets`);
       }
     }
   }

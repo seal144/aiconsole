@@ -101,20 +101,25 @@ Now analyse the chat.
 
 
 async def director_analyse(chat_mutator: ChatMutator, message_group_id: str):
+    ai_can_add_extra_materials = chat_mutator.chat.chat_options.ai_can_add_extra_materials
+
+    if ai_can_add_extra_materials is None:
+        ai_can_add_extra_materials = True
+
+    agents = create_agents_str(agent_id=chat_mutator.chat.chat_options.agent_id)
+    materials = create_materials_str(
+        materials_ids=chat_mutator.chat.chat_options.materials_ids,
+        ai_can_add_extra_materials=ai_can_add_extra_materials,
+    )
+
     initial_system_prompt = INITIAL_SYSTEM_PROMPT.format(
         agents=create_agents_str(agent_id=chat_mutator.chat.chat_options.agent_id),
-        materials=create_materials_str(
-            materials_ids=chat_mutator.chat.chat_options.materials_ids,
-            ai_can_add_extra_materials=chat_mutator.chat.chat_options.ai_can_add_extra_materials,
-        ),
+        materials=materials,
     )
 
     last_system_prompt = LAST_SYSTEM_PROMPT.format(
-        agents=create_agents_str(agent_id=chat_mutator.chat.chat_options.agent_id),
-        materials=create_materials_str(
-            materials_ids=chat_mutator.chat.chat_options.materials_ids,
-            ai_can_add_extra_materials=chat_mutator.chat.chat_options.ai_can_add_extra_materials,
-        ),
+        agents=agents,
+        materials=materials,
     )
 
     return await gpt_analysis_function_step(

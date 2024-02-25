@@ -36,7 +36,7 @@ async function fetchAssets<T extends Asset>(): Promise<T[]> {
 
 async function setAssetEnabledFlag(assetType: AssetType, id: string, enabled: boolean) {
   return ky
-    .post(`${getBaseURL()}/api/${assetType}s/${id}/status-change`, {
+    .post(`${getBaseURL()}/api/assets/${id}/status-change`, {
       json: { enabled, to_global: false },
       hooks: API_HOOKS,
     })
@@ -133,7 +133,7 @@ async function updateAsset(assetType: AssetType, asset: Asset, originalId?: stri
   //   throw new Error('Chat cannot be updated');
   // }
 
-  return ky.patch(`${getBaseURL()}/api/${assetType}s/${originalId}`, {
+  return ky.patch(`${getBaseURL()}/api/assets/${originalId}`, {
     json: { ...asset },
     timeout: 60000,
     hooks: API_HOOKS,
@@ -149,7 +149,7 @@ async function deleteAsset(id: string) {
 async function getPathForAsset(assetType: AssetType, id: string) {
   return (
     (await ky
-      .get(`${getBaseURL()}/api/${assetType}s/${id}/path`, {
+      .get(`${getBaseURL()}/api/assets/${id}/path`, {
         hooks: API_HOOKS,
       })
       .json()) as { path: string }
@@ -157,7 +157,7 @@ async function getPathForAsset(assetType: AssetType, id: string) {
 }
 
 async function setAssetAvatar(assetType: AssetType, assetId: string, avatar: FormData) {
-  return ky.post(`${getBaseURL()}/api/${assetType}s/${assetId}/avatar`, { body: avatar, hooks: API_HOOKS });
+  return ky.post(`${getBaseURL()}/api/assets/${assetId}/avatar`, { body: avatar, hooks: API_HOOKS });
 }
 
 export const AssetsAPI = {

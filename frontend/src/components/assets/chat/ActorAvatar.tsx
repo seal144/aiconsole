@@ -19,7 +19,7 @@ export function ActorAvatar({ actorId, title, type, className, actorType }: Acto
   let src: string | undefined = '';
 
   if (actorType === 'agent') {
-    src = `${getBaseURL()}/api/agents/${actorId}/image?version=${agent?.version}`;
+    src = `${getBaseURL()}/api/assets/${actorId}/image?version=${agent?.version}`;
     className = cn(className, 'rounded-full mb-[10px] mt-[5px] border border-slate-800', {
       'w-20 h-20 ': type === 'large',
       'w-16 h-16': type === 'small',

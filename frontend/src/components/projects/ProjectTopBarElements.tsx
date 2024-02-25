@@ -15,7 +15,6 @@
 // limitations under the License.
 
 import { Link } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 
 import { useProjectStore } from '@/store/projects/useProjectStore';
 import { useProjectContextMenu } from '@/utils/projects/useProjectContextMenu';

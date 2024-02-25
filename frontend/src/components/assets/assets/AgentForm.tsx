@@ -86,7 +86,7 @@ export const AgentForm = ({
   useEffect(() => {
     // new Date is used to refresh image url
     if (!isAvatarOverwritten) {
-      const userAgentAvatarUrl = `${getBaseURL()}/api/agents/${agent.id}/image?version=${agent?.version}`;
+      const userAgentAvatarUrl = `${getBaseURL()}/api/assets/${agent.id}/image?version=${agent?.version}`;
       setAvatarUrl(userAgentAvatarUrl);
     }
   }, [agent.id, agent.version, getBaseURL, isAvatarOverwritten]);

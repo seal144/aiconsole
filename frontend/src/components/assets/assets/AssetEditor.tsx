@@ -207,7 +207,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
 
     if (lastSavedAsset?.id !== asset.id) {
       useAssetStore.setState({ lastSavedSelectedAsset: asset });
-      setNewPath(`/${assetType}s/${asset.id}`);
+      setNewPath(`/assets/${asset.id}`);
     } else {
       // Reload the asset from server
       const newAsset = await AssetsAPI.fetchAsset<Material>({

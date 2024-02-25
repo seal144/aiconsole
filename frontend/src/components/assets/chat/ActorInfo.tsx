@@ -131,7 +131,7 @@ export function ActorInfo({
       <>
         <ContextMenu options={menuItems} ref={triggerRef}>
           <Link
-            to={actorId.type === 'agent' ? `/agents/${actorId.id}` : ''}
+            to={actorId.type === 'agent' ? `/assets/${actorId.id}` : ''}
             onClick={openContext}
             className="flex-none items-center flex flex-col"
           >
