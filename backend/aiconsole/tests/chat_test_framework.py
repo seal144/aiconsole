@@ -1,3 +1,4 @@
+import asyncio
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -27,9 +28,6 @@ from aiconsole.core.chat.chat_mutations import (
 )
 from aiconsole.core.chat.load_chat_history import load_chat_history
 from aiconsole.core.chat.types import AICMessage
-from aiconsole.core.settings.fs.settings_file_storage import SettingsFileStorage
-from aiconsole.core.settings.settings import settings
-from aiconsole_toolkit.settings.partial_settings_data import PartialSettingsData
 
 
 class ChatTestFramework:
@@ -45,7 +43,7 @@ class ChatTestFramework:
         self._client = TestClient(app())
 
         self._websocket = None
-        self._project_path: str | None = None
+        self._project_path: Path | None = None
 
     @property
     def chat_id(self) -> str | None:
@@ -59,7 +57,7 @@ class ChatTestFramework:
         self._chat_id = str(uuid4())
         self._request_id = str(uuid4())
         self._message_group_id = str(uuid4())
-        self._project_path = project_path
+        self._project_path = Path(project_path).absolute()
 
         self._client.post("/api/projects/switch", json={"directory": project_path})
         self._client.patch("/api/settings", json={"to_global": True, "code_autorun": True})
@@ -94,7 +92,7 @@ class ChatTestFramework:
             finally:
                 await CloseChatClientMessage(request_id=self._request_id, chat_id=self._chat_id).send(websocket)
 
-    async def process_user_code_request(self, message: str) -> list[AICMessage]:
+    async def process_user_code_request(self, message: str, agent_id: str) -> list[AICMessage]:
         if self._websocket is None:
             raise Exception("You have to initialize project with chat first")
 
@@ -120,7 +118,7 @@ class ChatTestFramework:
 
         self._wait_for_mutation_type("LockReleasedMutation", self._websocket)
 
-        return await self._get_chat_messages_for_agent("automator")
+        return await self._get_chat_messages_for_agent(agent_id)
 
     def _wait_for_mutation_type(self, mutation_type: str, websocket: Any) -> None:
         while True:
@@ -143,7 +141,7 @@ class ChatTestFramework:
     async def _get_chat_messages_for_agent(self, agent_id: str, _retries: int = 0) -> list[AICMessage] | list:
         assert self._chat_id is not None
         assert self._project_path is not None
-        chat = await load_chat_history(id=self._chat_id, project_path=Path(self._project_path))
+        chat = await load_chat_history(id=self._chat_id, project_path=self._project_path)
         automator_message_group_messages = None
         for message_group in chat.message_groups:
             if message_group.actor_id.id == agent_id:
@@ -151,7 +149,7 @@ class ChatTestFramework:
                 break
 
         if automator_message_group_messages is None and _retries < 30:
-            sleep(5)
+            await asyncio.sleep(5)
             return await self._get_chat_messages_for_agent(agent_id, _retries + 1)
         elif automator_message_group_messages is None and _retries >= 30:
             raise Exception(f"[CHAT_ID: {self._chat_id}] Automator message group not found in chat")
