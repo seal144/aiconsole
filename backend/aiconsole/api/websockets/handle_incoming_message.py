@@ -37,6 +37,7 @@ from aiconsole.api.websockets.connection_manager import (
 from aiconsole.api.websockets.do_process_chat import do_process_chat
 from aiconsole.api.websockets.render_materials import render_materials
 from aiconsole.api.websockets.server_messages import (
+    ChatClosedServerMessage,
     ChatOpenedServerMessage,
     NotificationServerMessage,
     ResponseServerMessage,
@@ -205,7 +206,25 @@ async def _handle_stop_chat_ws_message(connection: AICConnection, json: dict):
 
 async def _handle_close_chat_ws_message(connection: AICConnection, json: dict):
     message = CloseChatClientMessage(**json)
-    connection.open_chats_ids.discard(message.chat_id)
+
+    if message.chat_id in connection.open_chats_ids:
+        connection.open_chats_ids.discard(message.chat_id)
+
+        await connection.send(
+            ChatClosedServerMessage(
+                chat_id=message.chat_id,
+            )
+        )
+    else:
+        # TODO: Uncomment after proper frontend implementation of ChatClosedServerMessage
+        pass
+        # await connection.send(
+        #     ResponseServerMessage(
+        #         request_id=message.request_id,
+        #         payload={"error": "Chat was NOT opened", "chat_id": message.chat_id},
+        #         is_error=True,
+        #     )
+        # )
 
 
 async def _handle_init_chat_mutation_ws_message(connection: AICConnection | None, json: dict):
