@@ -17,67 +17,14 @@
 import { Icon } from '@/components/common/icons/Icon';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
 import { useAssetStore } from '@/store/assets/useAssetStore';
-import { Agent, Asset, Material } from '@/types/assets/assetTypes';
 import useGroupByDate from '@/utils/assets/useGroupByDate';
 import { cn } from '@/utils/common/cn';
-import { SearchIcon, SlidersHorizontalIcon, XIcon } from 'lucide-react';
+import { SearchIcon, XIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { AddAssetDropdown } from '../assets/AddAssetDropdown';
+import { AddAssetDropdown } from './AddAssetDropdown';
 import SideBarItem from './SideBarItem';
-
-function assetMatchesSearchText(asset: Asset, searchText: string) {
-  if (asset.name.toLowerCase().includes(searchText.toLowerCase())) {
-    return true;
-  }
-
-  if (asset.id.toLowerCase().includes(searchText.toLowerCase())) {
-    return true;
-  }
-
-  if (asset.usage?.toLowerCase().includes(searchText.toLowerCase())) {
-    return true;
-  }
-
-  if (asset.type.toLowerCase().includes(searchText.toLowerCase())) {
-    return true;
-  }
-
-  if (!asset.enabled && 'disabled'.toLowerCase().includes(searchText.toLowerCase())) {
-    return true;
-  }
-
-  if (asset.type === 'material') {
-    const material = asset as Material;
-    if (material.content_type?.toLowerCase().includes(searchText.toLowerCase())) {
-      return true;
-    }
-
-    if (material.content?.toLowerCase().includes(searchText.toLowerCase())) {
-      return true;
-    }
-  }
-
-  if (asset.type === 'agent') {
-    const agent = asset as Agent;
-    if (agent.execution_mode?.toLowerCase().includes(searchText.toLowerCase())) {
-      return true;
-    }
-
-    if (agent.gpt_mode?.toLowerCase().includes(searchText.toLowerCase())) {
-      return true;
-    }
-
-    if (agent.system?.toLowerCase().includes(searchText.toLowerCase())) {
-      return true;
-    }
-  }
-
-  if (asset.usage_examples?.some((example) => example.toLowerCase().includes(searchText.toLowerCase()))) {
-    return true;
-  }
-
-  return false;
-}
+import { SideBarFilters } from './SideBarFilters';
+import { assetMatchesSearchText } from './filters';
 
 const SideBar = () => {
   const [searchText, setSearchText] = useState('');
@@ -123,11 +70,8 @@ const SideBar = () => {
               onClick={() => setSearchText('')}
             />
           )}
-          <Icon
-            icon={SlidersHorizontalIcon}
-            className={cn('min-w-[24px] min-h-[24px] w-[24px] h-[24px] cursor-pointer hover:text-white')}
-          />
 
+          <SideBarFilters searchText={searchText} setSearchText={setSearchText} />
           <AddAssetDropdown />
         </div>
         <div className="flex flex-col justify-between content-between relative overflow-y-auto">
