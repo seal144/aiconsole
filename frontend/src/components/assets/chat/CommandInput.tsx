@@ -168,6 +168,12 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
     setAICanAddExtraMaterials(!aiCanAddExtraMaterials);
   };
 
+  const clearChatOptions = () => {
+    setSelectedAgentId('');
+    setSelectedMaterialIds([]);
+    setAICanAddExtraMaterials(true);
+  };
+
   return (
     <div className={cn(className, 'flex w-full flex-col px-4 py-[20px] bg-gray-900 z-50')}>
       <div className="flex items-end gap-[10px] max-w-[700px] w-full mx-auto relative">
@@ -249,6 +255,14 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel }: M
                     />
                   </div>
                 )}
+
+                <div className="ml-auto">
+                  <Icon
+                    icon={X}
+                    className={cn('w-4 h-4 min-h-4 min-w-4 flex-shrink-0 cursor-pointer')}
+                    onClick={clearChatOptions}
+                  />
+                </div>
               </div>
             </div>
           )}

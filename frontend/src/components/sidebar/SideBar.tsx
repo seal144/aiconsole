@@ -20,7 +20,7 @@ import { useAssetStore } from '@/store/assets/useAssetStore';
 import { Agent, Asset, Material } from '@/types/assets/assetTypes';
 import useGroupByDate from '@/utils/assets/useGroupByDate';
 import { cn } from '@/utils/common/cn';
-import { SearchIcon, SlidersHorizontalIcon } from 'lucide-react';
+import { SearchIcon, SlidersHorizontalIcon, XIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { AddAssetDropdown } from '../assets/AddAssetDropdown';
 import SideBarItem from './SideBarItem';
@@ -116,6 +116,13 @@ const SideBar = () => {
             onChange={(e) => setSearchText(e.target.value)}
             autoFocus
           />
+          {searchText.length > 0 && (
+            <Icon
+              icon={XIcon}
+              className={cn('min-w-[24px] min-h-[24px] w-[24px] h-[24px] cursor-pointer hover:text-white')}
+              onClick={() => setSearchText('')}
+            />
+          )}
           <Icon
             icon={SlidersHorizontalIcon}
             className={cn('min-w-[24px] min-h-[24px] w-[24px] h-[24px] cursor-pointer hover:text-white')}
