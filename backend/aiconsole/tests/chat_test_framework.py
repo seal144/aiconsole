@@ -61,12 +61,8 @@ class ChatTestFramework:
         self._message_group_id = str(uuid4())
         self._project_path = project_path
 
-        settings().configure(storage=SettingsFileStorage(project_path=Path(project_path)))
-        settings().save(PartialSettingsData(code_autorun=True), to_global=True)
-
-        await self._project_directory.switch_or_save_project(
-            directory=project_path, background_tasks=self._background_tasks
-        )
+        self._client.post("/api/projects/switch", json={"directory": project_path})
+        self._client.patch("/api/settings", json={"to_global": True, "code_autorun": True})
 
         with self._client.websocket_connect("/ws") as websocket:
             try:
@@ -150,7 +146,7 @@ class ChatTestFramework:
         chat = await load_chat_history(id=self._chat_id, project_path=Path(self._project_path))
         automator_message_group_messages = None
         for message_group in chat.message_groups:
-            if message_group.actor_id == agent_id:
+            if message_group.actor_id.id == agent_id:
                 automator_message_group_messages = message_group.messages
                 break
 
