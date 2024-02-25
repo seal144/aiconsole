@@ -176,7 +176,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
           variant: 'success',
         });
       } else {
-        await AssetsAPI.updateAsset(assetType, asset);
+        await AssetsAPI.updateAsset(asset);
         showToast({
           title: 'Overwritten',
           message: `The ${assetType} has been overwritten.`,
@@ -186,7 +186,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
     } else if (lastSavedAsset && lastSavedAsset.id !== asset.id) {
       await renameAsset(lastSavedAsset.id, asset);
       lastSavedAsset.enabled = false;
-      await AssetsAPI.setAssetEnabledFlag(assetType, lastSavedAsset.id, lastSavedAsset.enabled);
+      await AssetsAPI.setAssetEnabledFlag(lastSavedAsset.id, lastSavedAsset.enabled);
       showToast({
         title: 'Overwritten',
         message: `The ${assetType} has been overwritten.`,
@@ -194,7 +194,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
       });
     } else {
       if (isAssetChanged) {
-        await AssetsAPI.updateAsset(assetType, asset);
+        await AssetsAPI.updateAsset(asset);
 
         showToast({
           title: 'Saved',
@@ -223,7 +223,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
     if (isAvatarOverwritten && avatarData) {
       avatarFormData = new FormData();
       avatarFormData.append('avatar', avatarData);
-      await AssetsAPI.setAssetAvatar(asset.type, asset.id, avatarFormData);
+      await AssetsAPI.setAssetAvatar(asset.id, avatarFormData);
       setIsAvatarOverwritten(false);
     }
   }, [

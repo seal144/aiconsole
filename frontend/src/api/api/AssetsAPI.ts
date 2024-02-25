@@ -34,7 +34,7 @@ async function fetchAssets<T extends Asset>(): Promise<T[]> {
   return ky.get(`${getBaseURL()}/api/assets/`, { hooks: API_HOOKS }).json();
 }
 
-async function setAssetEnabledFlag(assetType: AssetType, id: string, enabled: boolean) {
+async function setAssetEnabledFlag(id: string, enabled: boolean) {
   return ky
     .post(`${getBaseURL()}/api/assets/${id}/status-change`, {
       json: { enabled, to_global: false },
@@ -124,7 +124,7 @@ async function saveNewAsset(asset_id: string, asset: Asset) {
   });
 }
 
-async function updateAsset(assetType: AssetType, asset: Asset, originalId?: string) {
+async function updateAsset(asset: Asset, originalId?: string) {
   if (!originalId) {
     originalId = asset.id;
   }
@@ -146,7 +146,7 @@ async function deleteAsset(id: string) {
   });
 }
 
-async function getPathForAsset(assetType: AssetType, id: string) {
+async function getPathForAsset(id: string) {
   return (
     (await ky
       .get(`${getBaseURL()}/api/assets/${id}/path`, {
@@ -156,7 +156,7 @@ async function getPathForAsset(assetType: AssetType, id: string) {
   ).path;
 }
 
-async function setAssetAvatar(assetType: AssetType, assetId: string, avatar: FormData) {
+async function setAssetAvatar(assetId: string, avatar: FormData) {
   return ky.post(`${getBaseURL()}/api/assets/${assetId}/avatar`, { body: avatar, hooks: API_HOOKS });
 }
 

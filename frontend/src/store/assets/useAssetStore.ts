@@ -35,7 +35,7 @@ export type AssetsState = {
   getAsset: (id: string) => Asset | undefined;
   setSelectedAsset: (asset?: Asset) => void;
   setLastSavedSelectedAsset: (asset?: Asset) => void;
-  setIsEnabledFlag: (assetType: AssetType, id: string, enabled: boolean) => Promise<void>;
+  setIsEnabledFlag: (id: string, enabled: boolean) => Promise<void>;
 };
 
 export const useAssetStore = create<AssetsState>((set) => ({
@@ -76,7 +76,7 @@ export const useAssetStore = create<AssetsState>((set) => ({
       return;
     }
 
-    const path = await AssetsAPI.getPathForAsset(type, editable.id);
+    const path = await AssetsAPI.getPathForAsset(editable.id);
     window?.electron?.openFinder?.(path || '');
   },
 
@@ -194,7 +194,7 @@ export const useAssetStore = create<AssetsState>((set) => ({
       selectedAsset: asset,
     });
   },
-  setIsEnabledFlag: async (assetType: AssetType, id: string, enabled: boolean) => {
+  setIsEnabledFlag: async (id: string, enabled: boolean) => {
     useAssetStore.setState((state) => ({
       assets: (state.assets || []).map((asset) => {
         if (asset.id === id) {
@@ -204,6 +204,6 @@ export const useAssetStore = create<AssetsState>((set) => ({
       }),
     }));
 
-    await AssetsAPI.setAssetEnabledFlag(assetType, id, enabled);
+    await AssetsAPI.setAssetEnabledFlag(id, enabled);
   },
 }));

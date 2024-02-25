@@ -20,7 +20,7 @@ export const useAssets = (assetType: AssetType) => {
   const updateStatusIfNecessary = async () => {
     if (assetType === 'chat') return;
     if (isAssetStatusChanged && asset) {
-      await AssetsAPI.setAssetEnabledFlag(assetType, asset.id, asset.enabled);
+      await AssetsAPI.setAssetEnabledFlag(asset.id, asset.enabled);
 
       showToast({
         title: 'Status changed',
@@ -31,7 +31,7 @@ export const useAssets = (assetType: AssetType) => {
   };
 
   const renameAsset = async (previousAssetId: string, updatedAsset: Asset) => {
-    await AssetsAPI.updateAsset(assetType, updatedAsset, previousAssetId);
+    await AssetsAPI.updateAsset(updatedAsset, previousAssetId);
     await updateStatusIfNecessary();
   };
 

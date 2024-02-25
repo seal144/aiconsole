@@ -27,13 +27,9 @@ import { Asset, AssetType } from '@/types/assets/assetTypes';
 
 export const DISABLED_CSS_CLASSES = 'max-w-[400px] truncate !text-gray-400 pointer-events-none !cursor-default ';
 
-const statusHelper = (
-  enabled: boolean,
-  asset: Asset,
-  assetType: AssetType,
-): Omit<ContextMenuItem, 'type' | 'title'> => {
+const statusHelper = (enabled: boolean, asset: Asset): Omit<ContextMenuItem, 'type' | 'title'> => {
   const handleClick = (status: boolean) => () => {
-    useAssetStore.getState().setIsEnabledFlag(assetType, asset.id, status);
+    useAssetStore.getState().setIsEnabledFlag(asset.id, status);
   };
 
   const assetStatusIcon = (itemStatus: boolean) => {
@@ -69,13 +65,13 @@ const assetItems = (assetType: AssetType, asset: Asset): ContextMenuItems => {
     {
       type: 'item',
       title: 'Enabled',
-      ...statusHelper(true, asset, assetType),
+      ...statusHelper(true, asset),
     },
 
     {
       type: 'item',
       title: 'Disabled',
-      ...statusHelper(false, asset, assetType),
+      ...statusHelper(false, asset),
     },
   ];
 };
