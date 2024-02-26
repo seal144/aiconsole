@@ -10,38 +10,45 @@ from aiconsole_toolkit.settings.partial_settings_data import PartialSettingsData
 
 def load_settings_file(file_path: Path) -> PartialSettingsData:
     document = _get_document(file_path)
+    update_file = False
 
+    update_file |= _extract_and_delete_settings(document)
+    update_file |= _convert_enabled_disabled_to_boolean(document)
+
+    data = PartialSettingsData(**document.value)
+
+    if update_file:
+        _write_document(file_path, document)
+
+    return data
+
+
+def _extract_and_delete_settings(document):
+    update_file = False
     if "settings" in document:
         settings = document["settings"]
-
-        # if is container
         if isinstance(settings, dict):
-            if "openai_api_key" in settings:
-                document["openai_api_key"] = settings["openai_api_key"]
-
-            if "code_autorun" in settings:
-                document["code_autorun"] = settings["code_autorun"]
-
+            for key in ["openai_api_key", "code_autorun"]:
+                if key in settings:
+                    document[key] = settings[key]
             del document["settings"]
+            update_file = True
+    return update_file
 
-            # save
-            _write_document(file_path, document)
 
-    # Convert "enabled" to true and "disabled" to false for boolean fields
+def _convert_enabled_disabled_to_boolean(document):
+    update_file = False
     for collection_name in ["materials", "agents"]:
         if collection_name in document:
-            coll_dict = cast(dict, document[collection_name])
-            for key, value in coll_dict.items():
-                if isinstance(value, str):
-                    if value.lower() == "enabled":
-                        coll_dict[key] = "true"
-                    elif value.lower() == "disabled":
-                        coll_dict[key] = "false"
-                    elif value.lower() == "forced":
-                        coll_dict[key] = "true"
-
-    d: dict = dict(document)
-    return PartialSettingsData(**d)
+            collection_dict = cast(dict, document[collection_name])
+            for key, value in list(collection_dict.items()):
+                if isinstance(value, str) and value.lower() in ["enabled", "forced", "disabled"]:
+                    collection_dict[key] = value.lower() in ["enabled", "forced"]
+                    update_file = True
+            if update_file:
+                document.setdefault("assets", {}).update(collection_dict)
+                del document[collection_name]
+    return update_file
 
 
 def save_settings_file(file_path: Path, settings_data: PartialSettingsData):

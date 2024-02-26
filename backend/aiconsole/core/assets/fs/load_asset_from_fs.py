@@ -13,11 +13,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import logging
 import os
+import pathlib
 from datetime import datetime
 
+import aiofiles
 import aiofiles.os as async_os
 import rtoml
 
@@ -36,35 +37,43 @@ _log = logging.getLogger(__name__)
 
 _USER_AGENT_ID = "user"
 
+# LEGACY: Port 2.9 agent to 2.11
+execution_mode_mapping = {
+    "aiconsole.core.execution_modes.normal:execution_mode_normal": "aiconsole.core.chat.execution_modes.normal:execution_mode",
+    "aiconsole.core.execution_modes.interpreter:execution_mode_interpreter": "aiconsole.core.chat.execution_modes.interpreter:execution_mode",
+    "aiconsole.core.execution_modes.example_countdown:execution_mode_example_countdown": "aiconsole.core.chat.execution_modes.example_countdown:execution_mode",
+}
 
-async def load_asset_from_fs(asset_type: AssetType, asset_id: str, location: AssetLocation | None = None) -> Asset:
-    if asset_type == AssetType.AGENT:
-        if asset_id == _USER_AGENT_ID:
-            raise UserIsAnInvalidAgentIdError()
 
+async def _find_asset_path(
+    asset_type: AssetType, asset_id: str, location: AssetLocation | None
+) -> tuple[AssetLocation, pathlib.Path]:
     project_dir_path = get_project_assets_directory(asset_type)
     core_resource_path = get_core_assets_directory(asset_type)
+    asset_filename = f"{asset_id}.toml"
 
-    if (project_dir_path / f"{asset_id}.toml").exists() and (
-        location is None or location == AssetLocation.PROJECT_DIR
-    ):
-        if (core_resource_path / f"{asset_id}.toml").exists():
-            _log.info(f"Asset {asset_id} exists in core and project directory")
-        location = AssetLocation.PROJECT_DIR
-        path = project_dir_path / f"{asset_id}.toml"
-    elif (core_resource_path / f"{asset_id}.toml").exists() and (
-        location is None or location == AssetLocation.AICONSOLE_CORE
-    ):
-        location = AssetLocation.AICONSOLE_CORE
-        path = core_resource_path / f"{asset_id}.toml"
+    project_asset_path = project_dir_path / asset_filename
+    core_asset_path = core_resource_path / asset_filename
+
+    if project_asset_path.exists() and (location is None or location == AssetLocation.PROJECT_DIR):
+        return AssetLocation.PROJECT_DIR, project_asset_path
+    elif core_asset_path.exists() and (location is None or location == AssetLocation.AICONSOLE_CORE):
+        return AssetLocation.AICONSOLE_CORE, core_asset_path
     else:
         raise KeyError(f"Asset {asset_id} not found")
 
-    with open(path, "r", encoding="utf8", errors="replace") as file:
-        tomldoc = rtoml.loads(file.read())
+
+async def load_asset_from_fs(asset_type: AssetType, asset_id: str, location: AssetLocation | None = None) -> Asset:
+    if asset_type == AssetType.AGENT and asset_id == _USER_AGENT_ID:
+        raise UserIsAnInvalidAgentIdError()
+
+    location, path = await _find_asset_path(asset_type, asset_id, location)
+
+    async with aiofiles.open(path, mode="r", encoding="utf8", errors="replace") as file:
+        content = await file.read()
+        tomldoc = rtoml.loads(content)
 
     asset_id = os.path.splitext(os.path.basename(path))[0]
-
     stat = await async_os.stat(path)
 
     params = {
@@ -77,7 +86,8 @@ async def load_asset_from_fs(asset_type: AssetType, asset_id: str, location: Ass
         "enabled_by_default": tomldoc.get(
             "enabled_by_default", str(tomldoc.get("default_status", "enabled")).strip() == "enabled"
         ),
-        "override": location == AssetLocation.PROJECT_DIR and (core_resource_path / f"{asset_id}.toml").exists(),
+        "override": location == AssetLocation.PROJECT_DIR
+        and (get_core_assets_directory(asset_type) / f"{asset_id}.toml").exists(),
         "last_modified": datetime.fromtimestamp(stat.st_mtime),
     }
 
@@ -104,14 +114,11 @@ async def load_asset_from_fs(asset_type: AssetType, asset_id: str, location: Ass
     if asset_type == AssetType.AGENT:
         params["system"] = str(tomldoc["system"]).strip()
 
-        if "gpt_mode" in tomldoc:
-            params["gpt_mode"] = GPTMode(str(tomldoc["gpt_mode"]).strip())
+        params["gpt_mode"] = GPTMode(tomldoc.get("gpt_mode", "").strip())
 
-        if "execution_mode" in tomldoc:
-            params["execution_mode"] = str(tomldoc["execution_mode"]).strip()
+        execution_mode = tomldoc.get("execution_mode", "").strip()
+        params["execution_mode"] = execution_mode_mapping.get(execution_mode, execution_mode)
 
-        agent = AICAgent(**params)
-
-        return agent
+        return AICAgent(**params)
 
     raise Exception(f"Asset type {asset_type} not supported.")
