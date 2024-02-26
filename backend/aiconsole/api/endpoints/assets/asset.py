@@ -228,20 +228,19 @@ async def asset_path(request: Request, asset_id: str):
 async def profile_image(asset_id: str):
     asset = project.get_project_assets().get_asset(asset_id)
 
-    if asset is None:
-        raise HTTPException(status_code=404, detail=f"Asset {asset_id} not found")
+    if asset:
 
-    if is_project_initialized():
-        image_path = get_project_assets_directory(asset.type) / f"{asset_id}.jpg"
+        if is_project_initialized():
+            image_path = get_project_assets_directory(asset.type) / f"{asset_id}.jpg"
 
-        if image_path.exists():
-            return FileResponse(str(image_path))
+            if image_path.exists():
+                return FileResponse(str(image_path))
 
-    static_path = get_core_assets_directory(asset.type) / f"{asset_id}.jpg"
-    if static_path.exists():
-        return FileResponse(str(static_path))
+        static_path = get_core_assets_directory(asset.type) / f"{asset_id}.jpg"
+        if static_path.exists():
+            return FileResponse(str(static_path))
 
-    default_path = get_core_assets_directory(asset.type) / "default.jpg"
+    default_path = get_core_assets_directory(AssetType.AGENT) / "default.jpg"
     return FileResponse(str(default_path))
 
 
