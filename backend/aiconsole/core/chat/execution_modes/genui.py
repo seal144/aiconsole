@@ -36,7 +36,7 @@ from aiconsole.core.gpt.create_full_prompt_with_materials import (
 from aiconsole.core.gpt.function_calls import OpenAISchema
 
 
-class react_ui(OpenAISchema):
+class react_ui_tool(OpenAISchema):
     """
     Execute react typescript code in a browser.
     """
@@ -84,7 +84,7 @@ async def _execution_mode_process(
     await show_prototype_warning(chat_mutator)
 
     await generate_response_message_with_code(
-        chat_mutator, agent, system_message, language_classes=[react_ui], enforced_language=react_ui
+        chat_mutator, agent, system_message, language_classes=[react_ui_tool], enforced_language=react_ui_tool
     )
 
 

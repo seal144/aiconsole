@@ -40,7 +40,6 @@ import { ToolOutput } from './ToolOutput';
 import { transpileCode } from '@/utils/transpilation/transpileCode';
 import { createSandbox } from '@/utils/transpilation/createSandbox';
 import { MessageControls } from './MessageControls';
-import language from 'react-syntax-highlighter/dist/esm/languages/hljs/1c';
 
 interface MessageProps {
   group: AICMessageGroup;
@@ -143,7 +142,7 @@ export function ToolCall({ group, toolCall: tool_call }: MessageProps) {
             alwaysExecuteCode &&
             isViableForRunningCode(tool_call.id) &&
             !shouldDisplaySpinner &&
-            language === 'react_ui'
+            tool_call.language === 'react_ui'
           ) {
             await renderUIResult();
           } else {
@@ -155,21 +154,15 @@ export function ToolCall({ group, toolCall: tool_call }: MessageProps) {
         <div className="flex flex-row gap-2 items-center ">
           <div className="flex-grow flex flex-row gap-3 items-center">
             {shouldDisplaySpinner && <Spinner width={20} height={20} />}
-            {!shouldDisplaySpinner &&
-              !tool_call.is_successful &&
-              !(tool_call.output != undefined || tool_call.language == 'react_ui') && (
-                <Icon icon={CircleDashedIcon} width={20} height={20} className="text-success flex-shrink-0" />
-              )}
-            {!shouldDisplaySpinner &&
-              tool_call.is_successful &&
-              (tool_call.output != undefined || tool_call.language == 'react_ui') && (
-                <Icon icon={CheckCircle2Icon} width={20} height={20} className="text-success flex-shrink-0" />
-              )}
-            {!shouldDisplaySpinner &&
-              !tool_call.is_successful &&
-              (tool_call.output != undefined || tool_call.language == 'react_ui') && (
-                <Icon icon={AlertCircleIcon} width={20} height={20} className="text-danger flex-shrink-0" />
-              )}
+            {!shouldDisplaySpinner && !tool_call.is_successful && !(tool_call.output != undefined) && (
+              <Icon icon={CircleDashedIcon} width={20} height={20} className="text-success flex-shrink-0" />
+            )}
+            {!shouldDisplaySpinner && tool_call.is_successful && tool_call.output != undefined && (
+              <Icon icon={CheckCircle2Icon} width={20} height={20} className="text-success flex-shrink-0" />
+            )}
+            {!shouldDisplaySpinner && !tool_call.is_successful && tool_call.output != undefined && (
+              <Icon icon={AlertCircleIcon} width={20} height={20} className="text-danger flex-shrink-0" />
+            )}
 
             <span className="font-semibold"> {tool_call.headline ? tool_call.headline : 'Task'}</span>
           </div>
