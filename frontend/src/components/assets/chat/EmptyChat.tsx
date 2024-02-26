@@ -94,7 +94,7 @@ export const EmptyChat = () => {
     // Adjusting to include the full asset with its usage examples
     const usageExamplesWithAsset = assets
       .flatMap((asset) => asset.usage_examples.map((example) => ({ asset, example })))
-      .filter(({ example }) => !lastExamples.includes(example));
+      .filter(({ asset, example }) => !lastExamples.includes(example) && asset.enabled);
 
     const randomExamplesWithAsset = usageExamplesWithAsset
       .sort(() => Math.random() - 0.5)
@@ -102,7 +102,7 @@ export const EmptyChat = () => {
 
     return randomExamplesWithAsset;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [examplesVersion]);
+  }, [examplesVersion, assets]);
 
   useEffect(() => {
     setLastExamples(examplePrompts.map(({ example }) => example));
