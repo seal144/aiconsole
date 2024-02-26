@@ -20,45 +20,22 @@ import { useRecentProjectsStore } from '@/store/projects/useRecentProjectsStore'
 import { ContextMenuItems } from '@/types/common/contextMenu';
 import { RecentProject } from '@/types/projects/RecentProject';
 import { cn } from '@/utils/common/cn';
-import {
-  AlertTriangle,
-  Blocks,
-  LocateFixed,
-  LucideIcon,
-  MessageSquare,
-  MoreVertical,
-  ScanText,
-  StickyNote,
-  Trash,
-} from 'lucide-react';
+import { AlertTriangle, LocateFixed, MoreVertical, Trash } from 'lucide-react';
 import { MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useProjectStore } from '../../store/projects/useProjectStore';
+import { Spinner } from '../assets/chat/Spinner';
 import { ContextMenu, ContextMenuRef } from '../common/ContextMenu';
 import Tooltip from '../common/Tooltip';
 import { Icon } from '../common/icons/Icon';
-import { ActorAvatar } from '../assets/chat/ActorAvatar';
-import { Spinner } from '../assets/chat/Spinner';
 
 const MAX_CHATS_TO_DISPLAY = 3;
-interface CounterItemProps {
-  icon: LucideIcon;
-  count: number;
-  className?: string;
-}
-
-const CounterItem = ({ icon, count, className }: CounterItemProps) => (
-  <div className="flex items-center gap-[10px] text-gray-300 text-[15px]">
-    <Icon icon={icon} className={cn('text-orange', className)} />
-    {count}
-  </div>
-);
 
 export type ProjectCardProps = Omit<RecentProject, 'recent_chats' | 'incorrect_path'> & {
   recentChats: string[];
   incorrectPath: boolean;
 };
 
-export function ProjectCard({ name, path, recentChats, incorrectPath, stats }: ProjectCardProps) {
+export function ProjectCard({ name, path, recentChats, incorrectPath }: ProjectCardProps) {
   const chooseProject = useProjectStore((state) => state.chooseProject);
   const removeRecentProject = useRecentProjectsStore((state) => state.removeRecentProject);
   const [isShowingContext, setIsShowingContext] = useState(false);
@@ -71,9 +48,6 @@ export function ProjectCard({ name, path, recentChats, incorrectPath, stats }: P
   const reloadProjects = useRecentProjectsStore((state) => state.getRecentProjects);
   const resetFetching = useProjectStore((state) => state.resetProjectSwitchFetching);
   const openModal = useProjectFileManagerStore((state) => state.openModal);
-
-  const { chats_count, materials_dynamic_note_count, materials_note_count, materials_python_api_count, agents } =
-    stats;
 
   const deleteProject = useCallback(async () => {
     await removeRecentProject(path);
@@ -106,7 +80,7 @@ export function ProjectCard({ name, path, recentChats, incorrectPath, stats }: P
     event.preventDefault();
     event.stopPropagation();
     if (triggerRef.current) {
-      triggerRef?.current.handleTriggerClick(event);
+      triggerRef.current.handleTriggerClick(event);
     }
   };
 
@@ -235,7 +209,7 @@ export function ProjectCard({ name, path, recentChats, incorrectPath, stats }: P
                 )}
                 <h3
                   className={cn(
-                    'text-[22px] font-black transition-colors text-gray-400  group-hover:text-white duration-150',
+                    'text-[22px] font-black transition-colors text-gray-400  group-hover:text-white duration-150 uppercase',
                     {
                       'text-white': isShowingContext,
                     },
@@ -275,25 +249,6 @@ export function ProjectCard({ name, path, recentChats, incorrectPath, stats }: P
               </div>
             ) : null,
           )}
-        </div>
-
-        <div className="flex gap-2 justify-between w-full mt-[15px] mb-0">
-          {chats_count ? <CounterItem icon={MessageSquare} count={chats_count} className="text-purple-400" /> : null}
-          {materials_note_count ? <CounterItem icon={StickyNote} count={materials_note_count} /> : null}
-          {materials_dynamic_note_count ? <CounterItem icon={ScanText} count={materials_dynamic_note_count} /> : null}
-          {materials_python_api_count ? <CounterItem icon={Blocks} count={materials_python_api_count} /> : null}
-          {agents.count ? (
-            <div className="flex items-center text-[15px] text-gray-300">
-              <ActorAvatar actorType="agent" actorId={agents.agent_ids[0] || '1'} type="extraSmall" className="mb-0" />
-              <ActorAvatar
-                actorType="agent"
-                actorId={agents.agent_ids[1] || '2'}
-                type="extraSmall"
-                className="relative -left-[12px] mb-0"
-              />
-              <span className="-ml-[2px]">{agents.count}</span>
-            </div>
-          ) : null}
         </div>
 
         {isCurrentProjectFetching && (

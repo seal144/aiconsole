@@ -22,12 +22,7 @@ from aiconsole.core.chat.list_possible_historic_chat_ids import (
     list_possible_historic_chat_ids,
 )
 from aiconsole.core.chat.load_chat_history import load_chat_history
-from aiconsole.core.recent_projects.registry import recent_projects_stats
-from aiconsole.core.recent_projects.types import (
-    RecentProject,
-    RecentProjectStats,
-    RecentProjectStatsAgent,
-)
+from aiconsole.core.recent_projects.types import RecentProject
 
 _RECENT_PROJECTS_LAST_CHATS_COUNT = 4
 
@@ -81,8 +76,6 @@ async def get_recent_project() -> list[RecentProject]:
 
     for path in recent_projects:
         chat_ids = list_possible_historic_chat_ids(path)
-        materials_count = recent_projects_stats.get_materials_counts(path)
-        agents_count = recent_projects_stats.get_agents_count(path)
 
         recent_chat_names: list[str] = []
         for id in chat_ids[:_RECENT_PROJECTS_LAST_CHATS_COUNT]:
@@ -102,13 +95,6 @@ async def get_recent_project() -> list[RecentProject]:
                 path=path,
                 incorrect_path=incorrect_path,
                 recent_chats=recent_chat_names,
-                stats=RecentProjectStats(
-                    materials_note_count=materials_count.note,
-                    materials_dynamic_note_count=materials_count.dynamic_note,
-                    materials_python_api_count=materials_count.python_api,
-                    chats_count=len(chat_ids),
-                    agents=RecentProjectStatsAgent(count=agents_count.count, agent_ids=agents_count.agent_ids),
-                ),
             )
         )
 

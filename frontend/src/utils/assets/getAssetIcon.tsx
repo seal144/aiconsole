@@ -24,22 +24,21 @@ export const MATERIAL_CONTENT_TYPE_ICONS = {
   api: Blocks,
 };
 
-export function getAssetIcon(asset?: Asset | AssetType) {
+export function getAssetIcon(asset?: Asset | AssetType, contentType?: MaterialContentType) {
   let assetType;
-  let contentType: MaterialContentType = 'static_text';
 
   if (typeof asset === 'string') {
     assetType = asset;
   } else {
     assetType = getAssetType(asset);
-    if (assetType === 'material') {
+    if (assetType === 'material' && !contentType) {
       contentType = (asset as Material).content_type;
     }
   }
 
   switch (assetType) {
     case 'material': {
-      const icon = MATERIAL_CONTENT_TYPE_ICONS[contentType];
+      const icon = MATERIAL_CONTENT_TYPE_ICONS[contentType ?? 'static_text'];
       if (!icon) {
         return FileQuestion;
       }

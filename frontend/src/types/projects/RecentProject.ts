@@ -19,11 +19,4 @@ export type RecentProject = {
   path: string;
   recent_chats: string[];
   incorrect_path: boolean;
-  stats: {
-    agents: { count: number; agent_ids: string[] };
-    chats_count: number;
-    materials_dynamic_note_count: number;
-    materials_note_count: number;
-    materials_python_api_count: number;
-  };
 };
