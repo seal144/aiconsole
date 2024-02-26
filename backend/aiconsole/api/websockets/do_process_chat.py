@@ -31,31 +31,55 @@ async def do_process_chat(chat_mutator: ChatMutator):
     role: GPTRole = "assistant"
 
     agent: AICAgent | None = None
+    visible_agent_id = None
 
-    if chat_mutator.chat.chat_options.agent_id and not chat_mutator.chat.chat_options.ai_can_add_extra_materials:
+    if chat_mutator.chat.chat_options.agent_id:
+        # The user selected an agent for the chat
         for _agent in agents_to_choose_from():
             if _agent.id == chat_mutator.chat.chat_options.agent_id:
                 agent = _agent
-    else:
 
-        director_agent = cast(AICAgent | None, project.get_project_assets().get_asset(DIRECTOR_AGENT_ID))
-
-        if director_agent and director_agent.enabled and director_agent.type == AssetType.AGENT:
-            role = "system"  # TODO: This should be read from the agent, not hardcoded
-            agent = director_agent
-        else:
+        if not agent:
             await connection_manager().send_to_all(
-                NotificationServerMessage(
-                    title="No director agent found",
-                    message="No director agent found, using a random agent for the chat.",
+                ErrorServerMessage(
+                    error="The selected agent does not exist or is disabled, please select a different agent.",
                 )
             )
+            return
 
-            possible_agents = agents_to_choose_from()
+    if not agent or chat_mutator.chat.chat_options.ai_can_add_extra_materials:
+        # We need to run the director agent
 
-            # assign a random agent to the chat
-            if possible_agents:
-                agent = random.choice(possible_agents)
+        director_agent = cast(AICAgent | None, project.get_project_assets().get_enabled_asset(DIRECTOR_AGENT_ID))
+
+        if director_agent and director_agent.type == AssetType.AGENT:
+            role = "system"  # TODO: This should be read from the agent, not hardcoded
+
+            if agent:
+                # We want to show the chosen agent as the visible agent, even though the director agent is doing the analysis first
+                visible_agent_id = agent.id
+
+            agent = director_agent
+        else:
+            message: str = ""
+
+            if agent:
+                message = "Can not add extra materials."
+            else:
+                possible_agents = agents_to_choose_from()
+
+                # assign a random agent to the chat
+                if possible_agents:
+                    message = "No director agent found, using a random agent for the chat with no extra materials."
+                    agent = random.choice(possible_agents)
+
+            if message:
+                await connection_manager().send_to_all(
+                    NotificationServerMessage(
+                        title="No director agent found",
+                        message=message,
+                    )
+                )
 
     if not agent:
         await connection_manager().send_to_all(
@@ -86,15 +110,10 @@ async def do_process_chat(chat_mutator: ChatMutator):
     # Create a new message group for analysis
     message_group_id = str(uuid4())
 
-    visible_agent_id = agent.id
-
-    if chat_mutator.chat.chat_options.agent_id:
-        visible_agent_id = chat_mutator.chat.chat_options.agent_id
-
     await chat_mutator.mutate(
         CreateMessageGroupMutation(
             message_group_id=message_group_id,
-            actor_id=ActorId(type="agent", id=visible_agent_id),
+            actor_id=ActorId(type="agent", id=visible_agent_id or agent.id),
             role=role,
             materials_ids=materials_ids,
             analysis="",

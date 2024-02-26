@@ -137,6 +137,17 @@ class Assets:
 
         return None
 
+    def get_enabled_asset(self, id, location: AssetLocation | None = None):
+        """
+        Get a specific asset (must be enabled)
+        """
+        asset = self.get_asset(id, location)
+
+        if asset and self.is_enabled(asset.id):
+            return asset
+
+        return None
+
     async def reload(self, initial: bool = False):
         from aiconsole.core.assets.load_all_assets import load_all_assets
 
