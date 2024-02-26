@@ -1,0 +1,8 @@
+name = "Director"
+version = "0.0.1"
+usage = ""
+usage_examples = []
+default_status = "enabled"
+system = ""
+gpt_mode = "analysis"
+execution_mode = "aiconsole.core.chat.execution_modes.director:execution_mode"

@@ -145,6 +145,13 @@ class Assets:
         li: dict[str, list[Asset]] = defaultdict(list)
         for asset_type in [AssetType.AGENT, AssetType.MATERIAL, AssetType.CHAT]:
             d = await load_all_assets(asset_type)
+
+            # This might not be bulletproof, what if the settings are loaded after the assets? the backend should not use .enabled directly ...
+            # How to properly mix dynamic data or even per user data (chat options) with static data (assets, chats etc.)?
+            for k, v in d.items():
+                for asset in v:
+                    asset.enabled = self.is_enabled(asset.id)
+
             for k, v in d.items():
                 li[k].extend(v)
         self._assets = li

@@ -53,6 +53,7 @@ DIRECTOR_PREFERRED_TOKENS: int = 1000
 
 MAX_RECENT_PROJECTS = 8
 
+DIRECTOR_AGENT_ID = "director"
 
 LOG_FORMAT: str = "{name} {funcName} {message}"
 LOG_STYLE: str = "{"

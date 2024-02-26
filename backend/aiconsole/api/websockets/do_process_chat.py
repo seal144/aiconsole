@@ -1,10 +1,17 @@
 import logging
-from datetime import datetime
+import random
+from typing import cast
 from uuid import uuid4
 
+from aiconsole.api.websockets.connection_manager import connection_manager
 from aiconsole.api.websockets.render_materials import render_materials
+from aiconsole.api.websockets.server_messages import (
+    ErrorServerMessage,
+    NotificationServerMessage,
+)
+from aiconsole.consts import DIRECTOR_AGENT_ID
 from aiconsole.core.assets.agents.agent import AICAgent
-from aiconsole.core.assets.types import AssetLocation
+from aiconsole.core.assets.types import AssetType
 from aiconsole.core.chat.actor_id import ActorId
 from aiconsole.core.chat.chat_mutations import CreateMessageGroupMutation
 from aiconsole.core.chat.chat_mutator import ChatMutator
@@ -14,37 +21,49 @@ from aiconsole.core.chat.execution_modes.analysis.agents_to_choose_from import (
 from aiconsole.core.chat.execution_modes.utils.import_and_validate_execution_mode import (
     import_and_validate_execution_mode,
 )
-from aiconsole.core.gpt.consts import ANALYSIS_GPT_MODE
 from aiconsole.core.gpt.types import GPTRole
+from aiconsole.core.project import project
 
 _log = logging.getLogger(__name__)
 
-_director_agent = AICAgent(
-    id="director",
-    name="Director",
-    gpt_mode=ANALYSIS_GPT_MODE,
-    execution_mode="aiconsole.core.chat.execution_modes.director:execution_mode",
-    usage="",
-    usage_examples=[],
-    defined_in=AssetLocation.AICONSOLE_CORE,
-    override=False,
-    system="",
-    last_modified=datetime.now(),
-)
-
 
 async def do_process_chat(chat_mutator: ChatMutator):
-    role: GPTRole
+    role: GPTRole = "assistant"
 
-    agent = _director_agent
+    agent: AICAgent | None = None
 
     if chat_mutator.chat.chat_options.agent_id and not chat_mutator.chat.chat_options.ai_can_add_extra_materials:
-        for _agent in agents_to_choose_from(all=True):
+        for _agent in agents_to_choose_from():
             if _agent.id == chat_mutator.chat.chat_options.agent_id:
                 agent = _agent
-        role = "assistant"
     else:
-        role = "system"
+
+        director_agent = cast(AICAgent | None, project.get_project_assets().get_asset(DIRECTOR_AGENT_ID))
+
+        if director_agent and director_agent.enabled and director_agent.type == AssetType.AGENT:
+            role = "system"  # TODO: This should be read from the agent, not hardcoded
+            agent = director_agent
+        else:
+            await connection_manager().send_to_all(
+                NotificationServerMessage(
+                    title="No director agent found",
+                    message="No director agent found, using a random agent for the chat.",
+                )
+            )
+
+            possible_agents = agents_to_choose_from()
+
+            # assign a random agent to the chat
+            if possible_agents:
+                agent = random.choice(possible_agents)
+
+    if not agent:
+        await connection_manager().send_to_all(
+            ErrorServerMessage(
+                error="No agents found, please create an agent before processing the chat.",
+            )
+        )
+        return
 
     if chat_mutator.chat.chat_options.materials_ids:
         materials_ids = chat_mutator.chat.chat_options.materials_ids
