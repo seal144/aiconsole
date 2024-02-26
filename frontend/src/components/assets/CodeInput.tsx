@@ -20,7 +20,6 @@ import Editor from 'react-simple-code-editor';
 
 import { Icon } from '@/components/common/icons/Icon';
 import { cn } from '@/utils/common/cn';
-import { useClickOutside } from '@/utils/common/useClickOutside';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { FocusEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { CodeInputFullScreen } from './CodeInputFullScreen';
@@ -119,26 +118,6 @@ export function CodeInput({
     setFocus(true);
   }, []);
 
-  const handleClickOutside = useCallback(
-    (event: MouseEvent) => {
-      if (textareaRef.current?.contains(event.target as HTMLElement)) {
-        if (textareaRef.current && (!disabled || !readOnly)) {
-          textareaRef.current.focus();
-        }
-
-        return;
-      }
-
-      if (focus) {
-        setFocus(false);
-        onBlur?.();
-      }
-    },
-    [disabled, focus, onBlur, readOnly],
-  );
-
-  useClickOutside(editorBoxRef, handleClickOutside);
-
   useEffect(() => {
     if (focused) {
       setFocus(true);
@@ -191,6 +170,7 @@ export function CodeInput({
       >
         {typeof value === 'string' ? (
           <Editor
+            onBlur={onBlur}
             value={value}
             disabled={disabled || readOnly}
             textareaId={label}
