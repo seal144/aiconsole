@@ -50,9 +50,12 @@ async def do_process_chat(chat_mutator: ChatMutator):
     if not agent or chat_mutator.chat.chat_options.ai_can_add_extra_materials:
         # We need to run the director agent
 
-        director_agent = cast(AICAgent | None, project.get_project_assets().get_enabled_asset(DIRECTOR_AGENT_ID))
+        director_agent = cast(
+            AICAgent | None,
+            project.get_project_assets().get_asset(DIRECTOR_AGENT_ID, type=AssetType.AGENT, enabled=True),
+        )
 
-        if director_agent and director_agent.type == AssetType.AGENT:
+        if director_agent:
             role = "system"  # TODO: This should be read from the agent, not hardcoded
 
             if agent:
@@ -126,6 +129,6 @@ async def do_process_chat(chat_mutator: ChatMutator):
     await execution_mode.process_chat(
         chat_mutator=chat_mutator,
         agent=agent,
-        materials=materials,  # type: ignore
+        materials=materials,
         rendered_materials=rendered_materials,
     )

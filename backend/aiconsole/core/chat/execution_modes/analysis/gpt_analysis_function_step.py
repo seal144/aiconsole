@@ -100,9 +100,14 @@ async def gpt_analysis_function_step(
     gpt_executor = GPTExecutor()
 
     # Pick from forced or enabled agents if no agent is forced
+    possible_agent_choices: list[AICAgent]
+
     if chat_mutator.chat.chat_options.agent_id:
         agent_id = chat_mutator.chat.chat_options.agent_id
-        possible_agent_choices = [agent for agent in agents_to_choose_from(all=True) if agent.id == agent_id]
+        agent = project.get_project_assets().get_asset(agent_id, type=AssetType.AGENT, enabled=True)
+        if not agent:
+            raise ValueError(f"Agent {agent_id} not found")
+        possible_agent_choices = [cast(AICAgent, agent)]
     else:
         possible_agent_choices = agents_to_choose_from()
 

@@ -124,7 +124,9 @@ class Assets:
     def _suppress_notification(self):
         self._suppress_notification_until = datetime.datetime.now() + datetime.timedelta(seconds=10)
 
-    def get_asset(self, id, location: AssetLocation | None = None):
+    def get_asset(
+        self, id, location: AssetLocation | None = None, type: AssetType | None = None, enabled: bool | None = None
+    ):
         """
         Get a specific asset.
         """
@@ -133,18 +135,13 @@ class Assets:
 
         for asset in self._assets[id]:
             if location is None or asset.defined_in == location:
+                if type and asset.type != type:
+                    return None
+
+                if enabled is not None and self.is_enabled(asset.id) != enabled:
+                    return None
+
                 return asset
-
-        return None
-
-    def get_enabled_asset(self, id, location: AssetLocation | None = None):
-        """
-        Get a specific asset (must be enabled)
-        """
-        asset = self.get_asset(id, location)
-
-        if asset and self.is_enabled(asset.id):
-            return asset
 
         return None
 

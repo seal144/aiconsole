@@ -16,9 +16,11 @@
 
 import random
 
+from aiconsole.core.assets.types import AssetType
 from aiconsole.core.chat.execution_modes.analysis.agents_to_choose_from import (
     agents_to_choose_from,
 )
+from aiconsole.core.project import project
 
 
 def create_agents_str(agent_id) -> str:
@@ -28,13 +30,19 @@ def create_agents_str(agent_id) -> str:
 
     # Forced agents if available or enabled agents otherwise
     if agent_id:
-        possible_agent_choices = [agent for agent in agents_to_choose_from(all=True) if agent.id == agent_id]
+
+        agent = project.get_project_assets().get_asset(agent_id, type=AssetType.AGENT, enabled=True)
+
+        if not agent:
+            raise ValueError(f"Agent {agent_id} not found")
+
+        possible_agent_choices = [agent]
     else:
         possible_agent_choices = agents_to_choose_from()
 
+    random.shuffle(possible_agent_choices)
+
     new_line = "\n"
-    random_agents = new_line.join(
-        [f"* {c.id} - {c.usage}" for c in random.sample(possible_agent_choices, len(possible_agent_choices))]
-    )
+    random_agents = new_line.join([f"* {c.id} - {c.usage}" for c in possible_agent_choices])
 
     return random_agents

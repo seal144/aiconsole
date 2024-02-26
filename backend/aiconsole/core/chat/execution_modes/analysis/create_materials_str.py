@@ -40,10 +40,10 @@ def create_materials_str(materials_ids: list | None, ai_can_add_extra_materials:
             ],
         ]
 
+    random.shuffle(available_materials)
+
     random_materials = (
-        new_line.join([f"* {c.id} - {c.usage}" for c in random.sample(available_materials, len(available_materials))])
-        if available_materials
-        else ""
+        new_line.join([f"* {c.id} - {c.usage}" for c in available_materials]) if available_materials else ""
     )
 
     return random_materials
