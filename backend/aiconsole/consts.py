@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+from functools import lru_cache
 from pathlib import Path
+
+# WARNING: care with 3rd party imports, we have script for electron
+# that imports this file without installing 3rd party packages
 
 # this is a path to the root of the project - usually the installed one
 # this is pointing to the backend/aiconsole directory
@@ -30,18 +34,22 @@ ORIGINS: list[str] = [
 
 DIR_WITH_AICONSOLE_PACKAGE = Path(__file__).parent.parent
 
+GLOBAL_SETTINGS_FILENAME = "settings.toml"
+RECENT_FILENAME = "recent"
 
+
+@lru_cache()
 def AICONSOLE_USER_CONFIG_DIR() -> Path:
-    # WARNING: care with 3rd party imports, we have code that imports this file withot installing 3rd party packages
-    from platformdirs import user_config_dir
+    from aiconsole.utils.change_folder_icon import change_aiconsole_folder_icon
+    from aiconsole.utils.handle_legacy_filepath import handle_legacy_global_filepath
 
-    # windows path fix, no author in the path
-    windows_path_issue = Path(user_config_dir()) / APPLICATION_NAME
-    if windows_path_issue.exists():
-        return windows_path_issue
+    path = Path.home() / APPLICATION_NAME
+    if not path.exists():
+        path.mkdir(parents=True)
+        change_aiconsole_folder_icon(path)
 
-    path = Path(user_config_dir(APPLICATION_NAME))
-    path.mkdir(parents=True, exist_ok=True)
+    handle_legacy_global_filepath(path)
+
     return path
 
 

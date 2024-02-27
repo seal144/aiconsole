@@ -66,7 +66,11 @@ class applescript_tool(CodeTask):
     This function executes the given code on the user's system using the local environment and returns the output. Only use this if it can not be done in Python.
     """
 
-    code: str = Field(..., json_schema_extra={"type": "string"})
+    code: str = Field(
+        ...,
+        description="AppleScript code to execute. It will be executed using the user's local environment. Always show result to the user.",
+        json_schema_extra={"type": "string"},
+    )
 
 
 async def _execution_mode_process(
