@@ -32,7 +32,6 @@ async def send_code(
     message_id,
     language_classes: list[type],
 ):
-
     for index, tool_call in enumerate(tool_calls):
         default_language = LanguageStr(tool_name_to_language(language_classes[0].__name__))
 

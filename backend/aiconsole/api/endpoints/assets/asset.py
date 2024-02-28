@@ -229,7 +229,6 @@ async def profile_image(asset_id: str):
     asset = project.get_project_assets().get_asset(asset_id)
 
     if asset:
-
         if is_project_initialized():
             image_path = get_project_assets_directory(asset.type) / f"{asset_id}.jpg"
 

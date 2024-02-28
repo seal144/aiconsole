@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import pytest
 
 from aiconsole.tests.chat_test_framework import chat_test_framework

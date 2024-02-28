@@ -117,7 +117,6 @@ async def _handle_acquire_lock_ws_message(connection: AICConnection, json: dict)
 
 
 async def _handle_release_lock_ws_message(connection: AICConnection, json: dict):
-
     message = ReleaseLockClientMessage(**json)
 
     chat_mutator = SequentialChatMutator(
@@ -142,7 +141,6 @@ async def _handle_release_lock_ws_message(connection: AICConnection, json: dict)
 
 
 async def _handle_open_chat_ws_message(connection: AICConnection, json: dict):
-
     message = OpenChatClientMessage(**json)
 
     try:

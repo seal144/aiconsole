@@ -14,6 +14,6 @@ def _change_macos_aiconsole_folder_icon(folder_path: Path):
     import Cocoa
 
     with resources.path("aiconsole.utils", "electron.icns") as asset_path:
-        Cocoa.NSWorkspace.sharedWorkspace().setIcon_forFile_options_(
-            Cocoa.NSImage.alloc().initWithContentsOfFile_(str(asset_path)), str(folder_path), 0
+        Cocoa.NSWorkspace.sharedWorkspace().setIcon_forFile_options_(  # type: ignore
+            Cocoa.NSImage.alloc().initWithContentsOfFile_(str(asset_path)), str(folder_path), 0  # type: ignore
         )

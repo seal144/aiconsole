@@ -54,7 +54,6 @@ def accept_code_not_supported(
 
 
 class ExecutionMode:
-
     def __init__(
         self,
         process_chat: ProcessChatDataProtocol = process_chat_not_supported,

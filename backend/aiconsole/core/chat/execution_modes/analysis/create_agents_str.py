@@ -30,7 +30,6 @@ def create_agents_str(agent_id) -> str:
 
     # Forced agents if available or enabled agents otherwise
     if agent_id:
-
         agent = project.get_project_assets().get_asset(agent_id, type=AssetType.AGENT, enabled=True)
 
         if not agent:

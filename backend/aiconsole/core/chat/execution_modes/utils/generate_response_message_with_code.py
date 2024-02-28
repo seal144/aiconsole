@@ -95,7 +95,6 @@ async def generate_response_message_with_code(
                 temperature=0.2,
             )
         ):
-
             if chunk_or_clear == CLEAR_STR:
                 await chat_mutator.mutate(SetContentMessageMutation(message_id=message_id, content=""))
                 continue

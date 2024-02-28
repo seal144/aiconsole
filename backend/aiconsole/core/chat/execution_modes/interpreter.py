@@ -51,24 +51,13 @@ class python_tool(CodeTask):
     """
     Execute code in a stateful Jupyter notebook environment.
     You can execute shell commands by prefixing code lines with "!".
+    You can execute AppleScript in shell.
     Make sure to pass the code and headline as json and not python variables.
     """
 
     code: str = Field(
         ...,
         description="Python code to execute. It will be executed in the statefull Jupyter notebook environment. Always show result to the user.",
-        json_schema_extra={"type": "string"},
-    )
-
-
-class applescript_tool(CodeTask):
-    """
-    This function executes the given code on the user's system using the local environment and returns the output. Only use this if it can not be done in Python.
-    """
-
-    code: str = Field(
-        ...,
-        description="AppleScript code to execute. It will be executed using the user's local environment. Always show result to the user.",
         json_schema_extra={"type": "string"},
     )
 
@@ -87,7 +76,7 @@ async def _execution_mode_process(
         materials=rendered_materials,
     )
 
-    await generate_response_message_with_code(chat_mutator, agent, system_message, [python_tool, applescript_tool])
+    await generate_response_message_with_code(chat_mutator, agent, system_message, [python_tool])
 
     last_message = last_message_group.messages[-1]
 

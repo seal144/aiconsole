@@ -23,7 +23,7 @@ def install_dependencies(python_path: Path, dependency_path: Path, develop_mode:
         "pip",
         "install",
         str(dependency_path),
-        "--default-timeout=200"
+        "--default-timeout=200",
     ]
 
     if develop_mode:
