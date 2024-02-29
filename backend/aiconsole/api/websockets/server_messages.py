@@ -97,3 +97,7 @@ class ChatOpenedServerMessage(BaseServerMessage):
 
 class ChatClosedServerMessage(BaseServerMessage):
     chat_id: str
+
+
+class DuplicateChatServerMessage(BaseServerMessage):
+    chat_id: str

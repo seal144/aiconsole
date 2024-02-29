@@ -23,6 +23,7 @@ from aiconsole.api.websockets.client_messages import (
     AcceptCodeClientMessage,
     AcquireLockClientMessage,
     CloseChatClientMessage,
+    DuplicateChatClientMessage,
     InitChatMutationClientMessage,
     OpenChatClientMessage,
     ProcessChatClientMessage,
@@ -39,10 +40,12 @@ from aiconsole.api.websockets.render_materials import render_materials
 from aiconsole.api.websockets.server_messages import (
     ChatClosedServerMessage,
     ChatOpenedServerMessage,
+    DuplicateChatServerMessage,
     NotificationServerMessage,
     ResponseServerMessage,
 )
 from aiconsole.core.assets.agents.agent import AICAgent
+from aiconsole.core.chat.chat_mutations import AddMessageGroupsMutation
 from aiconsole.core.chat.execution_modes.utils.import_and_validate_execution_mode import (
     import_and_validate_execution_mode,
 )
@@ -71,6 +74,7 @@ async def handle_incoming_message(connection: AICConnection, json: dict):
         AcquireLockClientMessage.__name__: _handle_acquire_lock_ws_message,
         ReleaseLockClientMessage.__name__: _handle_release_lock_ws_message,
         OpenChatClientMessage.__name__: _handle_open_chat_ws_message,
+        DuplicateChatClientMessage.__name__: _handle_duplicate_chat_ws_message,  # Register the new handler here.
         StopChatClientMessage.__name__: _handle_stop_chat_ws_message,
         CloseChatClientMessage.__name__: _handle_close_chat_ws_message,
         InitChatMutationClientMessage.__name__: _handle_init_chat_mutation_ws_message,
@@ -176,6 +180,44 @@ async def _handle_open_chat_ws_message(connection: AICConnection, json: dict):
             ResponseServerMessage(
                 request_id=message.request_id,
                 payload={"error": "Error during opening chat", "chat_id": message.chat_id},
+                is_error=True,
+            )
+        )
+
+
+async def _handle_duplicate_chat_ws_message(connection: AICConnection, json: dict):
+    message = DuplicateChatClientMessage(**json)
+    # Implement the logic for duplicating a chat here.
+    # This is a placeholder implementation.
+    new_chat_id = str(uuid4())
+    try:
+        chat_mutator = SequentialChatMutator(
+            DefaultChatMutator(
+                chat_id=message.chat_id,
+                request_id=message.request_id,
+                connection=connection,
+            )
+        )
+
+        new_chat_mutator = SequentialChatMutator(
+            DefaultChatMutator(
+                chat_id=new_chat_id,
+                request_id=message.request_id,
+                connection=connection,
+            )
+        )
+
+        chat = await chat_mutator.read()
+
+        await new_chat_mutator.mutate(AddMessageGroupsMutation(message_groups=chat.message_groups))
+
+        await connection.send(DuplicateChatServerMessage(chat_id=new_chat_id))
+    except Exception as e:
+        _log.error(f"Error during duplicating chat {message.chat_id}: {e}")
+        await connection.send(
+            ResponseServerMessage(
+                request_id=message.request_id,
+                payload={"error": "Error during duplicating chat", "chat_id": message.chat_id},
                 is_error=True,
             )
         )

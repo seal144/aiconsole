@@ -49,6 +49,11 @@ class OpenChatClientMessage(BaseClientMessage):
     request_id: str
 
 
+class DuplicateChatClientMessage(BaseClientMessage):
+    chat_id: str
+    request_id: str
+
+
 class StopChatClientMessage(BaseClientMessage):
     request_id: str
 

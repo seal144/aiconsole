@@ -111,6 +111,13 @@ export const ChatClosedServerMessageSchema = BaseServerMessageSchema.extend({
 
 export type ChatClosedServerMessage = z.infer<typeof ChatClosedServerMessageSchema>;
 
+export const DuplicateChatServerMessageSchema = BaseServerMessageSchema.extend({
+  type: z.literal('DuplicateChatServerMessage'),
+  chat_id: z.string(),
+});
+
+export type DuplicateChatServerMessage = z.infer<typeof DuplicateChatServerMessageSchema>;
+
 export const ResponseServerMessageSchema = BaseServerMessageSchema.extend({
   request_id: z.string(),
   is_error: z.boolean(),
@@ -137,6 +144,7 @@ export const ServerMessageSchema = z.discriminatedUnion('type', [
   NotifyAboutChatMutationServerMessageSchema,
   ChatOpenedServerMessageSchema,
   ChatClosedServerMessageSchema,
+  DuplicateChatServerMessageSchema,
   ResponseServerMessageSchema,
 ]);
 

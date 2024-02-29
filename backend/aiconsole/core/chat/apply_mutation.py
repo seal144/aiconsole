@@ -17,6 +17,7 @@ from aiconsole.core.chat.chat_mutations import (
     DeleteMessageGroupMutation,
     DeleteMessageMutation,
     DeleteToolCallMutation,
+    AddMessageGroupsMutation,
     SetActorIdMessageGroupMutation,
     SetAnalysisMessageGroupMutation,
     SetCodeToolCallMutation,
@@ -46,6 +47,9 @@ _log = logging.getLogger(__name__)
 
 
 # Handlers
+
+def _handle_AddMessageGroupsMutation(chat: AICChat, mutation: AddMessageGroupsMutation) -> None:
+    chat.message_groups = mutation.message_groups
 
 
 def _handle_CreateMessageGroupMutation(chat: AICChat, mutation: CreateMessageGroupMutation) -> None:
@@ -257,6 +261,7 @@ def _get_tool_call_location(chat: AICChat, tool_call_id: str) -> AICToolCallLoca
 
 
 MUTATION_HANDLERS: dict[str, Callable[[AICChat, Any], None]] = {
+    AddMessageGroupsMutation.__name__: _handle_AddMessageGroupsMutation,
     CreateMessageGroupMutation.__name__: _handle_CreateMessageGroupMutation,
     DeleteMessageGroupMutation.__name__: _handle_DeleteMessageGroupMutation,
     SetIsAnalysisInProgressMutation.__name__: _handle_SetIsAnalysisInProgressMutation,

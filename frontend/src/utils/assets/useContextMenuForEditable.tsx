@@ -24,6 +24,7 @@ import { noop } from '../common/noop';
 import { useAssetStore } from '@/store/assets/useAssetStore';
 import { ContextMenuItem, ContextMenuItems } from '@/types/common/contextMenu';
 import { Asset, AssetType } from '@/types/assets/assetTypes';
+import { useWebSocketStore } from '@/api/ws/useWebSocketStore';
 
 export const DISABLED_CSS_CLASSES = 'max-w-[400px] truncate !text-gray-400 pointer-events-none !cursor-default ';
 
@@ -123,7 +124,25 @@ export function useAssetContextMenu({
         icon: Copy,
         title: 'Duplicate',
         action: () => {
-          navigate(`/assets/${assetType === 'chat' ? uuidv4() : 'new'}?copy=${asset.id}`);
+          (async () => {
+            try {
+              const response = await useWebSocketStore
+                .getState()
+                .sendMessageAndWaitForResponse(
+                  { type: 'DuplicateChatClientMessage', chat_id: asset.id, request_id: uuidv4() },
+                  (response) => {
+                    if (response.type === 'DuplicateChatServerMessage') {
+                      console.log('resp', response.chat_id); // Consider replacing with more robust logging or handling
+                      navigate(`/assets/${response.chat_id}`);
+                      return true;
+                    }
+                    return false;
+                  },
+                );
+            } catch (error) {
+              console.error('Error duplicating chat:', error);
+            }
+          })();
         },
       },
       {
