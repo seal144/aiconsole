@@ -49,12 +49,14 @@ from aiconsole.core.chat.chat_mutations import AddMessageGroupsMutation
 from aiconsole.core.chat.execution_modes.utils.import_and_validate_execution_mode import (
     import_and_validate_execution_mode,
 )
+from aiconsole.core.chat.load_chat_history import load_chat_history
 from aiconsole.core.chat.locking import (
     DefaultChatMutator,
     SequentialChatMutator,
     acquire_lock,
     release_lock,
 )
+from aiconsole.core.chat.save_chat_history import save_chat_history
 from aiconsole.core.code_running.run_code import reset_code_interpreters
 from aiconsole.core.code_running.virtual_env.create_dedicated_venv import (
     WaitForEnvEvent,
@@ -191,25 +193,10 @@ async def _handle_duplicate_chat_ws_message(connection: AICConnection, json: dic
     # This is a placeholder implementation.
     new_chat_id = str(uuid4())
     try:
-        chat_mutator = SequentialChatMutator(
-            DefaultChatMutator(
-                chat_id=message.chat_id,
-                request_id=message.request_id,
-                connection=connection,
-            )
-        )
-
-        new_chat_mutator = SequentialChatMutator(
-            DefaultChatMutator(
-                chat_id=new_chat_id,
-                request_id=message.request_id,
-                connection=connection,
-            )
-        )
-
-        chat = await chat_mutator.read()
-
-        await new_chat_mutator.mutate(AddMessageGroupsMutation(message_groups=chat.message_groups))
+        chat = await load_chat_history(message.chat_id)
+        chat.id = new_chat_id
+        await save_chat_history(chat)
+        await project.get_project_assets().reload(initial=True)
 
         await connection.send(DuplicateChatServerMessage(chat_id=new_chat_id))
     except Exception as e:
