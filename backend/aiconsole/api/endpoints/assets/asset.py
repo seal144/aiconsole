@@ -136,21 +136,18 @@ TODO: This is conflicting
 """
 
 
-@router.patch("/{chat_id}")
-async def chat(chat_id: str, chat_odj: dict):
-    chat = await load_chat_history(id=chat_id)
-    if chat_odj.get("name"):
-        chat.name = str(chat_odj.get("name"))
-        await save_chat_history(chat, scope="name")
-    return Response(status_code=status.HTTP_200_OK)
-
-
 @router.patch("/{asset_id}")
 async def partially_update_asset(
     asset_id: str, asset: DeserializableAsset, agents_service: AssetsService = Depends(assets)
 ):
     try:
-        await agents_service.partially_update_asset(asset_id=asset_id, asset=asset)
+        if asset.type == AssetType.CHAT:
+            chat = await load_chat_history(id=asset_id)
+            if asset.name:
+                chat.name = str(asset.name)
+                await save_chat_history(chat, scope="name")
+        else:
+            await agents_service.partially_update_asset(asset_id=asset_id, asset=asset)
 
     except AssetWithGivenNameAlreadyExistError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Asset with given name already exists")
