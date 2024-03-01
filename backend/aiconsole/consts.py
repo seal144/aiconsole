@@ -40,7 +40,7 @@ RECENT_FILENAME = "recent"
 
 @lru_cache()
 def AICONSOLE_USER_CONFIG_DIR() -> Path:
-    from aiconsole.utils.change_folder_icon import change_aiconsole_folder_icon
+    # from aiconsole.utils.change_folder_icon import change_aiconsole_folder_icon
     from aiconsole.utils.handle_legacy_filepath import handle_legacy_global_filepath
 
     path = Path.home() / APPLICATION_NAME
