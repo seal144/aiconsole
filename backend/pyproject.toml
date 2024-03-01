@@ -41,8 +41,6 @@ matplotlib = "^3.8.2"
 virtualenv = "^20.25.1"
 aiofiles = "^23.2.1"
 types-aiofiles = "^23.2.0.20240106"
-pyobjc-core = { version = "^10.1", markers = "sys_platform == 'darwin'" }
-pyobjc-framework-cocoa = { version = "^10.1", markers = "sys_platform == 'darwin'" }
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.13.2"

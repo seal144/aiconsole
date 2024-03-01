@@ -46,7 +46,8 @@ def AICONSOLE_USER_CONFIG_DIR() -> Path:
     path = Path.home() / APPLICATION_NAME
     if not path.exists():
         path.mkdir(parents=True)
-        change_aiconsole_folder_icon(path)
+        # FIX: resolve issues duiring build for pyobjc-core, pyobjc-framework-cocoa
+        # change_aiconsole_folder_icon(path)
 
     handle_legacy_global_filepath(path)
 
