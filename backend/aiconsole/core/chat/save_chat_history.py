@@ -36,6 +36,7 @@ async def save_chat_history(chat: AICChat, scope: str = "default"):
     await async_os.makedirs(history_directory, exist_ok=True)
 
     # check if file exists and contents are the same
+    original_st_mtime = None
     if await async_os.path.exists(file_path):
         async with aiofiles.open(file_path, "r", encoding="utf8", errors="replace") as f:
             old_content = json.loads(await f.read())
@@ -64,14 +65,14 @@ async def save_chat_history(chat: AICChat, scope: str = "default"):
             else:
                 return  # contents are the same, no need to write to file
 
-    # Last time file was changed
-    original_st_mtime = (await async_os.stat(file_path)).st_mtime
+        # Last time file was changed
+        original_st_mtime = (await async_os.stat(file_path)).st_mtime
 
     # write new content to file
     async with aiofiles.open(file_path, "w", encoding="utf8", errors="replace") as f:
         await f.write(json.dumps(new_content))
 
-    if not update_last_modified:
+    if original_st_mtime and not update_last_modified:
         os.utime(file_path, (original_st_mtime, original_st_mtime))
 
 

@@ -14,6 +14,7 @@ class SettingsData(BaseModel):
     openai_api_key: str | None = None
     user_profile: UserProfile = UserProfile()
     assets: dict[str, bool] = {}
+    tool_call_output_limit: int | None = None
     gpt_modes: dict[consts.GPTMode, GPTModeConfig] = {
         consts.ANALYSIS_GPT_MODE: GPTModeConfig(
             max_tokens=consts.GPT_MODE_ANALYSIS_MAX_TOKENS,
