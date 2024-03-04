@@ -23,7 +23,6 @@ from fastapi import (
     File,
     HTTPException,
     Request,
-    Response,
     UploadFile,
     status,
 )
@@ -116,17 +115,18 @@ async def get_asset(request: Request, asset_id: str):
     else:
         assets = project.get_project_assets()
 
-        agent = assets.get_asset(asset_id, location)
+        asset: Asset | None = assets.get_asset(asset_id, location)
 
-        if not agent:
+        if not asset:
             raise HTTPException(status_code=404, detail=f"{asset_id} not found")
 
-        # capitalize first letter
+        if isinstance(asset, AICMaterial):
+            asset.content = asset.inlined_content
 
         return JSONResponse(
             {
-                **agent.model_dump(),
-                "status": assets.is_enabled(agent.id),
+                **asset.model_dump(),
+                "status": assets.is_enabled(asset.id),
             }
         )
 
