@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 import traceback
 from dataclasses import dataclass
 from enum import Enum
@@ -128,3 +129,16 @@ class AICMaterial(Asset):
             await internal_events().emit(MaterialRenderErrorEvent(), details=f"Error in API material `{self.id}`")
             error_details = RenderedMaterial(id=self.id, content="", error=traceback.format_exc())
             raise ValueError("Error in Python API material", error_details)
+
+    @staticmethod
+    async def save_content_to_file(asset_id: str, content: str) -> Path:
+        from aiconsole.core.project.paths import get_project_assets_directory
+
+        directory = get_project_assets_directory(AssetType.MATERIAL)
+        filename = Path(f"{asset_id}.py")
+        file_path = directory / filename
+
+        with open(file_path, 'w') as file:
+            file.write(content)
+
+        return file_path

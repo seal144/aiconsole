@@ -26,6 +26,7 @@ from aiconsole.core.assets.fs.delete_asset_from_fs import delete_asset_from_fs
 from aiconsole.core.assets.fs.move_asset_in_fs import move_asset_in_fs
 from aiconsole.core.assets.fs.project_asset_exists_fs import project_asset_exists_fs
 from aiconsole.core.assets.fs.save_asset_to_fs import save_asset_to_fs
+from aiconsole.core.assets.materials.material import AICMaterial, MaterialContentType
 from aiconsole.core.assets.types import Asset, AssetLocation, AssetType
 from aiconsole.core.project import project
 from aiconsole.core.project.paths import get_project_assets_directory
@@ -90,6 +91,12 @@ class Assets:
             await move_asset_in_fs(asset.type, old_asset_id, asset.id)
             Assets.rename_asset(asset.type, old_asset_id, asset.id)
             rename = True
+
+        if isinstance(asset, AICMaterial):
+            if asset.content_type in (MaterialContentType.DYNAMIC_TEXT, MaterialContentType.API):
+                if not asset.content.startswith("file://"):
+                    file_path = await AICMaterial.save_content_to_file(asset.id, asset.content)
+                    asset.content = f"file://{file_path}"
 
         new_asset = await save_asset_to_fs(asset, old_asset_id)
 
