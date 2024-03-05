@@ -1,4 +1,3 @@
-from base64 import b64encode
 import hashlib
 from functools import lru_cache
 from mimetypes import guess_extension
@@ -43,7 +42,7 @@ class UserProfileService:
         self._save_avatar_to_fs(file, file_path)
 
         with open(file_path, "rb") as img_file:
-            profile_picture_base64 = b64encode(img_file.read())
+            profile_picture_base64 = img_file.read()
 
         settings().save(
             PartialSettingsData(
