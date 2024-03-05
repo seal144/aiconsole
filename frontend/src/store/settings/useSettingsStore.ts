@@ -16,82 +16,96 @@
 
 import { ProjectsAPI } from '@/api/api/ProjectsAPI';
 import { useProjectStore } from '@/store/projects/useProjectStore';
-import { Settings } from '@/types/settings/settingsTypes';
 import { create } from 'zustand';
 import { SettingsAPI } from '../../api/api/SettingsAPI';
+import { PartialSettingsData, SettingsData } from '@/types/settings/settingsTypes';
+import { produce } from 'immer';
 
 export type SettingsStore = {
-  openAiApiKey?: string;
+  settings: SettingsData;
   isApiKeyValid?: boolean | undefined;
-  alwaysExecuteCode: boolean;
-  username?: string;
-  userEmail?: string;
-  userAvatarUrl?: string;
   isSettingsModalVisible: boolean;
   setSettingsModalVisibility: (isVisible: boolean) => void;
   initSettings: () => Promise<void>;
   setAutoCodeExecution: (autoRun: boolean) => void;
-  saveSettings: (settings: Settings, isGlobal: boolean, avatar?: FormData | null) => Promise<void>;
+  saveSettings: (settings: PartialSettingsData, isGlobal: boolean, avatar?: FormData | null) => Promise<void>;
   validateApiKey: (key: string) => Promise<boolean>;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
-  openAiApiKey: undefined,
+  settings: {
+    user_id: '',
+    code_autorun: false,
+    openai_api_key: '',
+    user_profile: {
+      display_name: '',
+      profile_picture: '',
+    },
+    assets: {},
+    gpt_modes: {},
+    extra: {},
+  },
   isApiKeyValid: undefined,
-  alwaysExecuteCode: false,
-  username: undefined,
-  userEmail: undefined,
-  userAvatarUrl: undefined,
   isSettingsModalVisible: false,
   setSettingsModalVisibility: (isVisible: boolean) => {
     set({ isSettingsModalVisible: isVisible });
   },
   setAutoCodeExecution: async (autoRun: boolean) => {
     await SettingsAPI.saveSettings({ code_autorun: autoRun, to_global: true });
-    set({ alwaysExecuteCode: autoRun });
+    set(
+      produce((state: SettingsStore) => {
+        state.settings.code_autorun = autoRun;
+      }),
+    );
   },
-  saveSettings: async (settings: Settings, isGlobal: boolean, avatar?: FormData | null) => {
+  saveSettings: async (settings: PartialSettingsData, isGlobal: boolean, avatar?: FormData | null) => {
     const { user_profile, openai_api_key, code_autorun } = settings;
     await SettingsAPI.saveSettings({
       ...settings,
       to_global: isGlobal,
     });
     if (openai_api_key) {
-      set({
-        openAiApiKey: openai_api_key,
-        isApiKeyValid: true, // We assume that they key was validated before saving
-      });
+      set(
+        produce((state: SettingsStore) => {
+          state.settings.openai_api_key = openai_api_key;
+          state.isApiKeyValid = true; // We assume that they key was validated before saving
+        }),
+      );
     }
-    if (user_profile && user_profile.username) {
-      set({ username: user_profile.username });
+    if (user_profile && user_profile.display_name) {
+      set(
+        produce((state: SettingsStore) => {
+          state.settings.user_profile.display_name = user_profile.display_name || '';
+        }),
+      );
     }
-    if (user_profile && user_profile.email) {
-      set({ userEmail: user_profile.email });
+
+    if (user_profile && user_profile.profile_picture) {
+      set(
+        produce((state: SettingsStore) => {
+          state.settings.user_profile.profile_picture = user_profile.profile_picture || '';
+        }),
+      );
     }
+
     if (typeof code_autorun === 'boolean') {
-      set({ alwaysExecuteCode: code_autorun });
+      set(
+        produce((state: SettingsStore) => {
+          state.settings.code_autorun = code_autorun;
+        }),
+      );
     }
 
     if (avatar) {
       await SettingsAPI.setUserAvatar(avatar);
-      // Refetch updated avatar
-      const { avatar_url } = await SettingsAPI.getUserAvatar(user_profile?.email);
-      set({
-        userAvatarUrl: avatar_url,
-      });
     }
   },
   initSettings: async () => {
-    const { code_autorun, openai_api_key, user_profile } = await SettingsAPI.getSettings();
-    const { avatar_url } = await SettingsAPI.getUserAvatar(user_profile?.email);
+    const settings = await SettingsAPI.getSettings();
     set({
-      username: user_profile?.username,
-      userEmail: user_profile?.email,
-      alwaysExecuteCode: code_autorun,
-      openAiApiKey: openai_api_key,
-      isApiKeyValid: await get().validateApiKey(openai_api_key || ''),
-      userAvatarUrl: avatar_url,
+      settings: settings,
+      isApiKeyValid: await get().validateApiKey(settings.openai_api_key || ''),
     });
   },
   validateApiKey: async (key: string) => {

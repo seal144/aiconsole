@@ -13,7 +13,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { Content, Portal, Root } from '@radix-ui/react-dialog';
@@ -28,19 +27,18 @@ import GlobalSettingsApiSection from './sections/GlobalSettingsApiSection';
 import GlobalSettingsCodeSection from './sections/GlobalSettingsCodeSection';
 import GlobalSettingsUserSection from './sections/GlobalSettingsUserSection';
 import { GlobalSettingsFormData, GlobalSettingsFormSchema } from '@/forms/globalSettingsForm';
-import { Settings } from '@/types/settings/settingsTypes';
 import { UnsavedSettingsDialog } from '@/components/common/UnsavedSettingsDialog';
+import { SettingsData } from '@/types/settings/settingsTypes';
 
 // TODO: implement other features from figma like api for azure, user profile and tutorial
 export const GlobalSettingsModal = () => {
   const isSettingsModalVisible = useSettingsStore((state) => state.isSettingsModalVisible);
   const setSettingsModalVisibility = useSettingsStore((state) => state.setSettingsModalVisibility);
 
-  const username = useSettingsStore((state) => state.username);
-  const email = useSettingsStore((state) => state.userEmail);
-  const userAvatarUrl = useSettingsStore((state) => state.userAvatarUrl);
-  const openAiApiKey = useSettingsStore((state) => state.openAiApiKey);
-  const alwaysExecuteCode = useSettingsStore((state) => state.alwaysExecuteCode);
+  const username = useSettingsStore((state) => state.settings.user_profile.display_name);
+  const profilePicture = useSettingsStore((state) => state.settings.user_profile.profile_picture);
+  const openAiApiKey = useSettingsStore((state) => state.settings.openai_api_key);
+  const codeAutorun = useSettingsStore((state) => state.settings.code_autorun);
   const saveSettings = useSettingsStore((state) => state.saveSettings);
 
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
@@ -54,12 +52,11 @@ export const GlobalSettingsModal = () => {
     if (isSettingsModalVisible) {
       reset({
         user_profile: {
-          username,
-          email: email || '',
+          username: username,
+          profilePicture: profilePicture,
         },
         openai_api_key: openAiApiKey,
-        avatarUrl: userAvatarUrl,
-        code_autorun: alwaysExecuteCode,
+        code_autorun: codeAutorun,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,7 +86,7 @@ export const GlobalSettingsModal = () => {
     // Filter out ignored fields and create the data object
     const profileData = dirtyFields
       .filter((field) => !ignoreFields.includes(field))
-      .reduce<Settings>((prev, next) => {
+      .reduce<SettingsData>((prev, next) => {
         return { ...prev, [next]: data[next] };
       }, {});
 
@@ -135,7 +132,7 @@ export const GlobalSettingsModal = () => {
               <form onSubmit={handleSubmit(onSubmit)}>
                 <GlobalSettingsUserSection
                   control={control}
-                  avatarUrl={userAvatarUrl}
+                  avatarBase64={profilePicture}
                   onImageSelected={handleSetAvatarImage}
                 />
                 <GlobalSettingsApiSection control={control} />

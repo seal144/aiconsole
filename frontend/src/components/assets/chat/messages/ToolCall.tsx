@@ -52,12 +52,28 @@ export function ToolCall({ group, toolCall: tool_call }: MessageProps) {
   const saveCommandAndMessagesToHistory = useChatStore((state) => state.saveCommandAndMessagesToHistory);
   const chat = useChatStore((state) => state.chat);
 
-  const alwaysExecuteCode = useSettingsStore((state) => state.alwaysExecuteCode);
+  const code_autorun = useSettingsStore((state) => state.settings.code_autorun);
 
-  const [folded, setFolded] = useState(alwaysExecuteCode);
+  const [folded, setFolded] = useState(code_autorun);
   const doAcceptCode = useChatStore((state) => state.doAcceptCode);
-  const enableAutoCodeExecution = useSettingsStore((state) => state.setAutoCodeExecution);
+  const setAutoCodeExecution = useSettingsStore((state) => state.setAutoCodeExecution);
   const isViableForRunningCode = useChatStore((state) => state.isViableForRunningCode);
+
+  const handleRunClick = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.stopPropagation();
+    if (tool_call.language !== 'react_ui') {
+      runCode();
+    } else {
+      await renderUIResult();
+    }
+  };
+
+  const handleAlwaysRunClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.stopPropagation();
+    setAutoCodeExecution(true);
+    runCode();
+  };
+
 
   const [uiResult, setUIResult] = useState<ReactNode | null>(null);
 
@@ -90,20 +106,6 @@ export function ToolCall({ group, toolCall: tool_call }: MessageProps) {
     setUIResult(sandbox);
   };
 
-  const handleRunClick = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    event.stopPropagation();
-    if (tool_call.language !== 'react_ui') {
-      runCode();
-    } else {
-      await renderUIResult();
-    }
-  };
-
-  const handleAlwaysRunClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    event.stopPropagation();
-    enableAutoCodeExecution(true);
-    runCode();
-  };
 
   function translateLanguageToRealLanguage(language: string | undefined) {
     if (language === 'react_ui') {
@@ -139,7 +141,7 @@ export function ToolCall({ group, toolCall: tool_call }: MessageProps) {
         onClick={async () => {
           if (
             folded &&
-            alwaysExecuteCode &&
+            code_autorun &&
             isViableForRunningCode(tool_call.id) &&
             !shouldDisplaySpinner &&
             tool_call.language === 'react_ui'
@@ -220,7 +222,7 @@ export function ToolCall({ group, toolCall: tool_call }: MessageProps) {
                       Run
                     </Button>
 
-                    {!alwaysExecuteCode && (
+                    {!code_autorun && (
                       <Button onClick={handleAlwaysRunClick} variant="status" statusColor="purple" small>
                         <Icon icon={Infinity} />
                         Always Run

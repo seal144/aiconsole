@@ -126,7 +126,7 @@ export function useAssetContextMenu({
         action: () => {
           (async () => {
             try {
-              const response = await useWebSocketStore
+              await useWebSocketStore
                 .getState()
                 .sendMessageAndWaitForResponse(
                   { type: 'DuplicateChatClientMessage', chat_id: asset.id, request_id: uuidv4() },

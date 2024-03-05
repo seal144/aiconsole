@@ -14,7 +14,7 @@ interface ActorAvatarProps {
 export function ActorAvatar({ actorId, title, type, className, actorType }: ActorAvatarProps) {
   const getBaseURL = useAPIStore((state) => state.getBaseURL);
   const agent = useAssetStore((state) => state.getAsset(actorId || ''));
-  const userAvatarUrl = useSettingsStore((state) => state.userAvatarUrl) || undefined;
+  const userAvatarUrl = useSettingsStore((state) => state.settings.user_profile.profile_picture) || undefined;
 
   let src: string | undefined = '';
 

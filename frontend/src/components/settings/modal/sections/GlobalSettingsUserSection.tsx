@@ -13,7 +13,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 import { useState } from 'react';
 import { Controller, useWatch } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
@@ -27,10 +26,10 @@ import { GlobalSettingsFormData } from '@/forms/globalSettingsForm';
 interface GlobalSettingsUserSectionProps {
   control: Control<GlobalSettingsFormData>;
   onImageSelected: (avatar: File) => void;
-  avatarUrl?: string;
+  avatarBase64?: string; // Updated variable name to reflect base64 string
 }
 
-const GlobalSettingsUserSection = ({ onImageSelected, avatarUrl, control }: GlobalSettingsUserSectionProps) => {
+const GlobalSettingsUserSection = ({ onImageSelected, avatarBase64, control }: GlobalSettingsUserSectionProps) => {
   const [isEditMode, setIsEditMode] = useState(false);
 
   const watchName = useWatch({ control, name: 'user_profile.username' });
@@ -39,7 +38,10 @@ const GlobalSettingsUserSection = ({ onImageSelected, avatarUrl, control }: Glob
 
   return (
     <div className="flex items-stretch w-full gap-[30px] bg-secondary-gradient p-5 rounded-xl mb-5 border-gray-600 border">
-      <ImageUploader currentImage={avatarUrl} onUpload={onImageSelected} />
+      <ImageUploader
+        currentImage={avatarBase64}
+        onUpload={(avatar) => onImageSelected(new File([avatar], "avatar"))}
+      />
       <div className="flex flex-col justify-between">
         <div className="flex gap-2.5 flex-col">
           <span className="text-white text-[15px]">User name</span>

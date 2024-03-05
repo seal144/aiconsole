@@ -7,7 +7,7 @@ import { Icon } from './icons/Icon';
 
 interface ImageUploaderProps {
   currentImage?: string;
-  onUpload?: (file: File) => void;
+  onUpload?: (avatar: string) => void;
 }
 
 // TODO: update this component with generating ai logic and connect with backend
@@ -29,15 +29,16 @@ const ImageUploader = ({ currentImage, onUpload }: ImageUploaderProps) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
-          setPreviewImage(reader.result);
+          console.log('currentImage', currentImage);
+          setPreviewImage(`${currentImage}`);
         }
       };
       reader.readAsDataURL(file);
-      onUpload?.(file);
+      reader.onload = () => {
+        onUpload?.(reader.result as string);
+      };
     }
   };
-
-  // TODO: Implement when backend is ready
   // const removeImage = () => {
   //   setPreviewImage(null);
   // };

@@ -102,70 +102,70 @@ export function ActorInfo({
     }
   }, [agent]);
 
-  if (actorId.type === 'user') {
-    const username = useSettingsStore.getState().username;
-    const menuItems = userMenuItems;
+if (actorId.type === 'user') {
+  const display_name = useSettingsStore.getState().settings.user_profile.display_name;
+  const menuItems = userMenuItems;
 
-    return (
+  return (
+    <ContextMenu options={menuItems} ref={triggerRef}>
+      <Link to={''} className="flex-none items-center flex flex-col">
+        <ActorAvatar actorType="user" title={`${display_name}`} type="small" />
+        <div
+          className="text-[15px] w-32 text-center text-gray-300 max-w-[120px] truncate overflow-ellipsis overflow-hidden whitespace-nowrap"
+          title={`${display_name}`}
+        >
+          {display_name}
+        </div>
+      </Link>
+    </ContextMenu>
+  );
+} else {
+  const openContext = (event: MouseEvent) => {
+    if (triggerRef.current && actorId.type === 'user') {
+      triggerRef?.current.handleTriggerClick(event);
+    }
+  };
+
+  const menuItems = actorId.type === 'agent' ? editableMenuItems : userMenuItems;
+  return (
+    <>
       <ContextMenu options={menuItems} ref={triggerRef}>
-        <Link to={''} className="flex-none items-center flex flex-col">
-          <ActorAvatar actorType="user" title={`${username}`} type="small" />
+        <Link
+          to={actorId.type === 'agent' ? `/assets/${actorId.id}` : ''}
+          onClick={openContext}
+          className="flex-none items-center flex flex-col"
+        >
+          <ActorAvatar
+            actorType="agent"
+            actorId={actorId.id}
+            title={`${agent?.name || actorId}${task ? ` tasked with:\n${task}` : ``}`}
+            type="small"
+          />
           <div
-            className="text-[15px] w-32 text-center text-gray-300 max-w-[120px] truncate overflow-ellipsis overflow-hidden whitespace-nowrap"
-            title={`${username}`}
+            className={cn(
+              'text-[15px] w-32 text-center text-gray-300 max-w-[120px] truncate overflow-ellipsis overflow-hidden whitespace-nowrap  opacity-0',
+              {
+                'transition-opacity duration-500 opacity-100': isLoaded,
+                'opacity-100': !isAnalysisRunning && !isExecutionRunning,
+              },
+            )}
+            title={`${agent?.id} - ${agent?.usage}`}
           >
-            {username}
+            {agent?.name || agent?.id}
           </div>
         </Link>
       </ContextMenu>
-    );
-  } else {
-    const openContext = (event: MouseEvent) => {
-      if (triggerRef.current && actorId.type === 'user') {
-        triggerRef?.current.handleTriggerClick(event);
-      }
-    };
-
-    const menuItems = actorId.type === 'agent' ? editableMenuItems : userMenuItems;
-    return (
-      <>
-        <ContextMenu options={menuItems} ref={triggerRef}>
-          <Link
-            to={actorId.type === 'agent' ? `/assets/${actorId.id}` : ''}
-            onClick={openContext}
-            className="flex-none items-center flex flex-col"
-          >
-            <ActorAvatar
-              actorType="agent"
-              actorId={actorId.id}
-              title={`${agent?.name || actorId}${task ? ` tasked with:\n${task}` : ``}`}
-              type="small"
-            />
-            <div
-              className={cn(
-                'text-[15px] w-32 text-center text-gray-300 max-w-[120px] truncate overflow-ellipsis overflow-hidden whitespace-nowrap  opacity-0',
-                {
-                  'transition-opacity duration-500 opacity-100': isLoaded,
-                  'opacity-100': !isAnalysisRunning && !isExecutionRunning,
-                },
-              )}
-              title={`${agent?.id} - ${agent?.usage}`}
-            >
-              {agent?.name || agent?.id}
-            </div>
-          </Link>
-        </ContextMenu>
-        <div className="flex flex-col mt-2">
-          {materialsIds.map((material_id) => (
-            <AgentInfoMaterialLink
-              key={material_id}
-              materialId={material_id}
-              isLoaded={isLoaded}
-              isRunning={!isAnalysisRunning && !isExecutionRunning}
-            />
-          ))}
-        </div>
-      </>
-    );
-  }
+      <div className="flex flex-col mt-2">
+        {materialsIds.map((material_id) => (
+          <AgentInfoMaterialLink
+            key={material_id}
+            materialId={material_id}
+            isLoaded={isLoaded}
+            isRunning={!isAnalysisRunning && !isExecutionRunning}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
 }
