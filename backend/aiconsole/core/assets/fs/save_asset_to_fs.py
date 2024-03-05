@@ -23,6 +23,7 @@ from aiconsole.core.assets.fs.exceptions import UserIsAnInvalidAgentIdError
 from aiconsole.core.assets.fs.load_asset_from_fs import load_asset_from_fs
 from aiconsole.core.assets.materials.material import AICMaterial, MaterialContentType
 from aiconsole.core.assets.types import Asset
+from aiconsole.core.assets.users.users import User
 from aiconsole.core.project.paths import (
     get_core_assets_directory,
     get_project_assets_directory,
@@ -108,6 +109,9 @@ async def save_asset_to_fs(asset: Asset, old_asset_id: str) -> Asset:
             doc.append("system", tomlkit.string(asset.system))
             doc.append("gpt_mode", tomlkit.string(asset.gpt_mode))
             doc.append("execution_mode", tomlkit.string(asset.execution_mode))
+
+        if isinstance(asset, User):
+            doc.append("profile_picture", tomlkit.string(asset.profile_picture.decode()))
 
         file.write(doc.as_string())
 

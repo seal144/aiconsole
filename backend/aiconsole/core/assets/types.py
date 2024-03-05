@@ -29,6 +29,7 @@ class AssetType(str, Enum):
     AGENT = "agent"
     MATERIAL = "material"
     CHAT = "chat"
+    USER = "user"
 
 
 class Asset(BaseModel):

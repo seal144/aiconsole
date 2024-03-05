@@ -7,6 +7,7 @@ from aiconsole.core.users.types import PartialUserProfile
 
 
 class PartialSettingsData(BaseModel):
+    user_id: Optional[str] = None
     code_autorun: Optional[bool] = None
     openai_api_key: Optional[str] = None
     tool_call_output_limit: Optional[int] = None

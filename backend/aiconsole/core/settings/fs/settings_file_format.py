@@ -66,7 +66,7 @@ def _get_document(file_path: Path) -> tomlkit.TOMLDocument:
 
 
 def _update_document(document: tomlkit.TOMLDocument, settings_data: PartialSettingsData):
-    settings_data_dump = settings_data.model_dump(exclude_none=True)
+    settings_data_dump = settings_data.model_dump(exclude_none=True, mode="json")
     for key, value in settings_data_dump.items():
         if value is None:
             continue

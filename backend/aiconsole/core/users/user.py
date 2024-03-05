@@ -1,3 +1,4 @@
+from base64 import b64encode
 import hashlib
 from functools import lru_cache
 from mimetypes import guess_extension
@@ -20,23 +21,10 @@ class MissingFileName(Exception):
 class UserProfileService:
     def get_profile(self, email: str | None = None) -> UserProfile:
         user_profile = settings().unified_settings.user_profile
-        if not user_profile.avatar_url:
-            user_profile.avatar_url = self._get_default_avatar()
-        if email:
-            if email == user_profile.email and user_profile.avatar_url:
-                return user_profile
-
-            if email != user_profile.email:
-                return UserProfile(
-                    username=email or DEFAULT_USERNAME,
-                    email=email,
-                    avatar_url=self._get_default_avatar(email) if email else self._get_default_avatar(),
-                )
 
         return user_profile or UserProfile(
-            username=email or DEFAULT_USERNAME,
-            email=email,
-            avatar_url=self._get_default_avatar(email) if email else self._get_default_avatar(),
+            display_name=user_profile.display_name or DEFAULT_USERNAME,
+            profile_picture=settings().unified_settings.user_profile.profile_picture,
         )
 
     def save_avatar(
@@ -54,10 +42,12 @@ class UserProfileService:
         file_path = self.get_avatar(file_name)
         self._save_avatar_to_fs(file, file_path)
 
-        avatar_url = f"profile_image?img_filename={file_path.name}"
+        with open(file_path, "rb") as img_file:
+            profile_picture_base64 = b64encode(img_file.read())
+
         settings().save(
             PartialSettingsData(
-                user_profile=PartialUserProfile(avatar_url=avatar_url),
+                user_profile=PartialUserProfile(profile_picture=profile_picture_base64),
             ),
             to_global=True,
         )

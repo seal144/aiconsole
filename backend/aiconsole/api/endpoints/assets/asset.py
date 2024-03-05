@@ -69,7 +69,7 @@ async def get_asset(request: Request, asset_id: str):
 
         type = AssetType(type_raw)
 
-        asset: Asset
+        asset: Asset | None
 
         if type == "agent":
             asset = AICAgent(
@@ -115,7 +115,7 @@ async def get_asset(request: Request, asset_id: str):
     else:
         assets = project.get_project_assets()
 
-        asset: Asset | None = assets.get_asset(asset_id, location)
+        asset = assets.get_asset(asset_id, location)
 
         if not asset:
             raise HTTPException(status_code=404, detail=f"{asset_id} not found")
