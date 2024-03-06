@@ -1,13 +1,13 @@
-from pydantic import Base64Bytes, BaseModel
-
-DEFAULT_USERNAME = "user"
+from pydantic import BaseModel
 
 
 class PartialUserProfile(BaseModel):
+    user_id: str | None = None
     display_name: str | None = None
-    profile_picture: Base64Bytes | None = None
+    profile_picture: str | None = None
 
 
 class UserProfile(BaseModel):
-    display_name: str
-    profile_picture: Base64Bytes
+    user_id: str | None = None
+    display_name: str = "User"
+    profile_picture: str | None = None

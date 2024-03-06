@@ -10,12 +10,11 @@ REFERENCE_TO_GLOBAL_OPENAI_KEY = "ref/openai_api_key"
 
 
 class SettingsData(BaseModel):
-    user_id: str | None = None
     code_autorun: bool = False
     openai_api_key: str | None = None
-    user_profile: UserProfile
+    user_profile: UserProfile | None = None
     assets: dict[str, bool] = {}
-    tool_call_output_limit: int | None = None
+    tool_call_output_limit: int = 40000
     gpt_modes: dict[consts.GPTMode, GPTModeConfig] = {
         consts.ANALYSIS_GPT_MODE: GPTModeConfig(
             max_tokens=consts.GPT_MODE_ANALYSIS_MAX_TOKENS,

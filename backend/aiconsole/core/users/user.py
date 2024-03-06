@@ -1,12 +1,13 @@
+import base64
 import hashlib
 from functools import lru_cache
 from mimetypes import guess_extension
 from pathlib import Path
 from typing import BinaryIO
+from uuid import uuid4
 
-from aiconsole.consts import AICONSOLE_USER_CONFIG_DIR
 from aiconsole.core.settings.settings import settings
-from aiconsole.core.users.types import DEFAULT_USERNAME, PartialUserProfile, UserProfile
+from aiconsole.core.users.types import PartialUserProfile, UserProfile
 from aiconsole.utils.resource_to_path import resource_to_path
 from aiconsole_toolkit.settings.partial_settings_data import PartialSettingsData
 
@@ -18,13 +19,32 @@ class MissingFileName(Exception):
 
 
 class UserProfileService:
-    def get_profile(self, email: str | None = None) -> UserProfile:
+    def configure_user(self):
         user_profile = settings().unified_settings.user_profile
+        if user_profile is None:
+            user_id = str(uuid4())
+            settings().save(
+                PartialSettingsData(
+                    user_profile=PartialUserProfile(user_id=user_id, profile_picture=self.get_default_avatar(user_id))
+                ),
+                to_global=True,
+            )
 
-        return user_profile or UserProfile(
-            display_name=user_profile.display_name or DEFAULT_USERNAME,
-            profile_picture=settings().unified_settings.user_profile.profile_picture,
-        )
+    # TODO: change to use user_id
+    def get_profile(self, user_id: str | None = None) -> UserProfile:
+        if not user_id:
+            return settings().unified_settings.user_profile
+
+        raise NotImplementedError
+
+    def _encode_data_uri(self, binary_data: bytes, content_type: str | None = None) -> str:
+        """
+        Encodes binary data to a data URI string.
+        """
+        base64_encoded_data = base64.b64encode(binary_data).decode("utf-8")
+        if content_type:
+            return f"data:{content_type};base64,{base64_encoded_data}"
+        return base64_encoded_data
 
     def save_avatar(
         self,
@@ -32,49 +52,24 @@ class UserProfileService:
         file_name: str | None = None,
         content_type: str | None = None,
     ) -> None:
-        extension = guess_extension(content_type) if content_type else None
-        if not file_name:
-            if not extension:
-                raise MissingFileName()
-            file_name = f"avatar{extension}"
-
-        file_path = self.get_avatar(file_name)
-        self._save_avatar_to_fs(file, file_path)
-
-        with open(file_path, "rb") as img_file:
-            profile_picture_base64 = img_file.read()
+        binary_data = file.read()
+        profile_picture_data_uri = self._encode_data_uri(binary_data, content_type)
 
         settings().save(
-            PartialSettingsData(
-                user_profile=PartialUserProfile(profile_picture=profile_picture_base64),
-            ),
+            PartialSettingsData(user_profile=PartialUserProfile(profile_picture=profile_picture_data_uri)),
             to_global=True,
         )
 
-    def get_avatar(self, img_filename: str) -> Path:
-        return self.get_avatar_folder_path() / img_filename
-
-    @staticmethod
-    def get_avatar_folder_path() -> Path:
-        avatar_folder_path = AICONSOLE_USER_CONFIG_DIR() / "avatars"
-        avatar_folder_path.mkdir(parents=False, exist_ok=True)
-        return avatar_folder_path
-
-    @staticmethod
-    def get_profile_image_path(img_filename: str) -> Path:
-        return resource_to_path(DEFAULT_AVATARS_PATH) / img_filename
-
-    def _get_default_avatar(self, email: str | None = None) -> str:
-        key = email or settings().unified_settings.openai_api_key or "some_key"
+    def get_default_avatar(self, user_id: str) -> str:
         img_filename = self._deterministic_choice(
-            blob=key,
+            blob=user_id,
             choices=list(resource_to_path(resource=DEFAULT_AVATARS_PATH).glob(pattern="*")),
-        ).name
-        return f"profile_image?img_filename={img_filename}"
-
-    def _save_avatar_to_fs(self, file: BinaryIO, file_path: Path) -> None:
-        with open(file_path, "wb+") as file_object:
-            file_object.write(file.read())
+        )
+        with open(img_filename, mode="rb") as img:
+            file = img.read()
+        # Assuming the content type can be determined from the file extension
+        content_type = guess_extension(img_filename.suffix)
+        return self._encode_data_uri(file, content_type)
 
     def _deterministic_choice(self, blob: str, choices: list[Path]) -> Path:
         hash_value = hashlib.sha256(string=blob.encode()).hexdigest()

@@ -1,9 +1,7 @@
 from pathlib import Path
 from typing import cast
 
-import tomlkit
-import tomlkit.container
-import tomlkit.items
+import rtoml
 
 from aiconsole_toolkit.settings.partial_settings_data import PartialSettingsData
 
@@ -15,7 +13,7 @@ def load_settings_file(file_path: Path) -> PartialSettingsData:
     update_file |= _extract_and_delete_settings(document)
     update_file |= _convert_enabled_disabled_to_boolean(document)
 
-    data = PartialSettingsData(**document.value)
+    data = PartialSettingsData(**document)
 
     if update_file:
         _write_document(file_path, document)
@@ -57,15 +55,14 @@ def save_settings_file(file_path: Path, settings_data: PartialSettingsData):
     _write_document(file_path, document)
 
 
-def _get_document(file_path: Path) -> tomlkit.TOMLDocument:
+def _get_document(file_path: Path):
     if not file_path.exists():
-        return tomlkit.document()
+        return {}
 
-    with file_path.open("r", encoding="utf8", errors="replace") as file:
-        return tomlkit.loads(file.read())
+    return rtoml.load(file_path)
 
 
-def _update_document(document: tomlkit.TOMLDocument, settings_data: PartialSettingsData):
+def _update_document(document: dict, settings_data: PartialSettingsData):
     settings_data_dump = settings_data.model_dump(exclude_none=True, mode="json")
     for key, value in settings_data_dump.items():
         if value is None:
@@ -73,15 +70,14 @@ def _update_document(document: tomlkit.TOMLDocument, settings_data: PartialSetti
 
         item = document.get(key)
 
-        if isinstance(item, tomlkit.items.Table) and isinstance(value, dict):
+        if isinstance(item, dict) and isinstance(value, dict):
             item.update(value)
-        elif isinstance(item, tomlkit.items.Array) and isinstance(value, list):
+        elif isinstance(item, list) and isinstance(value, list):
             item.extend(value)
         else:
             document[key] = value
 
 
-def _write_document(file_path: Path, document: tomlkit.TOMLDocument):
+def _write_document(file_path: Path, document: dict):
     file_path.parent.mkdir(parents=True, exist_ok=True)
-    with file_path.open("w", encoding="utf8", errors="replace") as file:
-        file.write(document.as_string())
+    rtoml.dump(document, file_path, pretty=True)

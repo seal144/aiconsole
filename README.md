@@ -94,6 +94,8 @@ If you want to develop something on top of the aiconsole backend, you may instal
 
 # Running Development Non-Electron AIConsole
 
+**Important** Use python 3.11, version 12 is not supported :)
+
 In order to run the non electron development version of AIConsole:
 
 1. To run the standalone backend: `cd backend && poetry install && poetry run dev`
