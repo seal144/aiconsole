@@ -53,7 +53,6 @@ export const GlobalSettingsModal = () => {
       reset({
         user_profile: {
           username: username,
-          profilePicture: profilePicture,
         },
         openai_api_key: openAiApiKey,
         code_autorun: codeAutorun,

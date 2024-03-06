@@ -73,14 +73,6 @@ const GlobalSettingsUserSection = ({ onImageSelected, avatarBase64, control }: G
             </div>
           )}
         </div>
-        <div className="flex flex-col gap-2.5 w-[255px]">
-          <p className="text-white text-[15px]">E-mail address</p>
-          <Controller
-            name="user_profile.email"
-            control={control}
-            render={({ field }) => <TextInput type="email" placeholder="Write e-mail here" {...field} />}
-          />
-        </div>
       </div>
     </div>
   );
