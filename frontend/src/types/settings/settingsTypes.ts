@@ -26,6 +26,7 @@ export type GPTModeConfig = z.infer<typeof GPTModeConfigSchema>;
 
 // Define UserProfile schema
 const UserProfileSchema = z.object({
+  user_id: z.string().optional(),
   display_name: z.string(),
   profile_picture: z.string(), // Base64-encoded string
 });
@@ -33,7 +34,6 @@ const UserProfileSchema = z.object({
 export type UserProfile = z.infer<typeof UserProfileSchema>;
 
 export const PartialSettingsDataSchema = z.object({
-  user_id: z.string().optional(),
   code_autorun: z.boolean().optional(),
   openai_api_key: z.string().optional(),
   tool_call_output_limit: z.number().optional(), // Added to match the Python model
@@ -47,7 +47,6 @@ export const PartialSettingsDataSchema = z.object({
 export type PartialSettingsData = z.infer<typeof PartialSettingsDataSchema>;
 
 export const SettingsDataSchema = z.object({
-  user_id: z.string().optional(),
   code_autorun: z.boolean().default(false),
   openai_api_key: z.string().optional(),
   user_profile: UserProfileSchema,

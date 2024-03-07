@@ -53,6 +53,7 @@ export const GlobalSettingsModal = () => {
       reset({
         user_profile: {
           username: username,
+          avatarBase64: profilePicture,
         },
         openai_api_key: openAiApiKey,
         code_autorun: codeAutorun,
@@ -83,7 +84,7 @@ export const GlobalSettingsModal = () => {
     }
 
     // Filter out ignored fields and create the data object
-    const profileData = dirtyFields
+    const profileData: SettingsData = dirtyFields
       .filter((field) => !ignoreFields.includes(field))
       .reduce<SettingsData>((prev, next) => {
         return { ...prev, [next]: data[next] };

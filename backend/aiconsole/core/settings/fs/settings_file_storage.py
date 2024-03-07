@@ -18,6 +18,8 @@ _log = logging.getLogger(__name__)
 
 def _get_settings_from_path(file_path: Path | None) -> PartialSettingsData:
     if file_path:
+        if not file_path.exists():
+            save_settings_file(file_path, PartialSettingsData())
         data = load_settings_file(file_path)
     else:
         data = PartialSettingsData()
@@ -71,6 +73,8 @@ class SettingsFileStorage(SettingsStorage):
         save_settings_file(file_path, settings_data)
 
     async def _reload(self):
+        self._global_settings = _get_settings_from_path(self.global_settings_file_path)
+        self._project_settings = _get_settings_from_path(self.project_settings_file_path)
         await internal_events().emit(SettingsUpdatedEvent())
 
     def _start_observer(self):
@@ -80,3 +84,8 @@ class SettingsFileStorage(SettingsStorage):
 
         if self.observer:
             self.observer.start(file_paths=file_paths, on_changed=self._reload)
+
+    def destroy(self):
+        if self.observer:
+            self.observer.stop()
+            self.observer = None

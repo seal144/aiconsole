@@ -26,7 +26,7 @@ import { GlobalSettingsFormData } from '@/forms/globalSettingsForm';
 interface GlobalSettingsUserSectionProps {
   control: Control<GlobalSettingsFormData>;
   onImageSelected: (avatar: File) => void;
-  avatarBase64?: string; // Updated variable name to reflect base64 string
+  avatarBase64?: string;
 }
 
 const GlobalSettingsUserSection = ({ onImageSelected, avatarBase64, control }: GlobalSettingsUserSectionProps) => {

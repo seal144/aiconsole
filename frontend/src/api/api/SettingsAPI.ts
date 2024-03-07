@@ -25,13 +25,11 @@ const checkKey = (key: string) => {
   });
 };
 
-// TODO: this is not working now - backend is not ready
 async function setUserAvatar(avatar: FormData) {
   return ky.post(`${getBaseURL()}/profile_image`, { body: avatar, hooks: API_HOOKS });
 }
 
 async function saveSettings(params: { to_global: boolean } & PartialSettingsData) {
-  console.log(params);
   return ky.patch(`${getBaseURL()}/api/settings`, { json: params, hooks: API_HOOKS });
 }
 

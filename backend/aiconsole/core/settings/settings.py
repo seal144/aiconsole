@@ -28,29 +28,29 @@ _log = logging.getLogger(__name__)
 
 
 class Settings:
-    _storage: SettingsStorage | None = None
-    _settings_notifications: SettingsNotifications | None = None
-
     def configure(self, storage: SettingsStorage):
         from aiconsole.core.users.user import user_profile_service
 
         self.destroy()
 
-        self._storage = storage
-        self._settings_notifications = SettingsNotifications()
-
-        user_profile_service().configure_user()
+        self._storage: SettingsStorage = storage
+        self._settings_notifications: SettingsNotifications = SettingsNotifications()
 
         internal_events().subscribe(
             SettingsUpdatedEvent,
             self._when_reloaded,
         )
 
+        user_profile_service().configure_user()
+
         _log.info("Settings configured")
 
     def destroy(self):
-        self._storage = None
-        self._settings_notifications = None
+        if hasattr(self, "_storage"):
+            self._storage.destroy()
+            del self._storage
+        if hasattr(self, "_settings_notifications"):
+            del self._settings_notifications
 
         internal_events().unsubscribe(
             SettingsUpdatedEvent,

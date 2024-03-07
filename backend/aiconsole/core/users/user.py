@@ -1,15 +1,18 @@
 import base64
 import hashlib
 from functools import lru_cache
-from mimetypes import guess_extension
+import logging
+from mimetypes import guess_type
 from pathlib import Path
-from typing import BinaryIO
 from uuid import uuid4
 
 from aiconsole.core.settings.settings import settings
 from aiconsole.core.users.types import PartialUserProfile, UserProfile
 from aiconsole.utils.resource_to_path import resource_to_path
 from aiconsole_toolkit.settings.partial_settings_data import PartialSettingsData
+
+_log = logging.getLogger(__name__)
+
 
 DEFAULT_AVATARS_PATH = "aiconsole.preinstalled.avatars"
 
@@ -25,7 +28,9 @@ class UserProfileService:
             user_id = str(uuid4())
             settings().save(
                 PartialSettingsData(
-                    user_profile=PartialUserProfile(user_id=user_id, profile_picture=self.get_default_avatar(user_id))
+                    user_profile=PartialUserProfile(
+                        user_id=user_id, display_name="User", profile_picture=self.get_default_avatar(user_id)
+                    )
                 ),
                 to_global=True,
             )
@@ -33,7 +38,9 @@ class UserProfileService:
     # TODO: change to use user_id
     def get_profile(self, user_id: str | None = None) -> UserProfile:
         if not user_id:
-            return settings().unified_settings.user_profile
+            user_profile = settings().unified_settings.user_profile
+            if user_profile is not None:
+                return user_profile
 
         raise NotImplementedError
 
@@ -48,15 +55,12 @@ class UserProfileService:
 
     def save_avatar(
         self,
-        file: BinaryIO,
+        file,
         file_name: str | None = None,
         content_type: str | None = None,
     ) -> None:
-        binary_data = file.read()
-        profile_picture_data_uri = self._encode_data_uri(binary_data, content_type)
-
         settings().save(
-            PartialSettingsData(user_profile=PartialUserProfile(profile_picture=profile_picture_data_uri)),
+            PartialSettingsData(user_profile=PartialUserProfile(profile_picture=file.read())),
             to_global=True,
         )
 
@@ -67,9 +71,8 @@ class UserProfileService:
         )
         with open(img_filename, mode="rb") as img:
             file = img.read()
-        # Assuming the content type can be determined from the file extension
-        content_type = guess_extension(img_filename.suffix)
-        return self._encode_data_uri(file, content_type)
+        mime_type, _ = guess_type(img_filename)
+        return self._encode_data_uri(file, mime_type)
 
     def _deterministic_choice(self, blob: str, choices: list[Path]) -> Path:
         hash_value = hashlib.sha256(string=blob.encode()).hexdigest()

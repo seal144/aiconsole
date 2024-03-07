@@ -35,10 +35,10 @@ export type SettingsStore = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
   settings: {
-    user_id: '',
     code_autorun: false,
     openai_api_key: '',
     user_profile: {
+      user_id: '',
       display_name: '',
       profile_picture: '',
     },
