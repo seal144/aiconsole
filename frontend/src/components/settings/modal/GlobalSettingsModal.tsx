@@ -28,7 +28,7 @@ import GlobalSettingsCodeSection from './sections/GlobalSettingsCodeSection';
 import GlobalSettingsUserSection from './sections/GlobalSettingsUserSection';
 import { GlobalSettingsFormData, GlobalSettingsFormSchema } from '@/forms/globalSettingsForm';
 import { UnsavedSettingsDialog } from '@/components/common/UnsavedSettingsDialog';
-import { SettingsData } from '@/types/settings/settingsTypes';
+import { PartialSettingsData } from '@/types/settings/settingsTypes';
 
 // TODO: implement other features from figma like api for azure, user profile and tutorial
 export const GlobalSettingsModal = () => {
@@ -84,9 +84,9 @@ export const GlobalSettingsModal = () => {
     }
 
     // Filter out ignored fields and create the data object
-    const profileData: SettingsData = dirtyFields
+    const profileData = dirtyFields
       .filter((field) => !ignoreFields.includes(field))
-      .reduce<SettingsData>((prev, next) => {
+      .reduce<PartialSettingsData>((prev, next) => {
         return { ...prev, [next]: data[next] };
       }, {});
 

@@ -29,8 +29,8 @@ _log = logging.getLogger(__name__)
 
 
 class Settings:
-    _storage: SettingsStorage | None
-    _settings_notifications: SettingsNotifications | None
+    _storage: SettingsStorage | None = None
+    _settings_notifications: SettingsNotifications | None = None
 
     def configure(self, storage_type: Type[SettingsStorage], **kwargs) -> None:
         """
