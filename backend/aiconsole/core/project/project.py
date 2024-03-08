@@ -85,7 +85,7 @@ async def close_project():
 
     await connection_manager().send_to_all(ProjectClosedServerMessage())
 
-    settings().configure(SettingsFileStorage(project_path=None))
+    settings().configure(SettingsFileStorage, project_path=None)
 
 
 async def reinitialize_project():
@@ -112,7 +112,7 @@ async def reinitialize_project():
 
     _assets = assets.Assets()
 
-    settings().configure(SettingsFileStorage(project_path=get_project_directory_safe()))
+    settings().configure(SettingsFileStorage, project_path=get_project_directory_safe())
 
     await connection_manager().send_to_all(
         ProjectOpenedServerMessage(path=str(get_project_directory()), name=get_project_name())

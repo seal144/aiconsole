@@ -35,7 +35,7 @@ export const GlobalSettingsModal = () => {
   const isSettingsModalVisible = useSettingsStore((state) => state.isSettingsModalVisible);
   const setSettingsModalVisibility = useSettingsStore((state) => state.setSettingsModalVisibility);
 
-  const username = useSettingsStore((state) => state.settings.user_profile.display_name);
+  const display_name = useSettingsStore((state) => state.settings.user_profile.display_name);
   const profilePicture = useSettingsStore((state) => state.settings.user_profile.profile_picture);
   const openAiApiKey = useSettingsStore((state) => state.settings.openai_api_key);
   const codeAutorun = useSettingsStore((state) => state.settings.code_autorun);
@@ -52,7 +52,7 @@ export const GlobalSettingsModal = () => {
     if (isSettingsModalVisible) {
       reset({
         user_profile: {
-          username: username,
+          display_name: display_name,
           avatarBase64: profilePicture,
         },
         openai_api_key: openAiApiKey,
