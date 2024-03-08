@@ -29,7 +29,7 @@ class UserProfileService:
             settings().save(
                 PartialSettingsData(
                     user_profile=PartialUserProfile(
-                        user_id=user_id, display_name="User", profile_picture=self.get_default_avatar(user_id)
+                        id=user_id, display_name="User", profile_picture=self.get_default_avatar(user_id)
                     )
                 ),
                 to_global=True,

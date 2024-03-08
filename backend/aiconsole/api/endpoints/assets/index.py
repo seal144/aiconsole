@@ -30,7 +30,7 @@ router = APIRouter()
 async def fetch_assets():
     assets = []
 
-    assets.extend(project.get_project_assets().all_assets())
+    assets.extend(project.get_project_assets().visible_assets())
 
     return JSONResponse(
         [

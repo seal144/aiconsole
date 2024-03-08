@@ -25,7 +25,7 @@ const GPTModeConfigSchema = z.object({
 export type GPTModeConfig = z.infer<typeof GPTModeConfigSchema>;
 
 const UserProfileSchema = z.object({
-  user_id: z.string().optional(),
+  id: z.string().optional(),
   display_name: z.string(),
   profile_picture: z.string(), // Base64-encoded string
 });

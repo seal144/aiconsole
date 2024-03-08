@@ -26,7 +26,7 @@ from aiconsole.core.assets.agents.agent import AICAgent
 from aiconsole.core.assets.fs.exceptions import UserIsAnInvalidAgentIdError
 from aiconsole.core.assets.materials.material import AICMaterial, MaterialContentType
 from aiconsole.core.assets.types import Asset, AssetLocation, AssetType
-from aiconsole.core.assets.users.users import User
+from aiconsole.core.assets.users.users import AICUserProfile
 from aiconsole.core.gpt.consts import GPTMode
 from aiconsole.core.project.paths import (
     get_core_assets_directory,
@@ -123,9 +123,7 @@ async def load_asset_from_fs(asset_type: AssetType, asset_id: str, location: Ass
         return AICAgent(**params)
 
     if asset_type == AssetType.USER:
-        params["profile_picture"] = str(tomldoc["profile_picture"]).strip()
-
-        user = User(**params)
+        user = AICUserProfile(**params)
 
         return user
 
