@@ -27,6 +27,7 @@ import { cn } from '@/utils/common/cn';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
 import { ActorId } from '@/types/assets/chatTypes';
 import { AICUserProfile } from '@/types/assets/assetTypes';
+import { useSettingsStore } from '@/store/settings/useSettingsStore';
 
 function AgentInfoMaterialLink({
   materialId,
@@ -78,6 +79,7 @@ export function ActorInfo({
   const assets = useAssetStore((state) => state.assets) || [];
   const actor = assets.find((m) => m.id === actorId.id);
   const userMenuItems = useUserContextMenu();
+  const userProfile = useSettingsStore((state) => state.settings.user_profile);
 
   const editableMenuItems = useAssetContextMenu({
     assetType: 'agent',
@@ -104,7 +106,13 @@ export function ActorInfo({
 
   if (actorId.type === 'user') {
     const menuItems = userMenuItems;
-    const user = actor as AICUserProfile;
+    let user;
+
+    if (actorId.id === 'user') {
+      user = userProfile;
+    } else {
+      user = actor as AICUserProfile;
+    }
 
     return (
       <ContextMenu options={menuItems} ref={triggerRef}>
