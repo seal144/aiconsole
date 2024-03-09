@@ -14,6 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { z } from 'zod';
+import { UserProfileSchema } from '../assets/assetTypes';
 
 const GPTModeConfigSchema = z.object({
   max_tokens: z.number(),
@@ -23,14 +24,6 @@ const GPTModeConfigSchema = z.object({
 });
 
 export type GPTModeConfig = z.infer<typeof GPTModeConfigSchema>;
-
-const UserProfileSchema = z.object({
-  id: z.string().optional(),
-  display_name: z.string(),
-  profile_picture: z.string(), // Base64-encoded string
-});
-
-export type UserProfile = z.infer<typeof UserProfileSchema>;
 
 export const PartialSettingsDataSchema = z.object({
   code_autorun: z.boolean().optional(),

@@ -132,7 +132,6 @@ export function useAssetContextMenu({
                   { type: 'DuplicateChatClientMessage', chat_id: asset.id, request_id: uuidv4() },
                   (response) => {
                     if (response.type === 'DuplicateChatServerMessage') {
-                      console.log('resp', response.chat_id); // Consider replacing with more robust logging or handling
                       navigate(`/assets/${response.chat_id}`);
                       return true;
                     }

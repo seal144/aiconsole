@@ -67,14 +67,6 @@ class Assets:
         """
         return list(assets[0] for assets in self._assets.values() if assets)
 
-    def visible_assets(self) -> list[Asset]:
-        """
-        Return assets to show on Frontend.
-        """
-        exclude_types = [AssetType.USER]
-        visible_assets = [asset for asset in self.all_assets() if asset.type not in exclude_types]
-        return visible_assets
-
     def assets_with_enabled_flag_set_to(self, enabled: bool) -> list[Asset]:
         """
         Return all loaded assets with a specific status.

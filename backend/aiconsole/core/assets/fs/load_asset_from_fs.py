@@ -32,6 +32,7 @@ from aiconsole.core.project.paths import (
     get_core_assets_directory,
     get_project_assets_directory,
 )
+from aiconsole.core.users.types import UserProfile
 
 _log = logging.getLogger(__name__)
 
@@ -123,6 +124,8 @@ async def load_asset_from_fs(asset_type: AssetType, asset_id: str, location: Ass
         return AICAgent(**params)
 
     if asset_type == AssetType.USER:
+        userProfile = UserProfile(id=params['id'], **tomldoc)
+        params.update(userProfile.model_dump())
         user = AICUserProfile(**params)
 
         return user

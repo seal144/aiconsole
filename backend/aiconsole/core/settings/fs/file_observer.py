@@ -58,7 +58,7 @@ class FileObserver:
             if self._observer.is_alive():
                 try:
                     self._observer.stop()
-                    self._observer.join(timeout=5)  # Wait for 5 seconds for the observer to stop
+                    self._observer.join(timeout=5)
                 except Exception as e:
                     _log.error(f"[{self.__class__.__name__}] Error stopping observer: {e}")
                 else:
