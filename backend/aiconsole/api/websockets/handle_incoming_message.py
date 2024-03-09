@@ -16,6 +16,7 @@
 import asyncio
 import logging
 from collections import defaultdict
+from copy import deepcopy
 from typing import Any, Callable, cast
 from uuid import uuid4
 
@@ -23,7 +24,7 @@ from aiconsole.api.websockets.client_messages import (
     AcceptCodeClientMessage,
     AcquireLockClientMessage,
     CloseChatClientMessage,
-    DuplicateChatClientMessage,
+    DuplicateAssetClientMessage,
     InitChatMutationClientMessage,
     OpenChatClientMessage,
     ProcessChatClientMessage,
@@ -40,12 +41,11 @@ from aiconsole.api.websockets.render_materials import render_materials
 from aiconsole.api.websockets.server_messages import (
     ChatClosedServerMessage,
     ChatOpenedServerMessage,
-    DuplicateChatServerMessage,
+    DuplicateAssetServerMessage,
     NotificationServerMessage,
     ResponseServerMessage,
 )
 from aiconsole.core.assets.agents.agent import AICAgent
-from aiconsole.core.chat.chat_mutations import AddMessageGroupsMutation
 from aiconsole.core.chat.execution_modes.utils.import_and_validate_execution_mode import (
     import_and_validate_execution_mode,
 )
@@ -57,6 +57,7 @@ from aiconsole.core.chat.locking import (
     release_lock,
 )
 from aiconsole.core.chat.save_chat_history import save_chat_history
+from aiconsole.core.chat.types import AICChatHeadline
 from aiconsole.core.code_running.run_code import reset_code_interpreters
 from aiconsole.core.code_running.virtual_env.create_dedicated_venv import (
     WaitForEnvEvent,
@@ -76,7 +77,7 @@ async def handle_incoming_message(connection: AICConnection, json: dict):
         AcquireLockClientMessage.__name__: _handle_acquire_lock_ws_message,
         ReleaseLockClientMessage.__name__: _handle_release_lock_ws_message,
         OpenChatClientMessage.__name__: _handle_open_chat_ws_message,
-        DuplicateChatClientMessage.__name__: _handle_duplicate_chat_ws_message,  # Register the new handler here.
+        DuplicateAssetClientMessage.__name__: _handle_duplicate_chat_ws_message,  # Register the new handler here.
         StopChatClientMessage.__name__: _handle_stop_chat_ws_message,
         CloseChatClientMessage.__name__: _handle_close_chat_ws_message,
         InitChatMutationClientMessage.__name__: _handle_init_chat_mutation_ws_message,
@@ -87,6 +88,10 @@ async def handle_incoming_message(connection: AICConnection, json: dict):
     handler = handlers[message_type]
 
     _log.info(f"Handling message {message_type}")
+
+    # FIXME: Temporary, remove after https://github.com/10clouds/aiconsole/pull/911
+    if not json.get("chat_id"):
+        json["chat_id"] = json["asset_id"]
 
     task_id = str(uuid4())
     task = asyncio.create_task(handler(connection, json))
@@ -188,23 +193,31 @@ async def _handle_open_chat_ws_message(connection: AICConnection, json: dict):
 
 
 async def _handle_duplicate_chat_ws_message(connection: AICConnection, json: dict):
-    message = DuplicateChatClientMessage(**json)
-    # Implement the logic for duplicating a chat here.
-    # This is a placeholder implementation.
-    new_chat_id = str(uuid4())
+    message = DuplicateAssetClientMessage(**json)
+    new_asset_id = str(uuid4())
     try:
-        chat = await load_chat_history(message.chat_id)
-        chat.id = new_chat_id
-        await save_chat_history(chat)
+        asset = project.get_project_assets().get_asset(message.asset_id)
+        if not asset:
+            raise Exception("Asset not found")
+
+        if isinstance(asset, AICChatHeadline):
+            chat = await load_chat_history(message.chat_id)
+            chat.id = new_asset_id
+            await save_chat_history(chat)
+        else:
+            duplicated_asset = deepcopy(asset)
+            duplicated_asset.id = new_asset_id
+            await project.get_project_assets().save_asset(duplicated_asset, old_asset_id=new_asset_id, create=True)
+
         await project.get_project_assets().reload(initial=True)
 
-        await connection.send(DuplicateChatServerMessage(chat_id=new_chat_id))
+        await connection.send(DuplicateAssetServerMessage(asset_id=new_asset_id))
     except Exception as e:
-        _log.error(f"Error during duplicating chat {message.chat_id}: {e}")
+        _log.error(f"Error during duplicating asset {message.asset_id}: {e}")
         await connection.send(
             ResponseServerMessage(
                 request_id=message.request_id,
-                payload={"error": "Error during duplicating chat", "chat_id": message.chat_id},
+                payload={"error": "Error during duplicating asset", "asset_id": message.asset_id},
                 is_error=True,
             )
         )

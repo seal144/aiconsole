@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import shutil
+
 import rtoml
 
 from aiconsole.core.assets.agents.agent import AICAgent
@@ -65,7 +66,7 @@ async def save_asset_to_fs(asset: Asset, old_asset_id: str) -> Asset:
 
     if isinstance(asset, AICMaterial):
         material: AICMaterial = asset
-        toml_data["content_type"] = asset.content_type
+        toml_data["content_type"] = asset.content_type.value
         content_key = {
             MaterialContentType.STATIC_TEXT: "content_static_text",
             MaterialContentType.DYNAMIC_TEXT: "content_dynamic_text",
@@ -77,7 +78,7 @@ async def save_asset_to_fs(asset: Asset, old_asset_id: str) -> Asset:
         toml_data.update(
             {
                 "system": asset.system,
-                "gpt_mode": asset.gpt_mode,
+                "gpt_mode": str(asset.gpt_mode),
                 "execution_mode": asset.execution_mode,
             }
         )

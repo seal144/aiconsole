@@ -99,5 +99,5 @@ class ChatClosedServerMessage(BaseServerMessage):
     chat_id: str
 
 
-class DuplicateChatServerMessage(BaseServerMessage):
-    chat_id: str
+class DuplicateAssetServerMessage(BaseServerMessage):
+    asset_id: str

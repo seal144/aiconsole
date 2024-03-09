@@ -129,10 +129,10 @@ export function useAssetContextMenu({
               await useWebSocketStore
                 .getState()
                 .sendMessageAndWaitForResponse(
-                  { type: 'DuplicateChatClientMessage', chat_id: asset.id, request_id: uuidv4() },
+                  { type: 'DuplicateAssetClientMessage', asset_id: asset.id, request_id: uuidv4() },
                   (response) => {
-                    if (response.type === 'DuplicateChatServerMessage') {
-                      navigate(`/assets/${response.chat_id}`);
+                    if (response.type === 'DuplicateAssetServerMessage') {
+                      navigate(`/assets/${response.asset_id}`);
                       return true;
                     }
                     return false;
