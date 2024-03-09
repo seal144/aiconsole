@@ -20,10 +20,10 @@ from aiconsole.core.chat.chat_mutations import (
 )
 from aiconsole.core.chat.chat_mutator import ChatMutator
 from aiconsole.core.chat.load_chat_history import load_chat_history
+from aiconsole.core.chat.load_chat_options import load_chat_options
 from aiconsole.core.chat.save_chat_history import save_chat_history
 from aiconsole.core.chat.types import AICChat
-
-from aiconsole.core.chat.load_chat_options import load_chat_options
+from aiconsole.core.project.project import get_project_assets
 
 chats: dict[str, AICChat] = {}
 lock_events: dict[str, asyncio.Event] = defaultdict(asyncio.Event)
@@ -79,6 +79,10 @@ async def release_lock(chat_id: str, request_id: str) -> None:
     if chat_id in chats and chats[chat_id].lock_id == request_id:
         chats[chat_id].lock_id = None
         await save_chat_history(chats[chat_id], scope="message_groups")
+
+        project_assets = get_project_assets()
+        if not project_assets.get_asset(chat_id):
+            await project_assets.reload(True)
         del chats[chat_id]
         lock_events[chat_id].set()
 

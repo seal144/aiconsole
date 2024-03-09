@@ -77,7 +77,7 @@ async def handle_incoming_message(connection: AICConnection, json: dict):
         AcquireLockClientMessage.__name__: _handle_acquire_lock_ws_message,
         ReleaseLockClientMessage.__name__: _handle_release_lock_ws_message,
         OpenChatClientMessage.__name__: _handle_open_chat_ws_message,
-        DuplicateAssetClientMessage.__name__: _handle_duplicate_chat_ws_message,  # Register the new handler here.
+        DuplicateAssetClientMessage.__name__: _handle_duplicate_chat_ws_message,
         StopChatClientMessage.__name__: _handle_stop_chat_ws_message,
         CloseChatClientMessage.__name__: _handle_close_chat_ws_message,
         InitChatMutationClientMessage.__name__: _handle_init_chat_mutation_ws_message,
