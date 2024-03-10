@@ -30,7 +30,8 @@ const SideBar = () => {
   const [searchText, setSearchText] = useState('');
 
   const chat = useChatStore((state) => state.chat);
-  const assets = useAssetStore((state) => state.assets);
+  // TODO: filtering by user is temporary  
+  const assets = useAssetStore((state) => state.assets.filter((asset) => asset.type !== 'user'));
 
   const filteredAssets = useMemo(
     () => assets.filter((asset) => assetMatchesSearchText(asset, searchText)),

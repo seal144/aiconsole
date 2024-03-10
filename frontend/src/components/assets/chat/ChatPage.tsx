@@ -78,6 +78,7 @@ export function ChatPage() {
   const assetType = 'chat';
   const searchParams = useSearchParams()[0];
   const copyId = searchParams.get('copy');
+  const dt = searchParams.get('dt') || '';
   const forceRefresh = searchParams.get('forceRefresh'); // used to force a refresh
   const command = useChatStore((state) => state.commandHistory[state.commandIndex]);
 
@@ -163,7 +164,7 @@ export function ChatPage() {
       AssetsAPI.closeChat(id);
       useChatStore.setState({ chat: undefined });
     };
-  }, [copyId, id, assetType, forceRefresh, setChat]);
+  }, [copyId, id, dt, assetType, forceRefresh, setChat]);
 
   const isLastMessageFromUser =
     chat?.message_groups.length && chat.message_groups[chat.message_groups.length - 1].actor_id.type === 'user';
