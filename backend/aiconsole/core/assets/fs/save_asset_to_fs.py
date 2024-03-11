@@ -50,9 +50,12 @@ async def save_asset_to_fs(asset: Asset, old_asset_id: str) -> Asset:
         raise ValueError("Cannot save asset with id 'new'")
 
     project_assets_directory_path = get_project_assets_directory(asset.type)
-    original_st_mtime = os.stat(project_assets_directory_path / f"{asset.id}.toml").st_mtime
-
     project_assets_directory_path.mkdir(parents=True, exist_ok=True)
+    file_path = project_assets_directory_path / f"{asset.id}.toml"
+
+    original_st_mtime = None
+    if file_path.exists():
+        original_st_mtime = os.stat(file_path).st_mtime
 
     try:
         old_asset = await load_asset_from_fs(asset.type, asset.id)
@@ -106,10 +109,10 @@ async def save_asset_to_fs(asset: Asset, old_asset_id: str) -> Asset:
             }
         )
 
-    rtoml.dump(toml_data, project_assets_directory_path / f"{asset.id}.toml")
+    rtoml.dump(toml_data, file_path)
 
     if original_st_mtime and not update_last_modified:
-        os.utime(project_assets_directory_path / f"{asset.id}.toml", (original_st_mtime, original_st_mtime))
+        os.utime(file_path, (original_st_mtime, original_st_mtime))
 
     extensions = [".jpeg", ".jpg", ".png", ".gif", ".SVG"]
     for extension in extensions:
