@@ -16,7 +16,6 @@
 
 import { z } from 'zod';
 
-
 export type AssetDefinedIn = 'aiconsole' | 'project';
 export const assetDefinedInOptions: AssetDefinedIn[] = ['aiconsole', 'project'];
 export type MaterialContentType = 'static_text' | 'dynamic_text' | 'api';
@@ -79,6 +78,7 @@ export const AgentSchema = AssetSchema.extend({
   system: z.string(),
   gpt_mode: GPTModeSchema,
   execution_mode: z.string(),
+  execution_mode_params_values: z.record(z.string()),
 });
 
 export type Agent = z.infer<typeof AgentSchema>;
