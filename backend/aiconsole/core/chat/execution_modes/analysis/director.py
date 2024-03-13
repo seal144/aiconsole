@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from aiconsole.core.chat.chat_mutator import ChatMutator
 from aiconsole.core.chat.execution_modes.analysis.create_agents_str import (
     create_agents_str,
 )
@@ -23,6 +22,7 @@ from aiconsole.core.chat.execution_modes.analysis.create_materials_str import (
 from aiconsole.core.chat.execution_modes.analysis.gpt_analysis_function_step import (
     gpt_analysis_function_step,
 )
+from aiconsole.core.chat.locations import ChatRef
 from aiconsole.core.gpt.consts import ANALYSIS_GPT_MODE
 
 INITIAL_SYSTEM_PROMPT = """
@@ -100,20 +100,21 @@ Now analyse the chat.
 """.strip()
 
 
-async def director_analyse(chat_mutator: ChatMutator, message_group_id: str):
-    ai_can_add_extra_materials = chat_mutator.chat.chat_options.ai_can_add_extra_materials
+async def director_analyse(chat_ref: ChatRef, message_group_id: str):
+
+    ai_can_add_extra_materials = (await chat_ref.chat_options.get()).ai_can_add_extra_materials
 
     if ai_can_add_extra_materials is None:
         ai_can_add_extra_materials = True
 
-    agents = create_agents_str(agent_id=chat_mutator.chat.chat_options.agent_id)
+    agents = create_agents_str(agent_id=(await chat_ref.chat_options.get()).agent_id)
     materials = create_materials_str(
-        materials_ids=chat_mutator.chat.chat_options.materials_ids,
+        materials_ids=(await chat_ref.chat_options.get()).materials_ids,
         ai_can_add_extra_materials=ai_can_add_extra_materials,
     )
 
     initial_system_prompt = INITIAL_SYSTEM_PROMPT.format(
-        agents=create_agents_str(agent_id=chat_mutator.chat.chat_options.agent_id),
+        agents=create_agents_str(agent_id=(await chat_ref.chat_options.get()).agent_id),
         materials=materials,
     )
 
@@ -123,8 +124,8 @@ async def director_analyse(chat_mutator: ChatMutator, message_group_id: str):
     )
 
     return await gpt_analysis_function_step(
+        chat_ref=chat_ref,
         message_group_id=message_group_id,
-        chat_mutator=chat_mutator,
         gpt_mode=ANALYSIS_GPT_MODE,
         initial_system_prompt=initial_system_prompt,
         last_system_prompt=last_system_prompt,

@@ -16,8 +16,8 @@
 import os
 
 from aiconsole.api.websockets.base_server_message import BaseServerMessage
-from aiconsole.core.chat.chat_mutations import ChatMutation
 from aiconsole.core.chat.types import AICChat
+from fastmutation.mutations import AssetMutation
 
 
 class NotificationServerMessage(BaseServerMessage):
@@ -61,10 +61,9 @@ class SettingsServerMessage(BaseServerMessage):
     initial: bool
 
 
-class NotifyAboutChatMutationServerMessage(BaseServerMessage):
+class NotifyAboutAssetMutationServerMessage(BaseServerMessage):
     request_id: str
-    chat_id: str
-    mutation: ChatMutation
+    mutation: AssetMutation
 
     def model_dump(self, **kwargs):
         # include type of mutation in the dump of "mutation"
@@ -75,6 +74,9 @@ class NotifyAboutChatMutationServerMessage(BaseServerMessage):
                 "type": self.mutation.__class__.__name__,
             },
         }
+
+
+# NotifyAboutAssetMutationServerMessage.model_rebuild()
 
 
 class ResponseServerMessage(BaseServerMessage):
@@ -93,6 +95,10 @@ class ResponseServerMessage(BaseServerMessage):
 
 class ChatOpenedServerMessage(BaseServerMessage):
     chat: AICChat
+
+
+class DuplicateChatServerMessage(BaseServerMessage):
+    chat_id: str
 
 
 class ChatClosedServerMessage(BaseServerMessage):

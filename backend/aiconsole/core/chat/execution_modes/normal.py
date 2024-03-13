@@ -19,7 +19,6 @@ from typing import Any
 from aiconsole.core.assets.agents.agent import AICAgent
 from aiconsole.core.assets.materials.material import AICMaterial
 from aiconsole.core.assets.materials.rendered_material import RenderedMaterial
-from aiconsole.core.chat.chat_mutator import ChatMutator
 from aiconsole.core.chat.execution_modes.execution_mode import ExecutionMode
 from aiconsole.core.chat.execution_modes.utils.generate_response_message_with_code import (
     generate_response_message_with_code,
@@ -27,6 +26,7 @@ from aiconsole.core.chat.execution_modes.utils.generate_response_message_with_co
 from aiconsole.core.chat.execution_modes.utils.get_agent_system_message import (
     get_agent_system_message,
 )
+from aiconsole.core.chat.locations import ChatRef
 from aiconsole.core.gpt.create_full_prompt_with_materials import (
     create_full_prompt_with_materials,
 )
@@ -35,7 +35,7 @@ _log = logging.getLogger(__name__)
 
 
 async def _execution_mode_process(
-    chat_mutator: ChatMutator,
+    chat_ref: ChatRef,
     agent: AICAgent,
     materials: list[AICMaterial],
     rendered_materials: list[RenderedMaterial],
@@ -44,7 +44,7 @@ async def _execution_mode_process(
     _log.debug("execution_mode_normal")
 
     await generate_response_message_with_code(
-        chat_mutator,
+        chat_ref,
         agent,
         system_message=create_full_prompt_with_materials(
             intro=get_agent_system_message(agent),
