@@ -24,8 +24,8 @@ TBaseObject = TypeVar("TBaseObject", bound=BaseObject)
 class ObjectRef(Generic[TBaseObject], BaseModel):
     id: str
     parent_collection: "CollectionRef"
-    context: "DataContext | None" = Field(
-        exclude=True
+    context: DataContext | None = Field(
+        exclude=True, default=None
     )  # Context must be set externally after deserialisation in order to use the object
 
     class Config:
@@ -80,9 +80,9 @@ class ObjectRef(Generic[TBaseObject], BaseModel):
 
 class CollectionRef(Generic[TBaseObject], BaseModel):
     id: str
-    parent: "ObjectRef | None"
-    context: "DataContext | None" = Field(
-        exclude=True
+    parent: ObjectRef | None = Field(default=None)
+    context: DataContext | None = Field(
+        exclude=True, default=None
     )  # Context must be set externally after deserialisation in order to use the object
 
     class Config:

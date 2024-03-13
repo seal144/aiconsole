@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from time import sleep
-from typing import Type, TypeVar
+from typing import Type, TypeVar, cast
 from uuid import uuid4
 
 import pytest
@@ -29,9 +29,9 @@ from aiconsole.api.websockets.server_messages import (
 from aiconsole.app import app, lifespan
 from aiconsole.core.chat.actor_id import ActorId
 from aiconsole.core.chat.load_chat_history import load_chat_history
-from aiconsole.core.chat.locations import ChatRef
+from aiconsole.core.chat.locations import AssetCollectionRef, ChatRef
 from aiconsole.core.chat.root import Root
-from aiconsole.core.chat.types import AICMessage, AICMessageGroup
+from aiconsole.core.chat.types import AICChat, AICMessage, AICMessageGroup
 from fastmutation.apply_mutation import apply_mutation
 from fastmutation.data_context import DataContext
 from fastmutation.mutations import AssetMutation, LockReleasedMutation
@@ -49,7 +49,7 @@ class ClientSideDataContext(DataContext):
         self._websocket = websocket
         self._request_id = request_id
 
-    async def mutate(self, mutation: AssetMutation) -> None:
+    async def mutate(self, mutation: AssetMutation, originating_from_server) -> None:
         # apply mutation to chat
         apply_mutation(self, mutation)
 
@@ -114,13 +114,9 @@ class ChatTestFramework:
 
         with self._client.websocket_connect("/ws") as websocket:
             try:
-                chat = self._wait_for_websocket_response(websocket, ChatOpenedServerMessage).chat
-
                 root = Root(
                     id="root",
-                    assets=[
-                        chat,
-                    ],
+                    assets=[],
                 )
 
                 self._context = ClientSideDataContext(
@@ -129,11 +125,19 @@ class ChatTestFramework:
                     request_id=self._request_id,
                 )
 
-                self.chat_ref = ChatRef(id=str(uuid4()), context=self._context)
+                assets = AssetCollectionRef(context=self._context)
+                chat = AICChat.create_empty_chat()
+                await assets.create(chat)
+                self.chat_ref = cast(ChatRef, assets[chat.id])
+
                 await SubscribeToClientMessage(
                     request_id=self._request_id,
                     ref=self.chat_ref,
                 ).send(websocket)
+
+                chat = self._wait_for_websocket_response(websocket, ChatOpenedServerMessage).chat
+
+                root.assets.append(chat)
 
                 await AcquireLockClientMessage(
                     request_id=self._request_id,

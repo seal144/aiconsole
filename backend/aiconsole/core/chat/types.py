@@ -15,11 +15,12 @@
 # limitations under the License.
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from aiconsole.core.assets.types import Asset, AssetType
+from aiconsole.core.assets.types import Asset, AssetLocation, AssetType
 from aiconsole.core.chat.actor_id import ActorId
 from aiconsole.core.code_running.code_interpreters.language import LanguageStr
 from aiconsole.core.gpt.tool_definition import ToolDefinition
@@ -112,6 +113,20 @@ class AICChat(AICChatHeadline):
                             tool_call=tool_call,
                         )
         return None
+
+    @classmethod
+    def create_empty_chat(cls):
+        return AICChat(
+            id="chat",
+            name="",
+            usage="",
+            usage_examples=[],
+            defined_in=AssetLocation.PROJECT_DIR,
+            last_modified=datetime.now(),
+            title_edited=False,
+            message_groups=[],
+            override=False,
+        )
 
 
 class Command(BaseModel):

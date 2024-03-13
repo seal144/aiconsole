@@ -121,7 +121,11 @@ async def _handle_open_chat_ws_message(connection: AICConnection, json: dict):
     try:
         connection.subscribe_to_ref(message.ref)
 
-        chat = cast(AICChat, message.ref.get())
+        message.ref.context = AICFileDataContext(
+            lock_id=message.request_id,
+            origin=connection,
+        )
+        chat = cast(AICChat, await message.ref.get())
 
         if connection.is_ref_open(message.ref):
             await connection.send(
