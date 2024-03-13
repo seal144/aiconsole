@@ -46,13 +46,13 @@ export const ReleaseLockClientMessageSchema = BaseClientMessageSchema.extend({
 
 export type ReleaseLockClientMessage = z.infer<typeof ReleaseLockClientMessageSchema>;
 
-export const OpenChatClientMessageSchema = BaseClientMessageSchema.extend({
-  type: z.literal('OpenChatClientMessage'),
-  chat_id: z.string(),
+export const SubscribeToClientMessageSchema = BaseClientMessageSchema.extend({
+  type: z.literal('SubscribeToClientMessage'),
+  ref: z.object({ id: z.string(), context: z.object({ id: z.string() }) }),
   request_id: z.string(),
 });
 
-export type OpenChatClientMessage = z.infer<typeof OpenChatClientMessageSchema>;
+export type SubscribeToClientMessage = z.infer<typeof SubscribeToClientMessageSchema>;
 
 export const DuplicateAssetClientMessageSchema = BaseClientMessageSchema.extend({
   type: z.literal('DuplicateAssetClientMessage'),
@@ -70,13 +70,13 @@ export const StopChatClientMessageSchema = BaseClientMessageSchema.extend({
 
 export type StopChatClientMessage = z.infer<typeof StopChatClientMessageSchema>;
 
-export const CloseChatClientMessageSchema = BaseClientMessageSchema.extend({
-  type: z.literal('CloseChatClientMessage'),
-  chat_id: z.string(),
+export const UnsubscribeClientMessageSchema = BaseClientMessageSchema.extend({
+  type: z.literal('UnsubscribeClientMessage'),
+  ref: z.object({ id: z.string(), context: z.object({ id: z.string() }) }),
   request_id: z.string(),
 });
 
-export type CloseChatClientMessage = z.infer<typeof CloseChatClientMessageSchema>;
+export type UnsubscribeClientMessage = z.infer<typeof UnsubscribeClientMessageSchema>;
 
 export const AcceptCodeClientMessageSchema = BaseClientMessageSchema.extend({
   type: z.literal('AcceptCodeClientMessage'),
@@ -99,9 +99,9 @@ export const ClientMessageSchema = z.union([
   AcquireLockClientMessageSchema,
   ReleaseLockClientMessageSchema,
   DuplicateAssetClientMessageSchema,
-  OpenChatClientMessageSchema,
+  SubscribeToClientMessageSchema,
   StopChatClientMessageSchema,
-  CloseChatClientMessageSchema,
+  UnsubscribeClientMessageSchema,
   AcceptCodeClientMessageSchema,
   ProcessChatClientMessageSchema,
 ]);

@@ -55,18 +55,20 @@ async function fetchAsset<T extends Asset>({
   contentType?: string;
 }): Promise<T> {
   if (assetType === 'chat') {
-    const response: ChatOpenedServerMessage = (await useWebSocketStore
-      .getState()
-      .sendMessageAndWaitForResponse(
-        { type: 'OpenChatClientMessage', chat_id: id, request_id: uuidv4() },
-        (response: ServerMessage) => {
-          if (response.type === 'ChatOpenedServerMessage') {
-            return response.chat.id === id;
-          } else {
-            return false;
-          }
-        },
-      )) as ChatOpenedServerMessage;
+    const response: ChatOpenedServerMessage = (await useWebSocketStore.getState().sendMessageAndWaitForResponse(
+      {
+        type: 'SubscribeToClientMessage',
+        ref: { id, parent_collection: { id: 'assets', parent: null, context: null }, context: null },
+        request_id: uuidv4(),
+      },
+      (response: ServerMessage) => {
+        if (response.type === 'ChatOpenedServerMessage') {
+          return response.chat.id === id;
+        } else {
+          return false;
+        }
+      },
+    )) as ChatOpenedServerMessage;
 
     return response.chat as unknown as T;
   }
@@ -82,8 +84,8 @@ async function fetchAsset<T extends Asset>({
 async function closeChat(id: string): Promise<ServerMessage> {
   const response = await useWebSocketStore.getState().sendMessageAndWaitForResponse(
     {
-      type: 'CloseChatClientMessage',
-      chat_id: id,
+      type: 'UnsubscribeClientMessage',
+      ref: { id, parent_collection: { id: 'assets', parent: null, context: null }, context: null },
       request_id: uuidv4(),
     },
     (response: ServerMessage) => {
