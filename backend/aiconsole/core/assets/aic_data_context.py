@@ -101,6 +101,7 @@ class AICFileDataContext(DataContext):
                 #         )
 
                 await apply_mutation(self, mutation)
+                # TODO: specific code for mutations
             except Exception as e:
                 _log.exception(f"Error during mutation: {e}")
                 raise
@@ -196,7 +197,7 @@ class AICFileDataContext(DataContext):
         segment = segments.pop(0)
         if segment == "assets":
             if not segments:
-                return list(get_project_assets().all_assets())
+                return cast(list[BaseObject], get_project_assets().all_assets())
             # Get the object from the assets collection
             segment = segments.pop(0)
             obj = get_project_assets().get_asset(segment)

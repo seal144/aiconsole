@@ -51,8 +51,6 @@ class ClientSideDataContext(DataContext):
 
     async def mutate(self, mutation: AssetMutation, originating_from_server) -> None:
         # apply mutation to chat
-        await apply_mutation(self, mutation)
-
         await DoMutationClientMessage(
             request_id=self._request_id,
             mutation=mutation,
