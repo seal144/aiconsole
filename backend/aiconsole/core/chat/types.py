@@ -17,6 +17,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
+import uuid
 
 from pydantic import BaseModel, Field
 
@@ -117,7 +118,7 @@ class AICChat(AICChatHeadline):
     @classmethod
     def create_empty_chat(cls):
         return AICChat(
-            id="chat",
+            id=str(uuid.uuid4()),
             name="",
             usage="",
             usage_examples=[],

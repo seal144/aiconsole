@@ -92,14 +92,15 @@ class AICFileDataContext(DataContext):
     async def mutate(self, mutation: "AssetMutation", originating_from_server: bool) -> None:
         async def h():
             try:
-                # Check if ref is locked or any of it's parents are locked with the current lock_id, if not raise an exception
-                if isinstance(mutation.ref, ObjectRef):
-                    if _no_lock_taken[mutation.ref].is_set():
-                        raise Exception(
-                            f"Lock not acquired for chat {mutation.ref.id} request_id={self.lock_id}",
-                        )
+                # TODO: CHANGE THIS
+                # # Check if ref is locked or any of it's parents are locked with the current lock_id, if not raise an exception
+                # if isinstance(mutation.ref, ObjectRef):
+                #     if _no_lock_taken[mutation.ref].is_set():
+                #         raise Exception(
+                #             f"Lock not acquired for chat {mutation.ref.id} request_id={self.lock_id}",
+                #         )
 
-                apply_mutation(self, mutation)
+                await apply_mutation(self, mutation)
             except Exception as e:
                 _log.exception(f"Error during mutation: {e}")
                 raise

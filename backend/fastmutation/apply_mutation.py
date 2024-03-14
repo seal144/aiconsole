@@ -51,7 +51,7 @@ MUTATION_HANDLERS: dict[str, Callable[[DataContext, Any], Awaitable[None]]] = {
 }
 
 
-def apply_mutation(root: DataContext, mutation: AssetMutation) -> None:
+async def apply_mutation(root: DataContext, mutation: AssetMutation) -> None:
     """
     KEEEP THIS IN SYNC WITH FRONTEND applyMutation!
 
@@ -59,4 +59,4 @@ def apply_mutation(root: DataContext, mutation: AssetMutation) -> None:
     It provides modification methods which should be used instead of modifying the chat directly.
     """
 
-    MUTATION_HANDLERS[mutation.__class__.__name__](root, mutation)
+    await MUTATION_HANDLERS[mutation.__class__.__name__](root, mutation)

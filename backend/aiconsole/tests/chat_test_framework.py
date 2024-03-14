@@ -51,15 +51,15 @@ class ClientSideDataContext(DataContext):
 
     async def mutate(self, mutation: AssetMutation, originating_from_server) -> None:
         # apply mutation to chat
-        apply_mutation(self, mutation)
+        await apply_mutation(self, mutation)
 
         await DoMutationClientMessage(
             request_id=self._request_id,
             mutation=mutation,
         ).send(self._websocket)
 
-    def get(self, ref: ObjectRef | CollectionRef) -> BaseObject | list[BaseObject]:
-        raise NotImplementedError("This method is not implemented")
+    async def get(self, ref: ObjectRef | CollectionRef) -> BaseObject | list[BaseObject]:
+        raise NotImplementedError("This metod is not implemented")
 
     def exists(self, ref: AnyRef) -> bool:
         raise NotImplementedError("This method is not implemented")
