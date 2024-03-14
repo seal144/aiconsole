@@ -125,7 +125,7 @@ async def _handle_open_chat_ws_message(connection: AICConnection, json: dict):
             lock_id=message.request_id,
             origin=connection,
         )
-        chat = cast(AICChat, await message.ref.get())
+        chat = cast(AICChat, await message.ref.get()) if message.ref.id != "new" else AICChat.create_empty_chat()
 
         if connection.is_ref_open(message.ref):
             await connection.send(
