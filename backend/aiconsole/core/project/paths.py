@@ -39,12 +39,6 @@ def get_core_preinstalled_assets_directory():
     return resource_to_path("aiconsole.preinstalled")
 
 
-def get_history_directory(project_path: Path | None = None):
-    if not is_project_initialized() and not project_path:
-        raise ValueError("Project settings are not initialized")
-    return get_project_directory(project_path) / "chats"
-
-
 def get_aic_directory(project_path: Path | None = None):
     if not is_project_initialized() and not project_path:
         raise ValueError("Project settings are not initialized")

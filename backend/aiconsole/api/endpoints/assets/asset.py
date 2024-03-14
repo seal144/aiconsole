@@ -33,12 +33,10 @@ from aiconsole.core.assets.get_material_content_name import get_material_content
 from aiconsole.core.assets.materials.material import AICMaterial, MaterialContentType
 from aiconsole.core.assets.types import Asset, AssetLocation, AssetType
 from aiconsole.core.chat.load_chat_history import load_chat_history
-from aiconsole.core.chat.save_chat_history import save_chat_history
 from aiconsole.core.chat.types import AICChat
 from aiconsole.core.project import project
 from aiconsole.core.project.paths import (
     get_core_assets_directory,
-    get_history_directory,
     get_project_assets_directory,
 )
 from aiconsole.core.project.project import is_project_initialized
@@ -137,7 +135,6 @@ async def partially_update_asset(
             chat = await load_chat_history(id=asset_id)
             if asset.name:
                 chat.name = str(asset.name)
-                await save_chat_history(chat, scope="name")
                 await project.get_project_assets().reload(initial=True)
         else:
             await agents_service.partially_update_asset(asset_id=asset_id, asset=asset)

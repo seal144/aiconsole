@@ -32,7 +32,6 @@ from aiconsole.core.chat.load_chat_history import load_chat_history
 from aiconsole.core.chat.locations import AssetCollectionRef, ChatRef
 from aiconsole.core.chat.root import Root
 from aiconsole.core.chat.types import AICChat, AICMessage, AICMessageGroup
-from fastmutation.apply_mutation import apply_mutation
 from fastmutation.data_context import DataContext
 from fastmutation.mutations import AssetMutation, LockReleasedMutation
 from fastmutation.types import AnyRef, BaseObject, CollectionRef, ObjectRef
@@ -137,12 +136,12 @@ class ChatTestFramework:
 
                 root.assets.append(chat)
 
-                await AcquireLockClientMessage(
-                    request_id=self._request_id,
-                    ref=self.chat_ref,
-                ).send(websocket)
+                # await AcquireLockClientMessage(
+                #     request_id=self._request_id,
+                #     ref=self.chat_ref,
+                # ).send(websocket)
 
-                self._wait_for_websocket_response(websocket, NotifyAboutAssetMutationServerMessage)
+                # self._wait_for_websocket_response(websocket, NotifyAboutAssetMutationServerMessage)
 
                 await self.chat_ref.message_groups.create(
                     AICMessageGroup(

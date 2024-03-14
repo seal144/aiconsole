@@ -4,7 +4,7 @@ from fastapi import APIRouter, Response, status
 from pydantic import BaseModel
 
 from aiconsole.core.chat.load_chat_history import load_chat_history
-from aiconsole.core.chat.save_chat_history import save_chat_history
+from aiconsole.core.project.project import get_project_assets
 
 router = APIRouter()
 
@@ -32,5 +32,5 @@ async def chat_options(chat_id: str, chat_options: PatchChatOptions):
     if chat_options.draft_command is not None:
         chat.chat_options.draft_command = chat_options.draft_command
 
-    await save_chat_history(chat, scope="chat_options")
+    await get_project_assets().save_asset(chat, scope="chat_options")
     return Response(status_code=status.HTTP_200_OK)

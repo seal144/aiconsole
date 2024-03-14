@@ -45,7 +45,7 @@ class DataContext(ABC):
 
     @property
     @abstractmethod
-    def type_to_cls_mapping(self) -> "Dict[str, Type[BaseObject]]":
+    def type_to_cls_mapping(self) -> "dict[str, Type[BaseObject]]":
         pass
 
     @asynccontextmanager

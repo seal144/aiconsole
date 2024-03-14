@@ -1,4 +1,5 @@
-from typing import Any, Awaitable, Callable
+from typing import Any, Awaitable, Callable, cast
+from aiconsole.core.project.project import get_project_assets
 
 from fastmutation.data_context import DataContext
 from fastmutation.mutations import (
@@ -16,7 +17,10 @@ async def _handle_CreateMutation(root: DataContext, mutation: CreateMutation):
     if collection is None:
         raise ValueError(f"Collection {mutation.ref.parent_collection} not found")
 
-    collection.append(root.type_to_cls_mapping[mutation.object_type](**mutation.object, id=mutation.ref.id))
+    object_type = root.type_to_cls_mapping[mutation.object_type]
+    asset = object_type(**mutation.object, id=mutation.ref.id)
+
+    await get_project_assets().save_asset(asset, "new", create=True)
 
 
 async def _handle_DeleteMutation(root: DataContext, mutation: DeleteMutation):

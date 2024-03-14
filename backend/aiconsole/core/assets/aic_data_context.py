@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from collections import defaultdict, deque
-from typing import Any, Callable, Coroutine, List, cast, overload
+from typing import Any, Callable, Coroutine, List, Type, cast, overload
 
 from aiconsole.api.websockets.connection_manager import (
     AICConnection,
@@ -100,8 +100,9 @@ class AICFileDataContext(DataContext):
                 #             f"Lock not acquired for chat {mutation.ref.id} request_id={self.lock_id}",
                 #         )
 
-                await apply_mutation(self, mutation)
                 # TODO: specific code for mutations
+                await apply_mutation(self, mutation)
+
             except Exception as e:
                 _log.exception(f"Error during mutation: {e}")
                 raise
@@ -226,7 +227,7 @@ class AICFileDataContext(DataContext):
         return await self.get(ref) is not None
 
     @property
-    def type_to_cls_mapping(self) -> dict[str, type[BaseObject]]:
+    def type_to_cls_mapping(self) -> dict[str, Type[BaseObject]]:
         return {
             "AICMessageGroup": AICMessageGroup,
             "AICMessage": AICMessage,
