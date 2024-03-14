@@ -33,7 +33,7 @@ export type InitChatMutationClientMessage = z.infer<typeof InitChatMutationClien
 export const AcquireLockClientMessageSchema = BaseClientMessageSchema.extend({
   type: z.literal('AcquireLockClientMessage'),
   request_id: z.string(),
-  chat_id: z.string(),
+  ref: z.object({ id: z.string(), context: z.object({ id: z.string() }) }),
 });
 
 export type AcquireLockClientMessage = z.infer<typeof AcquireLockClientMessageSchema>;

@@ -68,7 +68,7 @@ export const createMessageSlice: StateCreator<ChatStore, [], [], MessageSlice> =
       {
         type: 'AcquireLockClientMessage',
         request_id: lockId,
-        chat_id: chat.id,
+        ref: { id: chat_id, parent_collection: { id: 'assets', parent: null, context: null }, context: null },
       },
       (response) =>
         response.type === 'NotifyAboutChatMutationServerMessage' &&
