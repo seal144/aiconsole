@@ -28,7 +28,7 @@ class MissingFileName(Exception):
 class UserProfileService:
     def configure_user(self):
         user_profile = settings().unified_settings.user_profile
-        if user_profile and (
+        if not user_profile or (
             user_profile.id is None or user_profile.profile_picture is None or user_profile.display_name is None
         ):
             user_id = str(uuid4())
