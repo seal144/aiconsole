@@ -204,7 +204,7 @@ async def asset_path(request: Request, asset_id: str):
         raise HTTPException(status_code=404, detail=f"Asset {asset_id} not found")
 
     if asset.type == AssetType.CHAT:
-        path = get_history_directory() / f"{asset_id}.json"
+        path = get_project_assets_directory(AssetType.CHAT) / f"{asset_id}.json"
     else:
         path = get_project_assets_directory(asset.type) / f"{asset_id}.toml"
 

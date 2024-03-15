@@ -125,7 +125,7 @@ class ChatTestFramework:
                 assets = AssetCollectionRef(context=self._context)
                 chat = AICChat.create_empty_chat()
                 await assets.create(chat)
-                self.chat_ref = cast(ChatRef, assets[chat.id])
+                self.chat_ref = ChatRef(chat.id, self._context)
 
                 await SubscribeToClientMessage(
                     request_id=self._request_id,
@@ -142,7 +142,6 @@ class ChatTestFramework:
                 # ).send(websocket)
 
                 # self._wait_for_websocket_response(websocket, NotifyAboutAssetMutationServerMessage)
-
                 await self.chat_ref.message_groups.create(
                     AICMessageGroup(
                         id=self._message_group_id,
@@ -154,6 +153,7 @@ class ChatTestFramework:
                         messages=[],
                     ),
                 )
+                self._wait_for_websocket_response(websocket, NotifyAboutAssetMutationServerMessage)
 
                 self._websocket = websocket
 
@@ -177,7 +177,7 @@ class ChatTestFramework:
             ),
         )
 
-        await ReleaseLockClientMessage(request_id=self._request_id, ref=self.chat_ref).send(self._websocket)
+        # await ReleaseLockClientMessage(request_id=self._request_id, ref=self.chat_ref).send(self._websocket)
 
         await ProcessChatClientMessage(request_id=self._request_id, chat_ref=self.chat_ref).send(self._websocket)
 

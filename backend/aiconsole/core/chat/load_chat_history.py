@@ -21,16 +21,16 @@ from pathlib import Path
 import aiofiles
 import aiofiles.os as async_os
 
-from aiconsole.core.assets.types import AssetLocation
+from aiconsole.core.assets.types import AssetLocation, AssetType
 from aiconsole.core.chat.types import AICChat
-from aiconsole.core.project.paths import get_history_directory
+from aiconsole.core.project.paths import get_project_assets_directory
 
 
 async def load_chat_history(id: str, project_path: Path | None = None) -> AICChat:
     if id == "new":
         raise ValueError("Cannot load chat with id 'new'")
 
-    history_directory = get_history_directory(project_path)
+    history_directory = get_project_assets_directory(AssetType.CHAT, project_path)
     file_path = history_directory / f"{id}.json"
 
     if await async_os.path.exists(file_path):

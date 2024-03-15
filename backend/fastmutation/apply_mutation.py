@@ -1,4 +1,4 @@
-from typing import Any, Awaitable, Callable, cast
+from typing import Any, Awaitable, Callable
 from aiconsole.core.project.project import get_project_assets
 
 from fastmutation.data_context import DataContext
@@ -17,10 +17,28 @@ async def _handle_CreateMutation(root: DataContext, mutation: CreateMutation):
     if collection is None:
         raise ValueError(f"Collection {mutation.ref.parent_collection} not found")
 
-    object_type = root.type_to_cls_mapping[mutation.object_type]
-    asset = object_type(**mutation.object, id=mutation.ref.id)
+    asset = get_project_assets().get_asset(mutation.ref.ref_segments[1])
 
-    await get_project_assets().save_asset(asset, "new", create=True)
+    object_type = root.type_to_cls_mapping[mutation.object_type]
+    obj = object_type(**mutation.object, id=mutation.ref.id)
+
+    attr = asset
+    for ref in mutation.ref.ref_segments[2:-1]:
+        if isinstance(attr, list):
+            attr = next((item for item in attr if item.id == ref), None)
+        else:
+            attr = getattr(attr, ref)
+
+    if isinstance(attr, list):
+        attr.append(obj)
+    elif isinstance(attr, dict):
+        attr.update(obj)
+    else:
+        attr = obj
+
+    await get_project_assets().save_asset(
+        asset or attr, (asset and asset.id) or "new", create=asset is None
+    )
 
 
 async def _handle_DeleteMutation(root: DataContext, mutation: DeleteMutation):

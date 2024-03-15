@@ -140,7 +140,8 @@ class AICFileDataContext(DataContext):
                 mutation=mutation,
             ),
             mutation.ref,
-            except_connection=None if originating_from_server else self.origin,
+            # except_connection=None if originating_from_server else self.origin,
+            except_connection=None,
         )
 
     async def acquire_write_lock(self, ref: ObjectRef, originating_from_server: bool):

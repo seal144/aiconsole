@@ -13,15 +13,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import os
 from pathlib import Path
+from aiconsole.core.assets.types import AssetType
 
-from aiconsole.core.project.paths import get_history_directory
+from aiconsole.core.project.paths import get_project_assets_directory
 
 
 def list_possible_historic_chat_ids(project_path: Path | None = None):
-    history_directory = get_history_directory(project_path)
+    history_directory = get_project_assets_directory(AssetType.CHAT, project_path)
     if history_directory.exists() and history_directory.is_dir():
         entries = os.scandir(history_directory)
 
