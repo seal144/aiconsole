@@ -37,7 +37,15 @@ module.exports = {
     asar: true,
     icon: './assets/icon',
     extraResource: ['python'],
-    osxSign: {},
+    osxSign: {
+      optionsForFile: (filePath) => {
+        return {
+          gatekeeperAssess: false,
+          entitlements: './entitlements.mac.inherit.plist',
+          entitlementsInherit: './entitlements.mac.inherit.plist',
+        };
+      }
+    },
     ...(skipSign
       ? {}
       : {
