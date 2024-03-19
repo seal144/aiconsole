@@ -144,6 +144,7 @@ class AICFileDataContext(DataContext):
         # else:
         #    message_group.role = "assistant"
 
+        # FIXME: Tepm for making test work
         await connection_manager().send_to_ref(
             NotifyAboutAssetMutationServerMessage(
                 request_id=self.lock_id,
@@ -156,24 +157,36 @@ class AICFileDataContext(DataContext):
 
     async def acquire_write_lock(self, ref: ObjectRef, originating_from_server: bool):
         _log.debug(f"Acquiring lock {ref} {self.lock_id}")
+        obj = await self.get(ref)
 
-        async def h():
+        if obj is not None and obj.lock_id:
+            await _wait_for_lock(ref)
 
-            obj = await self.get(ref)
+        _no_lock_taken[ref].clear()
 
-            if obj is not None and obj.lock_id:
-                await _wait_for_lock(ref)
+        if self.origin and not originating_from_server:
+            self.origin.lock_acquired(ref=ref, request_id=self.lock_id)
 
-            _no_lock_taken[ref].clear()
+        await self.mutate(LockAcquiredMutation(ref=ref, lock_id=self.lock_id), originating_from_server=True)
 
-            if self.origin and not originating_from_server:
-                self.origin.lock_acquired(ref=ref, request_id=self.lock_id)
+        # FIXME: currently not in sequence
+        # async def h():
 
-            await self.mutate(LockAcquiredMutation(ref=ref, lock_id=self.lock_id), originating_from_server=True)
+        #     obj = await self.get(ref)
 
-        await self.__in_sequence(ref, h)
-        # Potential deadlock in original code - What if one connection wants to acquire a lock and another is processing and wants to do another mutation in sequence?
-        await self.__wait_for_all_mutations(ref)
+        #     if obj is not None and obj.lock_id:
+        #         await _wait_for_lock(ref)
+
+        #     _no_lock_taken[ref].clear()
+
+        #     if self.origin and not originating_from_server:
+        #         self.origin.lock_acquired(ref=ref, request_id=self.lock_id)
+
+        #     await self.mutate(LockAcquiredMutation(ref=ref, lock_id=self.lock_id), originating_from_server=True)
+
+        # await self.__in_sequence(ref, h)
+        # # Potential deadlock in original code - What if one connection wants to acquire a lock and another is processing and wants to do another mutation in sequence?
+        # await self.__wait_for_all_mutations(ref)
 
     async def release_write_lock(self, ref: ObjectRef, originating_from_server: bool):
         async def h():
