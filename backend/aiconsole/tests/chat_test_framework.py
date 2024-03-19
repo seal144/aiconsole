@@ -26,6 +26,7 @@ from aiconsole.api.websockets.server_messages import (
     ChatClosedServerMessage,
     ChatOpenedServerMessage,
     NotifyAboutAssetMutationServerMessage,
+    ResponseServerMessage,
 )
 from aiconsole.app import app, lifespan
 from aiconsole.core.chat.actor_id import ActorId
@@ -138,12 +139,13 @@ class ChatTestFramework:
 
                 root.assets.append(chat)
 
-                # await AcquireLockClientMessage(
-                #     request_id=self._request_id,
-                #     ref=self.chat_ref,
-                # ).send(websocket)
+                await AcquireLockClientMessage(
+                    request_id=self._request_id,
+                    ref=self.chat_ref,
+                ).send(websocket)
 
-                # self._wait_for_websocket_response(websocket, NotifyAboutAssetMutationServerMessage)
+                self._wait_for_websocket_response(websocket, ResponseServerMessage)
+
                 await self.chat_ref.message_groups.create(
                     AICMessageGroup(
                         id=self._message_group_id,
@@ -190,7 +192,7 @@ class ChatTestFramework:
 
             await ProcessChatClientMessage(request_id=self._request_id, chat_ref=self.chat_ref).send(websocket)
 
-            self._wait_for_websocket_response(websocket, ChatClosedServerMessage)
+            self._wait_for_websocket_response(websocket, ResponseServerMessage)
 
         return await self._get_chat_messages_for_agent(agent_id)
 
@@ -205,7 +207,7 @@ class ChatTestFramework:
         self, websocket: WebSocketTestSession, message_class: Type[TServerMessage]
     ) -> TServerMessage:
         tries_count = 0
-        while tries_count < 100:
+        while tries_count < 1000:
             json = websocket.receive_json()
             if json["type"] == "ResponseServerMessage" and json["payload"].get("error", None):
                 raise Exception(f"Error received: {json['payload']['error']}")
@@ -213,7 +215,7 @@ class ChatTestFramework:
                 _log.debug(f">> Recived a message {message_class.__name__}")
                 return message_class(**json)
             tries_count += 1
-            sleep(1)
+            sleep(0.1)
 
         raise Exception(f"Response of type {message_class.__name__} not received")
 

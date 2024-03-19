@@ -84,7 +84,7 @@ class ResponseServerMessage(BaseServerMessage):
     payload: dict
     is_error: bool
 
-    def __init__(self, request_id: str, payload: dict, is_error: bool = False) -> None:
+    def __init__(self, request_id: str, payload: dict, is_error: bool = False, **kwargs) -> None:
         from aiconsole.core.project.paths import get_project_directory
 
         project_path = get_project_directory()

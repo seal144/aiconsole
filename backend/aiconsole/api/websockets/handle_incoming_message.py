@@ -303,8 +303,13 @@ async def _handle_process_chat_ws_message(connection: AICConnection, json: dict)
     async def cancelable_task_function():
         # async with context.write_lock(ref=message.chat_ref, originating_from_server=True):
         await do_process_chat(message.chat_ref)
+        await connection.send(
+            ResponseServerMessage(request_id=message.request_id, payload={"chat_id": message.chat_ref.id})
+        )
 
-    task = asyncio.create_task(cancelable_task_function(), )
+    task = asyncio.create_task(
+        cancelable_task_function(),
+    )
     _stoppable_tasks_for_chat[message.chat_ref.id][task.get_name()] = task
     task.add_done_callback(_get_done_callback(message.chat_ref.id, task.get_name()))
 

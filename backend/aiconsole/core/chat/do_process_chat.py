@@ -56,8 +56,6 @@ async def do_process_chat(chat_ref: ChatRef):
         )
 
         if director_agent:
-            role = "system"  # TODO: This should be read from the agent, not hardcoded
-
             if agent:
                 # We want to show the chosen agent as the visible agent, even though the director agent is doing the analysis first
                 visible_agent_id = agent.id
