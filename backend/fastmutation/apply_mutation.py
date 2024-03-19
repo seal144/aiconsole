@@ -104,11 +104,17 @@ async def _handle_AppendToStringMutation(data: DataContext, mutation: AppendToSt
 
 
 async def _handle_LockAcquiredMutation(root: DataContext, mutation: LockAcquiredMutation) -> None:
-    pass
+    obj = await root.get(mutation.ref)
+    asset = get_project_assets().get_asset(mutation.ref.ref_segments[1])
+    if asset is None:
+        raise ValueError(f"Asset {mutation.ref.ref_segments[1]} not found")
 
 
 async def _handle_LockReleasedMutation(root: DataContext, mutation: LockReleasedMutation) -> None:
-    pass
+    obj = await root.get(mutation.ref)
+    asset = get_project_assets().get_asset(mutation.ref.ref_segments[1])
+    if asset is None:
+        raise ValueError(f"Asset {mutation.ref.ref_segments[1]} not found")
 
 
 MUTATION_HANDLERS: dict[str, Callable[[DataContext, Any], Awaitable[None]]] = {
