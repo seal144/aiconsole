@@ -158,6 +158,13 @@ class ChatTestFramework:
                     ),
                 )
                 self._wait_for_websocket_response(websocket, NotifyAboutAssetMutationServerMessage)
+
+                await ReleaseLockClientMessage(
+                    request_id=self._request_id,
+                    ref=self.chat_ref,
+                ).send(websocket)
+
+                self._wait_for_websocket_response(websocket, ResponseServerMessage)
             finally:
                 await UnsubscribeClientMessage(request_id=self._request_id, ref=self.chat_ref).send(websocket)
 
@@ -178,6 +185,15 @@ class ChatTestFramework:
                 ref=self.chat_ref,
             ).send(websocket)
 
+            self._wait_for_websocket_response(websocket, ChatOpenedServerMessage)
+
+            await AcquireLockClientMessage(
+                request_id=self._request_id,
+                ref=self.chat_ref,
+            ).send(websocket)
+
+            self._wait_for_websocket_response(websocket, ResponseServerMessage)
+
             await self.chat_ref.message_groups[self._message_group_id].messages.create(
                 AICMessage(
                     id=str(uuid4()),
@@ -188,9 +204,14 @@ class ChatTestFramework:
 
             self._wait_for_websocket_response(websocket, NotifyAboutAssetMutationServerMessage)
 
-            # await ReleaseLockClientMessage(request_id=self._request_id, ref=self.chat_ref).send(self._websocket)
-
             await ProcessChatClientMessage(request_id=self._request_id, chat_ref=self.chat_ref).send(websocket)
+
+            self._wait_for_websocket_response(websocket, ResponseServerMessage)
+
+            await ReleaseLockClientMessage(
+                request_id=self._request_id,
+                ref=self.chat_ref,
+            ).send(websocket)
 
             self._wait_for_websocket_response(websocket, ResponseServerMessage)
 

@@ -1,12 +1,14 @@
 from typing import Any, Awaitable, Callable
-from aiconsole.core.project.project import get_project_assets
 
+from aiconsole.core.project.project import get_project_assets
 from fastmutation.data_context import DataContext
 from fastmutation.mutations import (
     AppendToStringMutation,
     AssetMutation,
     CreateMutation,
     DeleteMutation,
+    LockAcquiredMutation,
+    LockReleasedMutation,
     SetValueMutation,
 )
 
@@ -17,7 +19,7 @@ async def _handle_CreateMutation(root: DataContext, mutation: CreateMutation):
     if collection is None:
         raise ValueError(f"Collection {mutation.ref.parent_collection} not found")
 
-    asset = get_project_assets().get_asset(mutation.ref.ref_segments[1])
+    asset = get_project_assets().get_asset(mutation.ref.ref_segments[1])  # [0] is 'assets' and [1] is the asset id
 
     object_type = root.type_to_cls_mapping[mutation.object_type]
     obj = object_type(**mutation.object, id=mutation.ref.id)
@@ -36,9 +38,7 @@ async def _handle_CreateMutation(root: DataContext, mutation: CreateMutation):
     else:
         attr = obj
 
-    await get_project_assets().save_asset(
-        asset or attr, (asset and asset.id) or "new", create=asset is None
-    )
+    await get_project_assets().save_asset(asset or attr, (asset and asset.id) or "new", create=asset is None)
 
 
 async def _handle_DeleteMutation(root: DataContext, mutation: DeleteMutation):
@@ -103,11 +103,21 @@ async def _handle_AppendToStringMutation(data: DataContext, mutation: AppendToSt
     await get_project_assets().save_asset(asset, asset.id, create=False)
 
 
+async def _handle_LockAcquiredMutation(root: DataContext, mutation: LockAcquiredMutation) -> None:
+    pass
+
+
+async def _handle_LockReleasedMutation(root: DataContext, mutation: LockReleasedMutation) -> None:
+    pass
+
+
 MUTATION_HANDLERS: dict[str, Callable[[DataContext, Any], Awaitable[None]]] = {
     CreateMutation.__name__: _handle_CreateMutation,
     DeleteMutation.__name__: _handle_DeleteMutation,
     SetValueMutation.__name__: _handle_SetValueMutation,
     AppendToStringMutation.__name__: _handle_AppendToStringMutation,
+    LockAcquiredMutation.__name__: _handle_LockAcquiredMutation,
+    LockReleasedMutation.__name__: _handle_LockReleasedMutation,
 }
 
 
