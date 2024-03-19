@@ -66,7 +66,7 @@ async def _wait_for_lock(ref: ObjectRef, lock_timeout=30) -> None:
         raise Exception(f"Lock acquisition timed out for {ref}")
 
 
-async def _check_mutation_queue(ref: ObjectRef):
+async def _check_queue_and_create_task(ref: ObjectRef):
     if _running_mutations[ref] is not None or _waiting_mutations[ref].empty():
         return
 
@@ -88,7 +88,7 @@ async def _check_mutation_queue(ref: ObjectRef):
         # created event will only work within one loop
         del _mutation_complete_events[ref]
 
-        await _check_mutation_queue(ref)
+        await _check_queue_and_create_task(ref)
 
     task.add_done_callback(clear_task)
 
@@ -252,4 +252,4 @@ class AICFileDataContext(DataContext):
 
     async def __in_sequence(self, ref: ObjectRef, f: Callable[[], Coroutine]):
         await _waiting_mutations[ref].put(f)
-        await _check_mutation_queue(ref)
+        await _check_queue_and_create_task(ref)
