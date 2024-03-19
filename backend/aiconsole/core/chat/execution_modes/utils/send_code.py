@@ -1,7 +1,7 @@
 import logging
 from typing import cast
 
-from aiconsole.core.chat.locations import MessageRef
+from aiconsole.core.chat.locations import MessageRef, ToolCallRef
 from aiconsole.core.chat.types import AICToolCall
 from aiconsole.core.code_running.code_interpreters.language import LanguageStr
 from aiconsole.core.code_running.code_interpreters.language_map import language_map
@@ -40,9 +40,9 @@ async def send_code(
             if tool_call_mutator.is_streaming.get():
                 await prev_tool_mutator.is_streaming.set(False)
 
-        tool_call_mutator = message_ref.tool_calls[tool_call.id]
+        tool_call_mutator: ToolCallRef = message_ref.tool_calls[tool_call.id]
 
-        if not tool_call_mutator.exists():
+        if not await tool_call_mutator.exists():
             await message_ref.tool_calls.create(
                 AICToolCall(
                     id=tool_call.id,
@@ -57,7 +57,7 @@ async def send_code(
             )
 
         async def send_language_if_needed(lang: LanguageStr):
-            if tool_call_mutator.language.get() is None:
+            if await tool_call_mutator.language.get() is None:
                 await tool_call_mutator.language.set(lang)
 
         async def send_headline_delta_for_headline(headline: str):

@@ -125,8 +125,8 @@ class CollectionRef(Generic[TBaseObject], BaseModel):
 
     async def get_item_id_by_index(self, index: int) -> str:
         objects_list = await self.get()
-        if index < 0 or index >= len(objects_list):
-            raise IndexError("Index out of range.")
+        # if index >= len(objects_list) or len(objects_list):
+        #     raise IndexError("Index out of range.")
         obj_id = objects_list[index].id
         return obj_id
 

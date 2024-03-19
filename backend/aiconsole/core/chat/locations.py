@@ -33,10 +33,12 @@ class AssetRef(ObjectRef):
 
 
 class ChatRef(ObjectRef[AICChat]):
-    parent: AssetCollectionRef = Field(default=AssetCollectionRef)
+    parent_collection: AssetCollectionRef
 
-    def __init__(self, id: str, context: DataContext | None):
-        super().__init__(id=id, parent_collection=AssetCollectionRef(context=context), context=context)
+    def __init__(self, id: str, context: DataContext | None = None, parent_collection: AssetCollectionRef | None = None):
+        super().__init__(
+            id=id, parent_collection=parent_collection or AssetCollectionRef(context=context), context=context
+        )
 
     @property
     def message_groups(self):

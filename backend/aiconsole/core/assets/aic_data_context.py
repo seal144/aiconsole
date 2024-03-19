@@ -1,7 +1,7 @@
 import asyncio
 import logging
-from collections import defaultdict, deque
-from typing import Any, Callable, Coroutine, List, Type, cast, overload
+from collections import defaultdict
+from typing import Any, Callable, Coroutine, Type, cast, overload
 
 from aiconsole.api.websockets.connection_manager import (
     AICConnection,
@@ -32,7 +32,7 @@ def create_set_event() -> asyncio.Event:
 
 
 _no_lock_taken: dict[ObjectRef, asyncio.Event] = defaultdict(create_set_event)
-_waiting_mutations: dict[ObjectRef, deque[Callable[[], Coroutine]]] = defaultdict(deque)
+_waiting_mutations: dict[ObjectRef, asyncio.Queue[Callable[[], Coroutine]]] = defaultdict(asyncio.Queue)
 _running_mutations: dict[ObjectRef, asyncio.Task | None] = defaultdict(lambda: None)
 _mutation_complete_events: dict[ObjectRef, asyncio.Event] = defaultdict(asyncio.Event)
 
@@ -66,19 +66,29 @@ async def _wait_for_lock(ref: ObjectRef, lock_timeout=30) -> None:
         raise Exception(f"Lock acquisition timed out for {ref}")
 
 
-def _check_mutation_queue(ref: ObjectRef):
-    if _running_mutations[ref] is not None or not _waiting_mutations[ref]:
+async def _check_mutation_queue(ref: ObjectRef):
+    if _running_mutations[ref] is not None or _waiting_mutations[ref].empty():
         return
 
-    h = _waiting_mutations[ref].popleft()
+    h = await _waiting_mutations[ref].get()
     task = asyncio.create_task(h())
     _running_mutations[ref] = task
 
     def clear_task(future):
+        # Schedule the coroutine using asyncio.create_task or similar
+        asyncio.create_task(clear_task_coroutine(future))
+
+    async def clear_task_coroutine(future):
         _running_mutations[ref] = None
+        # unblock those who are .wait()
         _mutation_complete_events[ref].set()
+        # reset the event
         _mutation_complete_events[ref].clear()
-        _check_mutation_queue(ref)
+        # current programm can have multiple event loops
+        # created event will only work within one loop
+        del _mutation_complete_events[ref]
+
+        await _check_mutation_queue(ref)
 
     task.add_done_callback(clear_task)
 
@@ -185,10 +195,10 @@ class AICFileDataContext(DataContext):
         ...
 
     @overload
-    async def get(self, ref: CollectionRef) -> "List[BaseObject] | None":  # fmt: off
+    async def get(self, ref: CollectionRef) -> "list[BaseObject] | None":  # fmt: off
         ...
 
-    async def get(self, ref: "AnyRef") -> "BaseObject | List[BaseObject] | None":
+    async def get(self, ref: "AnyRef") -> "BaseObject | list[BaseObject] | None":
         obj: BaseObject | None = Root(id="root", assets=[])
 
         segments = ref.ref_segments
@@ -210,7 +220,7 @@ class AICFileDataContext(DataContext):
             while True:
                 # Get the sub collection
                 segment = segments.pop(0)
-                col = cast(List[BaseObject], getattr(obj, segment))
+                col = cast(list[BaseObject], getattr(obj, segment))
 
                 if col is None or not segments:
                     return col
@@ -237,9 +247,9 @@ class AICFileDataContext(DataContext):
         }
 
     async def __wait_for_all_mutations(self, ref: ObjectRef):
-        while _waiting_mutations[ref] or _running_mutations[ref] is not None:
+        while not _waiting_mutations[ref].empty() or _running_mutations[ref] is not None:
             await _mutation_complete_events[ref].wait()
 
     async def __in_sequence(self, ref: ObjectRef, f: Callable[[], Coroutine]):
-        _waiting_mutations[ref].append(f)
-        _check_mutation_queue(ref)
+        await _waiting_mutations[ref].put(f)
+        await _check_mutation_queue(ref)

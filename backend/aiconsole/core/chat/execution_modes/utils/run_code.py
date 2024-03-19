@@ -55,8 +55,6 @@ async def run_code(
                     await tool_call_ref.output.append("\n[Output truncated due to limit]")
                     break
 
-                await tool_call_ref.output.append(token)
-
         except CodeExecutionError as e:
             _log.error(f"Code execution error for tool call {tool_call_ref.id}: {e}")
 

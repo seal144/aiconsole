@@ -1,10 +1,10 @@
 import asyncio
+import logging
 import os
-from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from time import sleep
-from typing import Type, TypeVar, cast
+from typing import Type, TypeVar
 from uuid import uuid4
 
 import pytest
@@ -23,6 +23,7 @@ from aiconsole.api.websockets.client_messages import (
     UnsubscribeClientMessage,
 )
 from aiconsole.api.websockets.server_messages import (
+    ChatClosedServerMessage,
     ChatOpenedServerMessage,
     NotifyAboutAssetMutationServerMessage,
 )
@@ -35,6 +36,8 @@ from aiconsole.core.chat.types import AICChat, AICMessage, AICMessageGroup
 from fastmutation.data_context import DataContext
 from fastmutation.mutations import AssetMutation, LockReleasedMutation
 from fastmutation.types import AnyRef, BaseObject, CollectionRef, ObjectRef
+
+_log = logging.getLogger(__name__)
 
 TServerMessage = TypeVar("TServerMessage", bound=BaseServerMessage)
 
@@ -99,7 +102,6 @@ class ChatTestFramework:
     def repeat(self, times: int) -> pytest.MarkDecorator:
         return pytest.mark.repeat(times)
 
-    @asynccontextmanager
     async def initialize_project_with_chat(self, project_path: str):
         self._request_id = str(uuid4())
         self._message_group_id = str(uuid4())
@@ -154,34 +156,41 @@ class ChatTestFramework:
                     ),
                 )
                 self._wait_for_websocket_response(websocket, NotifyAboutAssetMutationServerMessage)
-
-                self._websocket = websocket
-
-                yield
             finally:
                 await UnsubscribeClientMessage(request_id=self._request_id, ref=self.chat_ref).send(websocket)
 
     async def process_user_code_request(self, message: str, agent_id: str) -> list[AICMessage]:
-        if self._websocket is None:
-            raise Exception("You have to initialize project with chat first")
+        # if self._websocket is None:
+        #     raise Exception("You have to initialize project with chat first")
 
         assert self._message_group_id is not None
         assert self._request_id is not None
         assert self.chat_ref is not None
+        assert self._context is not None
 
-        await self.chat_ref.message_groups[self._message_group_id].messages.create(
-            AICMessage(
-                id=str(uuid4()),
-                timestamp=str(datetime.now()),
-                content=message,
-            ),
-        )
+        with self._client.websocket_connect("/ws") as websocket:
+            self._context._websocket = websocket
 
-        # await ReleaseLockClientMessage(request_id=self._request_id, ref=self.chat_ref).send(self._websocket)
+            await SubscribeToClientMessage(
+                request_id=self._request_id,
+                ref=self.chat_ref,
+            ).send(websocket)
 
-        await ProcessChatClientMessage(request_id=self._request_id, chat_ref=self.chat_ref).send(self._websocket)
+            await self.chat_ref.message_groups[self._message_group_id].messages.create(
+                AICMessage(
+                    id=str(uuid4()),
+                    timestamp=str(datetime.now()),
+                    content=message,
+                ),
+            )
 
-        self._wait_for_mutation_type(self._websocket, LockReleasedMutation)
+            self._wait_for_websocket_response(websocket, NotifyAboutAssetMutationServerMessage)
+
+            # await ReleaseLockClientMessage(request_id=self._request_id, ref=self.chat_ref).send(self._websocket)
+
+            await ProcessChatClientMessage(request_id=self._request_id, chat_ref=self.chat_ref).send(websocket)
+
+            self._wait_for_websocket_response(websocket, ChatClosedServerMessage)
 
         return await self._get_chat_messages_for_agent(agent_id)
 
@@ -201,9 +210,10 @@ class ChatTestFramework:
             if json["type"] == "ResponseServerMessage" and json["payload"].get("error", None):
                 raise Exception(f"Error received: {json['payload']['error']}")
             if json["type"] == message_class.__name__:
+                _log.debug(f">> Recived a message {message_class.__name__}")
                 return message_class(**json)
             tries_count += 1
-            sleep(0.1)
+            sleep(1)
 
         raise Exception(f"Response of type {message_class.__name__} not received")
 

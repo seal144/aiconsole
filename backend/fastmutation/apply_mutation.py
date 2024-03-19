@@ -55,14 +55,52 @@ async def _handle_DeleteMutation(root: DataContext, mutation: DeleteMutation):
     collection.remove(object)
 
 
+# TODO: rework
 async def _handle_SetValueMutation(data: DataContext, mutation: SetValueMutation) -> None:
-    object = await data.get(mutation.ref)
-    setattr(object, mutation.key, mutation.value)
+    obj = await data.get(mutation.ref)
+    asset = get_project_assets().get_asset(mutation.ref.ref_segments[1])
+    if asset is None:
+        raise ValueError(f"Asset {mutation.ref.ref_segments[1]} not found")
+
+    attr = asset
+    for ref in mutation.ref.ref_segments[2:]:
+        if isinstance(attr, list):
+            attr = next((item for item in attr if item.id == ref), None)
+        else:
+            attr = getattr(attr, ref)
+
+    if isinstance(attr, list):
+        attr.append(obj)
+    elif isinstance(attr, dict):
+        attr.update(obj)
+    else:
+        setattr(attr, mutation.key, mutation.value)
+
+    await get_project_assets().save_asset(asset, asset.id, create=False)
 
 
+# TODO: rework
 async def _handle_AppendToStringMutation(data: DataContext, mutation: AppendToStringMutation) -> None:
-    object = await data.get(mutation.ref)
-    setattr(object, mutation.key, getattr(object, mutation.key, "") + mutation.value)
+    obj = await data.get(mutation.ref)
+    asset = get_project_assets().get_asset(mutation.ref.ref_segments[1])
+    if asset is None:
+        raise ValueError(f"Asset {mutation.ref.ref_segments[1]} not found")
+
+    attr = asset
+    for ref in mutation.ref.ref_segments[2:]:
+        if isinstance(attr, list):
+            attr = next((item for item in attr if item.id == ref), None)
+        else:
+            attr = getattr(attr, ref)
+
+    if isinstance(attr, list):
+        attr.append(obj)
+    elif isinstance(attr, dict):
+        attr.update(obj)
+    else:
+        setattr(attr, mutation.key, getattr(attr, mutation.key, "") + mutation.value)
+
+    await get_project_assets().save_asset(asset, asset.id, create=False)
 
 
 MUTATION_HANDLERS: dict[str, Callable[[DataContext, Any], Awaitable[None]]] = {
