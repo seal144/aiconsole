@@ -57,6 +57,7 @@ export const useWebSocketStore = create<WebSockeStore>((set, get) => ({
     };
 
     ws.onmessage = async (e: MessageEvent) => {
+      console.log('Received message: ', JSON.parse(e.data));
       const parsedData = ServerMessageSchema.safeParse(JSON.parse(e.data));
       if (parsedData.success) {
         handleServerMessage(parsedData.data);

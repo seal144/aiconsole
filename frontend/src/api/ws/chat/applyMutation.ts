@@ -183,7 +183,7 @@ function applyMutation2(chat: AICChat, mutation: ChatMutation, messageBuffer?: M
 }
 
 // TODO: change asset type to generic AICAsset
-export function applyMutation(asset: Asset, mutation: AssetMutation) {
+export function applyMutation(asset: Asset, mutation: AssetMutation, messageBuffer?: MessageBuffer) {
   const refSegments = getRefSegments(mutation.ref);
 
   switch (mutation.type) {

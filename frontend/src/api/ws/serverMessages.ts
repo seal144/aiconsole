@@ -14,9 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
 import { AICChatSchema } from '@/types/assets/chatTypes';
-import { ChatMutationSchema } from './chat/chatMutations';
+import { z } from 'zod';
+import { AssetMutationSchema } from './assetMutations';
 
 export const BaseServerMessageSchema = z.object({});
 
@@ -88,14 +88,13 @@ export const SettingsServerMessageSchema = BaseServerMessageSchema.extend({
 
 export type SettingsServerMessage = z.infer<typeof SettingsServerMessageSchema>;
 
-export const NotifyAboutChatMutationServerMessageSchema = BaseServerMessageSchema.extend({
-  type: z.literal('NotifyAboutChatMutationServerMessage'),
+export const NotifyAboutAssetMutationServerMessageSchema = BaseServerMessageSchema.extend({
+  type: z.literal('NotifyAboutAssetMutationServerMessage'),
   request_id: z.string(),
-  chat_id: z.string(),
-  mutation: ChatMutationSchema, // Assuming ChatMutationSchema is defined
+  mutation: AssetMutationSchema, // Assuming ChatMutationSchema is defined
 });
 
-export type NotifyAboutChatMutationServerMessage = z.infer<typeof NotifyAboutChatMutationServerMessageSchema>;
+export type NotifyAboutAssetMutationServerMessage = z.infer<typeof NotifyAboutAssetMutationServerMessageSchema>;
 
 export const ChatOpenedServerMessageSchema = BaseServerMessageSchema.extend({
   type: z.literal('ChatOpenedServerMessage'),
@@ -137,7 +136,7 @@ export const ServerMessageSchema = z.discriminatedUnion('type', [
   ProjectLoadingServerMessageSchema,
   AssetsUpdatedServerMessageSchema,
   SettingsServerMessageSchema,
-  NotifyAboutChatMutationServerMessageSchema,
+  NotifyAboutAssetMutationServerMessageSchema,
   ChatOpenedServerMessageSchema,
   ChatClosedServerMessageSchema,
   DuplicateAssetServerMessageSchema,

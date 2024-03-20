@@ -112,6 +112,7 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
       }
 
       const messageGroupId = uuid();
+      const messageId = uuid();
 
       //  "AICMessageGroup": AICMessageGroup,
       //       "AICMessage": AICMessage,
@@ -149,7 +150,7 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
         {
           type: 'CreateMutation',
           ref: {
-            id: uuid(),
+            id: messageId,
             context: null,
             parent_collection: {
               id: 'messages',
@@ -171,7 +172,7 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
           object_type: 'AICMessage',
           object: {
             is_streaming: false,
-            id: uuid(),
+            id: messageId,
             message_group_id: messageGroupId,
             content: command,
             timestamp: new Date().toISOString(),

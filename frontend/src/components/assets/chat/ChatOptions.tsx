@@ -63,7 +63,6 @@ const ChatOptions = ({
       .filter((item) => !chatOptions?.materialsIds.includes(item.id))
       .filter((item) => item.id !== chatOptions?.agentId);
 
-    console.log('filteredMaterialOptions', filteredMaterialOptions);
     setFilteredAssetsOptions(filteredMaterialOptions);
   }, [assets, inputValue, chatOptions]);
 

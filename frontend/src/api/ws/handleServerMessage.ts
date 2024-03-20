@@ -79,7 +79,7 @@ export async function handleServerMessage(message: ServerMessage) {
         });
       }
       break;
-    case 'NotifyAboutChatMutationServerMessage': {
+    case 'NotifyAboutAssetMutationServerMessage': {
       const chat = deepCopyChat(useChatStore.getState().chat);
       if (!chat) {
         throw new Error('Chat is not initialized');

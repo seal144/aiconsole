@@ -106,7 +106,7 @@ export interface ObjectRef {
 export const CollectionRefSchema: z.ZodLazy<ZodTypeAny> = z.lazy(() =>
   z.object({
     id: z.string(),
-    parent: z.union([ObjectRefSchema, z.null()]),
+    parent: z.union([ObjectRefSchema, z.undefined()]),
     context: z.union([z.null(), z.undefined()]),
   }),
 );
