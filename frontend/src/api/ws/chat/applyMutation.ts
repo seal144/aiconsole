@@ -184,27 +184,27 @@ function applyMutation2(chat: AICChat, mutation: ChatMutation, messageBuffer?: M
 
 // TODO: change asset type to generic AICAsset
 export function applyMutation(asset: Asset, mutation: AssetMutation) {
-  console.log('mutation', mutation);
   const refSegments = getRefSegments(mutation.ref);
-  console.log(refSegments);
-  // const asset = useAssetStore.getState().getAsset(refSegments[1]);
 
   switch (mutation.type) {
     case 'CreateMutation':
-      console.log('refSegments', refSegments);
       let attr = asset;
       for (let refSegment of refSegments.slice(2, -1)) {
         if (Array.isArray(attr)) {
-          attr = attr.find((item) => item.id === refSegment) || null;
+          const index = attr.findIndex((a) => a.id === refSegment);
+          attr = attr[index];
         } else {
           attr = attr[refSegment];
         }
       }
-      console.log('attr', attr);
       if (Array.isArray(attr)) {
+        console.log('asset', asset);
+        console.log('attr', attr);
         attr.push(mutation.object);
+        console.log('attr after', attr);
+        console.log('asset after', asset);
       } else if (typeof attr === 'object' && attr !== null) {
-        attr = { ...attr, ...mutation.object };
+        Object.assign(attr, mutation.object);
       }
 
       break;
