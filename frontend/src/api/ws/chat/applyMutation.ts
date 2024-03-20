@@ -198,15 +198,10 @@ export function applyMutation(asset: Asset, mutation: AssetMutation) {
         }
       }
       if (Array.isArray(attr)) {
-        console.log('asset', asset);
-        console.log('attr', attr);
         attr.push(mutation.object);
-        console.log('attr after', attr);
-        console.log('asset after', asset);
       } else if (typeof attr === 'object' && attr !== null) {
         Object.assign(attr, mutation.object);
       }
-
       break;
     case 'DeleteMutation':
       if (!asset) {

@@ -20,6 +20,7 @@ import { v4 as uuid } from 'uuid';
 import { ChatAPI } from '../../../api/api/ChatAPI';
 import { ChatStore } from './useChatStore';
 import { useSettingsStore } from '@/store/settings/useSettingsStore';
+import { AICMessage } from '@/types/assets/chatTypes';
 
 export type CommandSlice = {
   commandHistory: string[];
@@ -169,11 +170,13 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
           },
           object_type: 'AICMessage',
           object: {
-            message_id: uuid(),
+            is_streaming: false,
+            id: uuid(),
             message_group_id: messageGroupId,
             content: command,
             timestamp: new Date().toISOString(),
-          },
+            tool_calls: [],
+          } as AICMessage,
         },
       ]);
 
