@@ -92,7 +92,7 @@ async def _handle_acquire_lock_ws_message(connection: AICConnection, json: dict)
         )
         await context.acquire_write_lock(ref=message.ref, originating_from_server=False)
         await connection.send(
-            ResponseServerMessage(request_id=message.request_id, payload={"ref": message.ref}, is_error=False)
+            ResponseServerMessage(request_id=message.request_id, payload={"chat_id": message.ref.id}, is_error=False)
         )
     except Exception as e:
         _log.error(f"Error during acquiring lock {message.ref if message else 'unknown'}: {e}")
@@ -114,7 +114,7 @@ async def _handle_release_lock_ws_message(connection: AICConnection, json: dict)
     )
     await context.release_write_lock(ref=message.ref, originating_from_server=False)
     await connection.send(
-        ResponseServerMessage(request_id=message.request_id, payload={"ref": message.ref}, is_error=False)
+        ResponseServerMessage(request_id=message.request_id, payload={"chat_id": message.ref.id}, is_error=False)
     )
 
 

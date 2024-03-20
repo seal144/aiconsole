@@ -70,11 +70,7 @@ export const createMessageSlice: StateCreator<ChatStore, [], [], MessageSlice> =
         request_id: lockId,
         ref: { id: chat_id, context: null, parent_collection: { id: 'assets', parent: null, context: null } },
       },
-      (response) =>
-        response.type === 'NotifyAboutChatMutationServerMessage' &&
-        response.mutation.type === 'LockAcquiredMutation' &&
-        response.mutation.lock_id === lockId &&
-        response.chat_id === chat_id,
+      (response) => response.type === 'ResponseServerMessage' && response.payload.chat_id === chat_id,
     );
   },
   unlockChat: async (lockId: string) => {
