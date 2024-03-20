@@ -36,7 +36,7 @@ from aiconsole.core.project.paths import (
 _USER_AGENT_ID = "user"
 
 
-async def save_asset_to_fs(asset: Asset, old_asset_id: str, scope: str = "default") -> Asset:
+async def save_asset_to_fs(asset: Asset, old_asset_id: str, scope: str) -> Asset:
     validate_asset_id(asset)
 
     project_assets_directory_path = get_project_assets_directory(asset.type)

@@ -73,7 +73,7 @@ class Assets:
         """
         return [assets[0] for assets in self._assets.values() if self.is_enabled(assets[0].id) == enabled]
 
-    async def save_asset(self, asset: Asset, old_asset_id: str, create: bool):
+    async def save_asset(self, asset: Asset, old_asset_id: str, create: bool, scope: str | None = None):
         if asset.defined_in != AssetLocation.PROJECT_DIR and not create:
             raise Exception("Cannot save asset not defined in project.")
 
@@ -98,7 +98,7 @@ class Assets:
                     file_path = await AICMaterial.save_content_to_file(asset.id, asset.content)
                     asset.content = f"file://{file_path}"
 
-        new_asset = await save_asset_to_fs(asset, old_asset_id)
+        new_asset = await save_asset_to_fs(asset, old_asset_id, scope or "default")
 
         if asset.id not in self._assets:
             self._assets[asset.id] = []
