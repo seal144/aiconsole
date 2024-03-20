@@ -90,3 +90,19 @@ export const UserProfileSchema = z.object({
 });
 
 export type UserProfile = z.infer<typeof UserProfileSchema>;
+
+export const CollectionRefSchema = z.object({
+  id: z.literal('assets'),
+  parent: z.union([z.null(), z.undefined()]),
+  context: z.union([z.null(), z.undefined()]),
+});
+
+export type CollectionRef = z.infer<typeof CollectionRefSchema>;
+
+export const ObjectRefSchema = z.object({
+  id: z.string(),
+  context: z.union([z.null(), z.undefined()]),
+  parent_collection: CollectionRefSchema,
+});
+
+export type ObjectRef = z.infer<typeof ObjectRefSchema>;
