@@ -10,16 +10,6 @@ class BaseMutation(BaseModel):
     ref: "ObjectRef"
 
 
-class LockAcquiredMutation(BaseMutation):
-    type: Literal["LockAcquiredMutation"] = "LockAcquiredMutation"
-    lock_id: str
-
-
-class LockReleasedMutation(BaseMutation):
-    type: Literal["LockReleasedMutation"] = "LockReleasedMutation"
-    lock_id: str
-
-
 class CreateMutation(BaseMutation):
     type: Literal["CreateMutation"] = "CreateMutation"
     object_type: str
@@ -42,11 +32,4 @@ class AppendToStringMutation(BaseMutation):
     value: str
 
 
-AssetMutation = (
-    LockAcquiredMutation
-    | LockReleasedMutation
-    | CreateMutation
-    | DeleteMutation
-    | SetValueMutation
-    | AppendToStringMutation
-)
+AssetMutation = CreateMutation | DeleteMutation | SetValueMutation | AppendToStringMutation

@@ -17,8 +17,6 @@ from fastmutation.apply_mutation import apply_mutation
 from fastmutation.data_context import DataContext
 from fastmutation.mutations import (
     AssetMutation,
-    LockAcquiredMutation,
-    LockReleasedMutation,
 )
 from fastmutation.types import AnyRef, BaseObject, CollectionRef, ObjectRef
 
@@ -100,25 +98,21 @@ class AICFileDataContext(DataContext):
         self.origin = origin
 
     async def mutate(self, mutation: "AssetMutation", originating_from_server: bool) -> None:
-        async def h():
-            try:
-                # TODO: CHANGE THIS
-                # # Check if ref is locked or any of it's parents are locked with the current lock_id, if not raise an exception
-                # if isinstance(mutation.ref, ObjectRef):
-                #     if _no_lock_taken[mutation.ref].is_set():
-                #         raise Exception(
-                #             f"Lock not acquired for chat {mutation.ref.id} request_id={self.lock_id}",
-                #         )
+        try:
+            # TODO: CHANGE THIS
+            # # Check if ref is locked or any of it's parents are locked with the current lock_id, if not raise an exception
+            # if isinstance(mutation.ref, ObjectRef):
+            #     if _no_lock_taken[mutation.ref].is_set():
+            #         raise Exception(
+            #             f"Lock not acquired for chat {mutation.ref.id} request_id={self.lock_id}",
+            #         )
 
-                # TODO: specific code for mutations
-                await apply_mutation(self, mutation)
+            # TODO: specific code for mutations
+            await apply_mutation(self, mutation)
 
-            except Exception as e:
-                _log.exception(f"Error during mutation: {e}")
-                raise
-
-        await self.__in_sequence(mutation.ref, h)
-        await self.__wait_for_all_mutations(mutation.ref)
+        except Exception as e:
+            _log.exception(f"Error during mutation: {e}")
+            raise
 
         # HANDLE DELETE
 
@@ -169,8 +163,9 @@ class AICFileDataContext(DataContext):
             if self.origin and not originating_from_server:
                 self.origin.lock_acquired(ref=ref, request_id=self.lock_id)
 
-        await self.__in_sequence(ref, h)
-        await self.mutate(LockAcquiredMutation(ref=ref, lock_id=self.lock_id), originating_from_server=True)
+        await self.__in_sequence(ref, f=h)
+        await self.__wait_for_all_mutations(ref)
+
         # Potential deadlock in original code - What if one connection wants to acquire a lock and another is processing and wants to do another mutation in sequence?
 
     async def release_write_lock(self, ref: ObjectRef, originating_from_server: bool):
@@ -185,7 +180,7 @@ class AICFileDataContext(DataContext):
                 raise Exception(f"Lock {ref} is not acquired by {self.lock_id}")
 
         await self.__in_sequence(ref, h)
-        await self.mutate(LockReleasedMutation(ref=ref, lock_id=self.lock_id), originating_from_server=True)
+        await self.__wait_for_all_mutations(ref)
 
     @overload
     async def get(self, ref: ObjectRef) -> "BaseObject | None":  # fmt: off

@@ -35,7 +35,7 @@ from aiconsole.core.chat.locations import AssetCollectionRef, ChatRef
 from aiconsole.core.chat.root import Root
 from aiconsole.core.chat.types import AICChat, AICMessage, AICMessageGroup
 from fastmutation.data_context import DataContext
-from fastmutation.mutations import AssetMutation, LockReleasedMutation
+from fastmutation.mutations import AssetMutation
 from fastmutation.types import AnyRef, BaseObject, CollectionRef, ObjectRef
 
 _log = logging.getLogger(__name__)

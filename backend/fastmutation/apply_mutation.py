@@ -7,8 +7,6 @@ from fastmutation.mutations import (
     AssetMutation,
     CreateMutation,
     DeleteMutation,
-    LockAcquiredMutation,
-    LockReleasedMutation,
     SetValueMutation,
 )
 
@@ -103,33 +101,11 @@ async def _handle_AppendToStringMutation(data: DataContext, mutation: AppendToSt
     await get_project_assets().save_asset(asset, asset.id, create=False)
 
 
-async def _handle_LockAcquiredMutation(root: DataContext, mutation: LockAcquiredMutation) -> None:
-    asset = get_project_assets().get_asset(mutation.ref.ref_segments[1])
-    if asset is None:
-        raise ValueError(f"Asset {mutation.ref.ref_segments[1]} not found")
-
-    asset.lock_id = mutation.lock_id
-
-    await get_project_assets().save_asset(asset, asset.id, create=False)
-
-
-async def _handle_LockReleasedMutation(root: DataContext, mutation: LockReleasedMutation) -> None:
-    asset = get_project_assets().get_asset(mutation.ref.ref_segments[1])
-    if asset is None:
-        raise ValueError(f"Asset {mutation.ref.ref_segments[1]} not found")
-
-    asset.lock_id = None
-
-    await get_project_assets().save_asset(asset, asset.id, create=False)
-
-
 MUTATION_HANDLERS: dict[str, Callable[[DataContext, Any], Awaitable[None]]] = {
     CreateMutation.__name__: _handle_CreateMutation,
     DeleteMutation.__name__: _handle_DeleteMutation,
     SetValueMutation.__name__: _handle_SetValueMutation,
     AppendToStringMutation.__name__: _handle_AppendToStringMutation,
-    LockAcquiredMutation.__name__: _handle_LockAcquiredMutation,
-    LockReleasedMutation.__name__: _handle_LockReleasedMutation,
 }
 
 
