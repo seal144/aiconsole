@@ -58,7 +58,7 @@ async function fetchAsset<T extends Asset>({
     const response: ChatOpenedServerMessage = (await useWebSocketStore.getState().sendMessageAndWaitForResponse(
       {
         type: 'SubscribeToClientMessage',
-        ref: { id, parent_collection: { id: 'assets', parent: null, context: null }, context: null },
+        ref: { id, context: null, parent_collection: { id: 'assets', parent: null, context: null } },
         request_id: uuidv4(),
       },
       (response: ServerMessage) => {
@@ -85,7 +85,7 @@ async function closeChat(id: string): Promise<ServerMessage> {
   const response = await useWebSocketStore.getState().sendMessageAndWaitForResponse(
     {
       type: 'UnsubscribeClientMessage',
-      ref: { id, parent_collection: { id: 'assets', parent: null, context: null }, context: null },
+      ref: { id, context: null, parent_collection: { id: 'assets', parent: null, context: null } },
       request_id: uuidv4(),
     },
     (response: ServerMessage) => {

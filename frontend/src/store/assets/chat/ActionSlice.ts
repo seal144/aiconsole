@@ -70,7 +70,12 @@ export const createActionSlice: StateCreator<ChatStore, [], [], ActionSlice> = (
       useWebSocketStore.getState().sendMessage({
         type: 'StopChatClientMessage',
         request_id: uuidv4(),
-        chat_id: chat.id,
+        ref: {
+          context: null,
+          id: chat.id,
+          parent: { id: 'assets', parent: null },
+          parent_collection: { id: 'assets', parent: null },
+        },
       });
     }
   },
@@ -90,7 +95,7 @@ export const createActionSlice: StateCreator<ChatStore, [], [], ActionSlice> = (
       useWebSocketStore.getState().sendMessage({
         type: 'ProcessChatClientMessage',
         request_id: uuidv4(),
-        chat_id: chat.id,
+        chat_ref: { id: chat.id, context: null, parent_collection: { id: 'assets', parent: null } },
       });
     } catch (err) {
       if ((err as Error).name === 'AbortError') {

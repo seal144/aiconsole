@@ -68,7 +68,7 @@ export const createMessageSlice: StateCreator<ChatStore, [], [], MessageSlice> =
       {
         type: 'AcquireLockClientMessage',
         request_id: lockId,
-        ref: { id: chat_id, parent_collection: { id: 'assets', parent: null, context: null }, context: null },
+        ref: { id: chat_id, context: null, parent_collection: { id: 'assets', parent: null, context: null } },
       },
       (response) =>
         response.type === 'NotifyAboutChatMutationServerMessage' &&
@@ -87,13 +87,14 @@ export const createMessageSlice: StateCreator<ChatStore, [], [], MessageSlice> =
     await useWebSocketStore.getState().sendMessage({
       type: 'ReleaseLockClientMessage',
       request_id: lockId,
-      chat_id: chat.id,
+      ref: { id: chat.id, context: null, parent_collection: { id: 'assets', parent: null, context: null } },
     });
   },
   userMutateChat: async (mutation: ChatMutation | ChatMutation[]) => {
     const mutations = Array.isArray(mutation) ? mutation : [mutation];
     const lockId = uuidv4();
     await get().lockChat(lockId);
+
     try {
       set((state) => {
         const chat = deepCopyChat(state.chat);
@@ -107,9 +108,8 @@ export const createMessageSlice: StateCreator<ChatStore, [], [], MessageSlice> =
 
           // send to server
           useWebSocketStore.getState().sendMessage({
-            type: 'InitChatMutationClientMessage',
+            type: 'DoMutationClientMessage',
             request_id: lockId,
-            chat_id: chat.id,
             mutation,
           });
         }

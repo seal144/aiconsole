@@ -16,39 +16,39 @@
 
 import { z } from 'zod';
 import { ChatMutationSchema } from './chat/chatMutations';
+import { CollectionRefSchema, ObjectRefSchema } from '@/types/assets/assetTypes';
 
 export const BaseClientMessageSchema = z.object({});
 
 export type BaseClientMessage = z.infer<typeof BaseClientMessageSchema>;
 
-export const InitChatMutationClientMessageSchema = BaseClientMessageSchema.extend({
-  type: z.literal('InitChatMutationClientMessage'),
+export const DoMutationClientMessageSchema = BaseClientMessageSchema.extend({
+  type: z.literal('DoMutationClientMessage'),
   request_id: z.string(),
-  chat_id: z.string(),
   mutation: ChatMutationSchema, // Replace with your actual ChatMutationSchema
 });
 
-export type InitChatMutationClientMessage = z.infer<typeof InitChatMutationClientMessageSchema>;
+export type DoMutationClientMessage = z.infer<typeof DoMutationClientMessageSchema>;
 
 export const AcquireLockClientMessageSchema = BaseClientMessageSchema.extend({
   type: z.literal('AcquireLockClientMessage'),
+  ref: ObjectRefSchema,
   request_id: z.string(),
-  ref: z.object({ id: z.string(), context: z.object({ id: z.string() }) }),
 });
 
 export type AcquireLockClientMessage = z.infer<typeof AcquireLockClientMessageSchema>;
 
 export const ReleaseLockClientMessageSchema = BaseClientMessageSchema.extend({
   type: z.literal('ReleaseLockClientMessage'),
+  ref: ObjectRefSchema,
   request_id: z.string(),
-  chat_id: z.string(),
 });
 
 export type ReleaseLockClientMessage = z.infer<typeof ReleaseLockClientMessageSchema>;
 
 export const SubscribeToClientMessageSchema = BaseClientMessageSchema.extend({
   type: z.literal('SubscribeToClientMessage'),
-  ref: z.object({ id: z.string(), context: z.object({ id: z.string() }) }),
+  ref: ObjectRefSchema,
   request_id: z.string(),
 });
 
@@ -65,14 +65,19 @@ export type DuplicateAssetClientMessage = z.infer<typeof DuplicateAssetClientMes
 export const StopChatClientMessageSchema = BaseClientMessageSchema.extend({
   type: z.literal('StopChatClientMessage'),
   request_id: z.string(),
-  chat_id: z.string(),
+  ref: z.object({
+    id: z.string(),
+    context: z.null(),
+    parent_collection: CollectionRefSchema,
+    parent: CollectionRefSchema,
+  }),
 });
 
 export type StopChatClientMessage = z.infer<typeof StopChatClientMessageSchema>;
 
 export const UnsubscribeClientMessageSchema = BaseClientMessageSchema.extend({
   type: z.literal('UnsubscribeClientMessage'),
-  ref: z.object({ id: z.string(), context: z.object({ id: z.string() }) }),
+  ref: ObjectRefSchema,
   request_id: z.string(),
 });
 
@@ -89,13 +94,13 @@ export type AcceptCodeClientMessage = z.infer<typeof AcceptCodeClientMessageSche
 export const ProcessChatClientMessageSchema = BaseClientMessageSchema.extend({
   type: z.literal('ProcessChatClientMessage'),
   request_id: z.string(),
-  chat_id: z.string(),
+  chat_ref: ObjectRefSchema,
 });
 
 export type ProcessChatClientMessage = z.infer<typeof ProcessChatClientMessageSchema>;
 
 export const ClientMessageSchema = z.union([
-  InitChatMutationClientMessageSchema,
+  DoMutationClientMessageSchema,
   AcquireLockClientMessageSchema,
   ReleaseLockClientMessageSchema,
   DuplicateAssetClientMessageSchema,

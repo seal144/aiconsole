@@ -121,11 +121,7 @@ export type DuplicateAssetServerMessage = z.infer<typeof DuplicateAssetServerMes
 export const ResponseServerMessageSchema = BaseServerMessageSchema.extend({
   request_id: z.string(),
   is_error: z.boolean(),
-  payload: z.object({
-    project_name: z.string(),
-    project_path: z.string(),
-    chat_id: z.string(),
-  }),
+  payload: z.record(z.string(), z.any()),
   type: z.literal('ResponseServerMessage'),
 });
 
