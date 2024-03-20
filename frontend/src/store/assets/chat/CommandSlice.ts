@@ -119,67 +119,42 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
       //       "AICToolCall": AICToolCall,
       //       "AICChat": AICChat,
 
-      await get().userMutateChat([
-        {
-          type: 'CreateMutation',
-          ref: {
-            id: messageGroupId,
-            context: null,
-            parent_collection: {
-              id: 'message_groups',
-              parent: {
-                id: chat.id,
-                context: null,
-                parent_collection: { id: 'assets', parent: null, context: null },
-              },
+      await get().userMutateChat({
+        type: 'CreateMutation',
+        ref: {
+          id: messageGroupId,
+          context: null,
+          parent_collection: {
+            id: 'message_groups',
+            parent: {
+              id: chat.id,
               context: null,
+              parent_collection: { id: 'assets', parent: null, context: null },
             },
-          },
-          object_type: 'AICMessageGroup',
-          object: {
-            id: messageGroupId,
-            actor_id: { type: 'user', id: useSettingsStore.getState().settings.user_profile.id || 'user' },
-            task: '',
-            materials_ids: [],
-            analysis: '',
-            role: 'user',
-            messages: [],
-            lock_id: null,
+            context: null,
           },
         },
-        {
-          type: 'CreateMutation',
-          ref: {
-            id: messageId,
-            context: null,
-            parent_collection: {
-              id: 'messages',
-              parent: {
-                id: messageGroupId,
-                parent_collection: {
-                  id: 'message_groups',
-                  parent: {
-                    id: chat.id,
-                    context: null,
-                    parent_collection: { id: 'assets', parent: null, context: null },
-                  },
-                  context: null,
-                },
-              },
-              context: null,
+        object_type: 'AICMessageGroup',
+        object: {
+          id: messageGroupId,
+          actor_id: { type: 'user', id: useSettingsStore.getState().settings.user_profile.id || 'user' },
+          task: '',
+          materials_ids: [],
+          analysis: '',
+          role: 'user',
+          messages: [
+            {
+              is_streaming: false,
+              id: messageId,
+              message_group_id: messageGroupId,
+              content: command,
+              timestamp: new Date().toISOString(),
+              tool_calls: [],
             },
-          },
-          object_type: 'AICMessage',
-          object: {
-            is_streaming: false,
-            id: messageId,
-            message_group_id: messageGroupId,
-            content: command,
-            timestamp: new Date().toISOString(),
-            tool_calls: [],
-          } as AICMessage,
+          ],
+          lock_id: null,
         },
-      ]);
+      });
 
       await get().saveCommandAndMessagesToHistory(command, true);
     }
