@@ -28,7 +28,6 @@ export type AssetsState = {
   deleteAsset: (id: string) => Promise<void>;
   canOpenFinderForEditable(editable: Asset): boolean;
   openFinderForEditable: (editable: Asset) => void;
-
   selectedAsset?: Asset;
   lastSavedSelectedAsset?: Asset;
   newAssetFromParams: (location: URLSearchParams) => void;

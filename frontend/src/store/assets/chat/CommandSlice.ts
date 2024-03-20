@@ -112,22 +112,68 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
 
       const messageGroupId = uuid();
 
+      //  "AICMessageGroup": AICMessageGroup,
+      //       "AICMessage": AICMessage,
+      //       "AICToolCall": AICToolCall,
+      //       "AICChat": AICChat,
+
       await get().userMutateChat([
         {
-          type: 'CreateMessageGroupMutation',
-          message_group_id: messageGroupId,
-          actor_id: { type: 'user', id: useSettingsStore.getState().settings.user_profile.id || 'user' },
-          task: '',
-          materials_ids: [],
-          analysis: '',
-          role: 'user',
+          type: 'CreateMutation',
+          ref: {
+            id: messageGroupId,
+            context: null,
+            parent_collection: {
+              id: 'message_groups',
+              parent: {
+                id: chat.id,
+                context: null,
+                parent_collection: { id: 'assets', parent: null, context: null },
+              },
+              context: null,
+            },
+          },
+          object_type: 'AICMessageGroup',
+          object: {
+            id: messageGroupId,
+            actor_id: { type: 'user', id: useSettingsStore.getState().settings.user_profile.id || 'user' },
+            task: '',
+            materials_ids: [],
+            analysis: '',
+            role: 'user',
+            messages: [],
+            lock_id: null,
+          },
         },
         {
-          type: 'CreateMessageMutation',
-          message_id: uuid(),
-          message_group_id: messageGroupId,
-          content: command,
-          timestamp: new Date().toISOString(),
+          type: 'CreateMutation',
+          ref: {
+            id: uuid(),
+            context: null,
+            parent_collection: {
+              id: 'messages',
+              parent: {
+                id: messageGroupId,
+                parent_collection: {
+                  id: 'message_groups',
+                  parent: {
+                    id: chat.id,
+                    context: null,
+                    parent_collection: { id: 'assets', parent: null, context: null },
+                  },
+                  context: null,
+                },
+              },
+              context: null,
+            },
+          },
+          object_type: 'AICMessage',
+          object: {
+            message_id: uuid(),
+            message_group_id: messageGroupId,
+            content: command,
+            timestamp: new Date().toISOString(),
+          },
         },
       ]);
 

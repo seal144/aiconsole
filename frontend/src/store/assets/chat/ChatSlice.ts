@@ -38,12 +38,10 @@ export type ChatSlice = {
   renameChat: (newChat: AICChat) => Promise<void>;
   setIsChatLoading: (isLoading: boolean) => void;
   setIsChatOptionsExpanded: (isExpanded: boolean) => void;
-
   setSelectedAgentId: (id: string) => void;
   setSelectedMaterialsIds: (ids: string[]) => void;
   setAICanAddExtraMaterials: (aiCanAddExtraMaterials: boolean) => void;
   setDraftCommand: (draftCommand: string) => void;
-
   chatOptionsSaveDebounceTimer: NodeJS.Timeout | null;
 };
 

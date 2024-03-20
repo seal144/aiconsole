@@ -1,18 +1,16 @@
 import { AICChat, getMessageGroup, getMessageLocation, getToolCallLocation } from '@/types/assets/chatTypes';
-import { ChatMutation } from '@/api/ws/chat/chatMutations';
 import { MessageBuffer } from '@/utils/common/MessageBuffer';
+import { AssetMutation } from '../assetMutations';
+import { ChatMutation } from './chatMutations';
+import { Asset } from '@/types/assets/assetTypes';
+import { useAssetStore } from '@/store/assets/useAssetStore';
+import { getRefSegments } from '@/utils/assets/getRefSegments';
 
 /**
  * KEEEP THIS IN SYNC WITH BACKEND apply_mutation!
  */
-export function applyMutation(chat: AICChat, mutation: ChatMutation, messageBuffer?: MessageBuffer) {
+function applyMutation2(chat: AICChat, mutation: ChatMutation, messageBuffer?: MessageBuffer) {
   switch (mutation.type) {
-    case 'LockAcquiredMutation':
-      chat.lock_id = mutation.lock_id;
-      break;
-    case 'LockReleasedMutation':
-      chat.lock_id = undefined;
-      break;
     case 'CreateMessageGroupMutation':
       chat.message_groups.push({
         id: mutation.message_group_id,
@@ -181,5 +179,59 @@ export function applyMutation(chat: AICChat, mutation: ChatMutation, messageBuff
       break;
     default:
       console.error('Unknown mutation type: ', mutation);
+  }
+}
+
+// TODO: change asset type to generic AICAsset
+export function applyMutation(asset: Asset, mutation: AssetMutation) {
+  console.log('mutation', mutation);
+  const refSegments = getRefSegments(mutation.ref);
+  console.log(refSegments);
+  // const asset = useAssetStore.getState().getAsset(refSegments[1]);
+
+  switch (mutation.type) {
+    case 'CreateMutation':
+      console.log('refSegments', refSegments);
+      let attr = asset;
+      for (let refSegment of refSegments.slice(2, -1)) {
+        if (Array.isArray(attr)) {
+          attr = attr.find((item) => item.id === refSegment) || null;
+        } else {
+          attr = attr[refSegment];
+        }
+      }
+      console.log('attr', attr);
+      if (Array.isArray(attr)) {
+        attr.push(mutation.object);
+      } else if (typeof attr === 'object' && attr !== null) {
+        attr = { ...attr, ...mutation.object };
+      }
+
+      break;
+    case 'DeleteMutation':
+      if (!asset) {
+        throw new Error(`Asset ${mutation.ref.id} not found`);
+      }
+      const collection = mutation.ref.parent_collection.id;
+
+      break;
+
+    case 'SetValueMutation':
+      if (!asset) {
+        throw new Error(`Asset ${mutation.ref.id} not found`);
+      }
+
+      const { key, value } = mutation;
+      const obj = structuredClone(asset) || {};
+
+      if (Array.isArray(obj[key])) {
+        obj[key].push(obj);
+      } else {
+        obj[key] = value;
+      }
+      break;
+
+    case 'AppendToStringMutation':
+      break;
   }
 }

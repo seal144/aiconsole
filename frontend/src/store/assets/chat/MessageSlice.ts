@@ -19,16 +19,17 @@ import { StateCreator } from 'zustand';
 import { AICToolCall, AICMessage } from '@/types/assets/chatTypes';
 import { ChatStore } from './useChatStore';
 import { deepCopyChat, getMessage, getToolCall } from '@/utils/assets/chatUtils';
-import { ChatMutation } from '@/api/ws/chat/chatMutations';
+// import { ChatMutation } from '@/api/ws/chat/chatMutations';
 import { applyMutation } from '@/api/ws/chat/applyMutation';
 import { useWebSocketStore } from '@/api/ws/useWebSocketStore';
 
 import { v4 as uuidv4 } from 'uuid';
+import { AssetMutation } from '@/api/ws/assetMutations';
 
 export type MessageSlice = {
   loadingMessages: boolean;
   isViableForRunningCode: (toolCallId: string) => boolean;
-  userMutateChat: (mutation: ChatMutation | ChatMutation[]) => Promise<void>;
+  userMutateChat: (mutation: AssetMutation | AssetMutation[]) => Promise<void>;
   lockChat: (lockId: string) => Promise<void>;
   unlockChat: (lockId: string) => Promise<void>;
 };
@@ -86,7 +87,7 @@ export const createMessageSlice: StateCreator<ChatStore, [], [], MessageSlice> =
       ref: { id: chat.id, context: null, parent_collection: { id: 'assets', parent: null, context: null } },
     });
   },
-  userMutateChat: async (mutation: ChatMutation | ChatMutation[]) => {
+  userMutateChat: async (mutation: AssetMutation | AssetMutation[]) => {
     const mutations = Array.isArray(mutation) ? mutation : [mutation];
     const lockId = uuidv4();
     await get().lockChat(lockId);
