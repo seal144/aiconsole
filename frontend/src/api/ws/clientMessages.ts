@@ -25,9 +25,13 @@ export type BaseClientMessage = z.infer<typeof BaseClientMessageSchema>;
 export const DoMutationClientMessageSchema = BaseClientMessageSchema.extend({
   type: z.literal('DoMutationClientMessage'),
   request_id: z.string(),
-  mutation: ChatMutationSchema, // Replace with your actual ChatMutationSchema
+  mutation: z.object({
+    ref: ObjectRefSchema,
+    type: z.literal('CreateMutation'),
+    object_type: z.string(),
+    object: ChatMutationSchema,
+  }),
 });
-
 export type DoMutationClientMessage = z.infer<typeof DoMutationClientMessageSchema>;
 
 export const AcquireLockClientMessageSchema = BaseClientMessageSchema.extend({
