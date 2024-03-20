@@ -1,7 +1,5 @@
 from typing import cast
 
-from pydantic import Field
-
 from aiconsole.core.chat.actor_id import ActorId
 from aiconsole.core.chat.types import (
     AICChat,
@@ -28,7 +26,7 @@ class AssetCollectionRef(CollectionRef):
 class AssetRef(ObjectRef):
     parent: AssetCollectionRef
 
-    def __init__(self, id: str, context: DataContext):
+    def __init__(self, id: str, context: DataContext | None):
         super().__init__(id=id, parent_collection=AssetCollectionRef(context=context), context=context)
 
 

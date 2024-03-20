@@ -99,20 +99,23 @@ class Assets:
                     asset.content = f"file://{file_path}"
 
         new_asset = await save_asset_to_fs(asset, old_asset_id, scope or "default")
+        if new_asset:
+            if asset.id not in self._assets:
+                self._assets[asset.id] = []
 
-        if asset.id not in self._assets:
-            self._assets[asset.id] = []
+            # integrity checks and deleting old assets from structure
+            if not create:
+                if not self._assets[asset.id] or self._assets[asset.id][0].defined_in != AssetLocation.PROJECT_DIR:
+                    raise Exception(f"Asset {asset.id} cannot be edited")
+                self._assets[asset.id].pop(0)
+            else:
+                if self._assets[asset.id] and self._assets[asset.id][0].defined_in == AssetLocation.PROJECT_DIR:
+                    raise Exception(f"Asset {asset.id} already exists")
 
-        # integrity checks and deleting old assets from structure
-        if not create:
-            if not self._assets[asset.id] or self._assets[asset.id][0].defined_in != AssetLocation.PROJECT_DIR:
-                raise Exception(f"Asset {asset.id} cannot be edited")
-            self._assets[asset.id].pop(0)
+            self._assets[asset.id].insert(0, new_asset)
         else:
-            if self._assets[asset.id] and self._assets[asset.id][0].defined_in == AssetLocation.PROJECT_DIR:
-                raise Exception(f"Asset {asset.id} already exists")
-
-        self._assets[asset.id].insert(0, new_asset)
+            if asset.id in self._assets:
+                del self._assets[asset.id]
 
         self._suppress_notification()
 
