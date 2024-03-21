@@ -78,18 +78,18 @@ export const EmptyChat = ({ textAreaRef }: EmptyChatProps) => {
     }
 
     if (asset.type === 'agent') {
-      if (chatOptions?.agentId !== asset.id) {
+      if (chatOptions?.agent_id !== asset.id) {
         return false;
       }
     }
 
     if (asset.type === 'material') {
-      if ((chatOptions?.materialsIds.length ?? 0) === 0 || chatOptions?.materialsIds[0] !== asset.id) {
+      if ((chatOptions?.materials_ids.length ?? 0) === 0 || chatOptions?.materials_ids[0] !== asset.id) {
         return false;
       }
     }
 
-    if (!(chatOptions?.aiCanAddExtraMaterials ?? true)) {
+    if (!(chatOptions?.ai_can_add_extra_materials ?? true)) {
       return false;
     }
 

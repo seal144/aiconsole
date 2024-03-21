@@ -1,5 +1,6 @@
 from typing import Any, Awaitable, Callable
 
+from aiconsole.core.chat.types import AICChatOptions
 from aiconsole.core.project.project import get_project_assets
 from fastmutation.data_context import DataContext
 from fastmutation.mutations import (
@@ -87,7 +88,10 @@ async def _handle_SetValueMutation(data: DataContext, mutation: SetValueMutation
     elif isinstance(attr, dict):
         attr.update(obj)
     else:
-        setattr(attr, mutation.key, mutation.value)
+        if isinstance(getattr(attr, mutation.key), AICChatOptions):
+            setattr(attr, mutation.key, AICChatOptions(**mutation.value))
+        else:
+            setattr(attr, mutation.key, mutation.value)
 
     await get_project_assets().save_asset(asset, asset.id, create=False)
 

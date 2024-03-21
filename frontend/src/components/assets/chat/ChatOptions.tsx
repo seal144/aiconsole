@@ -60,8 +60,8 @@ const ChatOptions = ({
       .filter((item) => regex.test(item.name))
       .filter((item) => item.enabled)
       .filter((item) => item.type !== 'chat')
-      .filter((item) => !chatOptions?.materialsIds.includes(item.id))
-      .filter((item) => item.id !== chatOptions?.agentId);
+      .filter((item) => !chatOptions?.materials_ids.includes(item.id))
+      .filter((item) => item.id !== chatOptions?.agent_id);
 
     setFilteredAssetsOptions(filteredMaterialOptions);
   }, [assets, inputValue, chatOptions]);

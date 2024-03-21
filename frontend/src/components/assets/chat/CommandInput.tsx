@@ -41,10 +41,10 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel, tex
   const chatOptionsInputRef = useRef<HTMLInputElement>(null);
 
   const setSelectedAgentId = useChatStore((state) => state.setSelectedAgentId);
-  const selectedAgentId = useChatStore((state) => state.chatOptions?.agentId);
+  const selectedAgentId = useChatStore((state) => state.chatOptions?.agent_id);
 
   const setAICanAddExtraMaterials = useChatStore((state) => state.setAICanAddExtraMaterials);
-  const aiCanAddExtraMaterials = useChatStore((state) => state.chatOptions?.aiCanAddExtraMaterials);
+  const aiCanAddExtraMaterials = useChatStore((state) => state.chatOptions?.ai_can_add_extra_materials);
 
   const chat = useChatStore((state) => state.chat);
   const draftCommand = useChatStore((state) => state.chatOptions?.draft_command);
@@ -57,7 +57,7 @@ export const CommandInput = ({ className, onSubmit, actionIcon, actionLabel, tex
 
   const assets = useAssetStore((state) => state.assets);
   const setSelectedMaterialIds = useChatStore((state) => state.setSelectedMaterialsIds);
-  const selectedMaterialIds = useChatStore((state) => state.chatOptions?.materialsIds || []);
+  const selectedMaterialIds = useChatStore((state) => state.chatOptions?.materials_ids || []);
 
   const selectedMaterials = useMemo(
     () => assets?.filter(({ id }) => selectedMaterialIds.includes(id)) || [],
