@@ -53,12 +53,19 @@ async def _handle_DeleteMutation(root: DataContext, mutation: DeleteMutation):
     if collection is None:
         raise ValueError(f"Collection {mutation.ref.parent_collection} not found")
 
+    asset = get_project_assets().get_asset(mutation.ref.ref_segments[1])
+
+    if asset is None:
+        raise ValueError(f"Asset {mutation.ref.ref_segments[1]} not found")
+
     object = await root.get(mutation.ref)
 
     if object is None:
         raise ValueError(f"Object {mutation.ref} not found")
 
     collection.remove(object)
+
+    await get_project_assets().save_asset(asset, asset.id, create=False)
 
 
 # TODO: rework
