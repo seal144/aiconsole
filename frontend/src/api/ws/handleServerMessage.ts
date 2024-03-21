@@ -118,11 +118,9 @@ export async function handleServerMessage(message: ServerMessage) {
     case 'ResponseServerMessage': {
       const chat = useChatStore.getState().chat;
 
-      if (!chat) {
-        throw new Error('Chat is not initialized');
+      if (chat) {
+        chat.lock_id = undefined;
       }
-
-      chat.lock_id = undefined;
 
       if (message.is_error) {
         AssetsAPI.closeChat(message.payload.chat_id);

@@ -59,7 +59,8 @@ class AICConnection:
         self._open_refs.add(ref)
 
     def unsubscribe_ref(self, ref: AnyRef):
-        self._open_refs.remove(ref)
+        if ref.id != "new":
+            self._open_refs.remove(ref)
 
     def lock_acquired(self, ref: AnyRef, request_id: str):
         if self.is_lock_acquired(ref):
