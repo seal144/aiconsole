@@ -119,11 +119,10 @@ async def _handle_release_lock_ws_message(connection: AICConnection, json: dict)
 
 
 async def _handle_open_chat_ws_message(connection: AICConnection, json: dict):
+
     message = SubscribeToClientMessage(**json)
 
     try:
-        connection.subscribe_to_ref(message.ref)
-
         message.ref.context = AICFileDataContext(
             lock_id=message.request_id,
             origin=connection,
@@ -131,9 +130,12 @@ async def _handle_open_chat_ws_message(connection: AICConnection, json: dict):
 
         if message.ref.id == "new":
             chat = AICChat.create_empty_chat()
+            message.ref.id = chat.id
         else:
             chat = await message.ref.get()
             chat = cast(AICChat, chat)
+
+        connection.subscribe_to_ref(message.ref)
 
         if connection.is_ref_open(message.ref):
             await connection.send(

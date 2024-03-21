@@ -27,17 +27,18 @@ export function MessageComponent({ message, group }: MessageProps) {
 
   const handleRemoveClick = useCallback(() => {
     userMutateChat({
-      type: 'DeleteMessageMutation',
-      message_id: message.id,
+      type: 'DeleteMutation',
+      ref: { id: message.id, parent_collection: { id: 'messages' } },
     });
   }, [message.id, userMutateChat]);
 
   const handleSaveClick = useCallback(
     async (content: string) => {
       await userMutateChat({
-        type: 'SetContentMessageMutation',
-        message_id: message.id,
-        content,
+        type: 'SetValueMutation',
+        ref: { id: message.id, parent_collection: { id: 'messages' } },
+        key: 'content',
+        value: content,
       });
 
       saveCommandAndMessagesToHistory(content, group.role === 'user');
