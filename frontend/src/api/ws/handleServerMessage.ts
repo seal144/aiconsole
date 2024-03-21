@@ -81,14 +81,17 @@ export async function handleServerMessage(message: ServerMessage) {
       break;
     case 'NotifyAboutAssetMutationServerMessage': {
       const chat = deepCopyChat(useChatStore.getState().chat);
+
       if (!chat) {
         throw new Error('Chat is not initialized');
       }
+
+      chat.lock_id = message.request_id;
       applyMutation(chat, message.mutation, messageBuffer);
       useChatStore.setState({ chat });
       break;
     }
-    case 'ChatOpenedServerMessage':
+    case 'ChatOpenedServerMessage': {
       const chat = message.chat;
 
       const currentlySreamingMessage = chat.message_groups
@@ -111,7 +114,14 @@ export async function handleServerMessage(message: ServerMessage) {
         },
       });
       break;
+    }
     case 'ResponseServerMessage': {
+      const chat = useChatStore.getState().chat;
+
+      if (chat) {
+        chat.lock_id = undefined;
+      }
+
       if (message.is_error) {
         AssetsAPI.closeChat(message.payload.chat_id);
         AssetsAPI.fetchAsset<AICChat>({ assetType: 'chat', id: uuidv4() }).then((chat) => {

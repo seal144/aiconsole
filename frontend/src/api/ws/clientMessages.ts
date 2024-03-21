@@ -15,7 +15,7 @@
 // limitations under the License.
 
 import { z } from 'zod';
-import { CollectionRefSchema, ObjectRefSchema } from '@/types/assets/assetTypes';
+import { ObjectRefSchema } from '@/types/assets/assetTypes';
 import { AssetMutationSchema } from './assetMutations';
 
 export const BaseClientMessageSchema = z.object({});
@@ -64,12 +64,7 @@ export type DuplicateAssetClientMessage = z.infer<typeof DuplicateAssetClientMes
 export const StopChatClientMessageSchema = BaseClientMessageSchema.extend({
   type: z.literal('StopChatClientMessage'),
   request_id: z.string(),
-  ref: z.object({
-    id: z.string(),
-    context: z.null(),
-    parent_collection: CollectionRefSchema,
-    parent: CollectionRefSchema,
-  }),
+  chat_ref: ObjectRefSchema,
 });
 
 export type StopChatClientMessage = z.infer<typeof StopChatClientMessageSchema>;
