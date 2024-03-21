@@ -9,7 +9,7 @@ import { BlinkingCursor } from '@/components/assets/chat/BlinkingCursor';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
 import { useAPIStore } from '@/store/useAPIStore';
 import { EditableContentMessage } from './EditableContentMessage';
-import { AICMessage, AICMessageGroup } from '../../../../types/assets/chatTypes';
+import { AICMessage, AICMessageGroup, getMessageLocation } from '../../../../types/assets/chatTypes';
 import { ToolCall } from './ToolCall';
 
 const urlRegex = /^https?:\/\//;
@@ -24,11 +24,40 @@ export function MessageComponent({ message, group }: MessageProps) {
   const saveCommandAndMessagesToHistory = useChatStore((state) => state.saveCommandAndMessagesToHistory);
   const getBaseURL = useAPIStore((state) => state.getBaseURL);
   const [isEditing, setIsEditing] = useState(false);
+  const chat = useChatStore((state) => state.chat);
 
   const handleRemoveClick = useCallback(() => {
+    const { group } = getMessageLocation(chat!, message.id);
+
+    if (group.messages.length < 2) {
+      userMutateChat({
+        type: 'DeleteMutation',
+        ref: {
+          id: group.id,
+          parent_collection: {
+            id: 'message_groups',
+            parent: { id: chat?.id, parent_collection: { id: 'assets', parent: null } },
+          },
+        },
+      });
+      return;
+    }
+
     userMutateChat({
       type: 'DeleteMutation',
-      ref: { id: message.id, parent_collection: { id: 'messages' } },
+      ref: {
+        id: message.id,
+        parent_collection: {
+          id: 'messages',
+          parent: {
+            id: group.id,
+            parent_collection: {
+              id: 'message_groups',
+              parent: { id: chat?.id, parent_collection: { id: 'assets', parent: null } },
+            },
+          },
+        },
+      },
     });
   }, [message.id, userMutateChat]);
 

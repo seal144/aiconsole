@@ -217,10 +217,12 @@ function handleCreateMutation(asset: Asset | AICChat, mutation: CreateMutation):
 }
 
 function handleDeleteMutation(asset: Asset | AICChat, mutation: DeleteMutation): void {
-  const collection: keyof typeof asset = mutation.ref.parent_collection.id;
+  const collection = findAttribute(asset, mutation.ref.refSegments);
 
-  const assetCollection: Array<{ id: string }> = asset[collection];
-  asset[collection] = assetCollection.filter((a) => a.id !== mutation.ref.id);
+  if (Array.isArray(collection)) {
+    const index = collection.findIndex((a) => a.id === mutation.ref.id);
+    collection.splice(index, 1);
+  }
 }
 
 function handleSetValueMutation(asset: Asset | AICChat, mutation: SetValueMutation): void {

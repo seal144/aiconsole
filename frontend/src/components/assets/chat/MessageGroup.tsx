@@ -26,6 +26,7 @@ import { useChatStore } from '@/store/assets/chat/useChatStore';
 export function MessageGroup({ group }: { group: AICMessageGroup }) {
   const [isAnalysisManuallyOpen, setIsAnalysisManuallyOpen] = useState<boolean | undefined>(undefined);
   const isBeingProcessed = useChatStore((state) => !!state.chat?.lock_id);
+  const chat = useChatStore((state) => state.chat);
 
   const lockId = useChatStore((state) => state.chat?.lock_id);
 
@@ -56,8 +57,14 @@ export function MessageGroup({ group }: { group: AICMessageGroup }) {
             hideControls={!!lockId}
             onRemoveClick={() => {
               useChatStore.getState().userMutateChat({
-                type: 'DeleteMessageGroupMutation',
-                message_group_id: group.id,
+                type: 'DeleteMutation',
+                ref: {
+                  id: group.id,
+                  parent_collection: {
+                    id: 'message_groups',
+                    parent: { id: chat?.id, parent_collection: { id: 'assets', parent: null } },
+                  },
+                },
               });
             }}
           />
