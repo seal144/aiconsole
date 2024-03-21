@@ -21,6 +21,7 @@ import { AICChat } from '@/types/assets/chatTypes';
 import { useAssetStore } from '../useAssetStore';
 import { ChatStore, useChatStore } from './useChatStore';
 import { ChatAPI } from '@/api/api/ChatAPI';
+import { CreateMutation } from '@/api/ws/assetMutations';
 
 export type ChatSlice = {
   chat?: AICChat;
@@ -42,6 +43,7 @@ export type ChatSlice = {
   setSelectedMaterialsIds: (ids: string[]) => void;
   setAICanAddExtraMaterials: (aiCanAddExtraMaterials: boolean) => void;
   setDraftCommand: (draftCommand: string) => void;
+  createChat: (chat: AICChat) => Promise<void>;
   chatOptionsSaveDebounceTimer: NodeJS.Timeout | null;
 };
 
@@ -136,6 +138,22 @@ export const createChatSlice: StateCreator<ChatStore, [], [], ChatSlice> = (set,
       debounceChatOptionsUpdate(state.chat?.id, newState.chatOptions);
       return newState;
     });
+  },
+  createChat: async (chat: AICChat) => {
+    const mutation: CreateMutation = {
+      type: 'CreateMutation',
+      ref: {
+        id: chat.id,
+        parent_collection: {
+          id: 'assets',
+          parent: null,
+        },
+      },
+      object_type: 'AICChat',
+      object: chat,
+    };
+
+    await get().userMutateChat(mutation);
   },
 });
 
