@@ -69,7 +69,7 @@ export const createMessageSlice: StateCreator<ChatStore, [], [], MessageSlice> =
       {
         type: 'AcquireLockClientMessage',
         request_id: lockId,
-        ref: { id: chat_id, context: null, parent_collection: { id: 'assets', parent: null, context: null } },
+        ref: { id: chat_id, parent_collection: { id: 'assets' } },
       },
       (response) => response.type === 'ResponseServerMessage' && response.payload.chat_id === chat_id,
     );
@@ -101,7 +101,7 @@ export const createMessageSlice: StateCreator<ChatStore, [], [], MessageSlice> =
         }
 
         for (const mutation of mutations) {
-          applyMutation(chat, mutation);
+          // applyMutation(chat, mutation);
 
           // send to server
           useWebSocketStore.getState().sendMessage({

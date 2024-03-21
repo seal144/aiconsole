@@ -21,7 +21,7 @@ class BaseObject(BaseModel):
 TBaseObject = TypeVar("TBaseObject", bound=BaseObject)
 
 
-class ObjectRef(Generic[TBaseObject], BaseModel):
+class ObjectRef(BaseModel, Generic[TBaseObject]):
     id: str
     parent_collection: "CollectionRef"
     context: DataContext | None = Field(
@@ -78,7 +78,7 @@ class ObjectRef(Generic[TBaseObject], BaseModel):
         return await self.context.exists(self)
 
 
-class CollectionRef(Generic[TBaseObject], BaseModel):
+class CollectionRef(BaseModel, Generic[TBaseObject]):
     id: str
     parent: ObjectRef | None = Field(default=None)
     context: DataContext | None = Field(
@@ -138,7 +138,7 @@ class CollectionRef(Generic[TBaseObject], BaseModel):
 AnyRef = ObjectRef | CollectionRef
 
 
-class AttributeRef(Generic[T], BaseModel):
+class AttributeRef(BaseModel, Generic[T]):
     name: str
     object: ObjectRef
     context: "DataContext | None" = Field(

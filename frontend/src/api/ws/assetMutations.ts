@@ -37,7 +37,7 @@ export const AppendToStringMutationSchema = BaseMutationSchema.extend({
 
 export type AppendToStringMutation = z.infer<typeof AppendToStringMutationSchema>;
 
-export const AssetMutationSchema = z.union([
+export const AssetMutationSchema = z.discriminatedUnion('type', [
   CreateMutationSchema,
   DeleteMutationSchema,
   SetValueMutationSchema,

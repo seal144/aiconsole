@@ -20,7 +20,6 @@ import { v4 as uuid } from 'uuid';
 import { ChatAPI } from '../../../api/api/ChatAPI';
 import { ChatStore } from './useChatStore';
 import { useSettingsStore } from '@/store/settings/useSettingsStore';
-import { AICMessage } from '@/types/assets/chatTypes';
 
 export type CommandSlice = {
   commandHistory: string[];
@@ -123,20 +122,16 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
         type: 'CreateMutation',
         ref: {
           id: messageGroupId,
-          context: null,
           parent_collection: {
             id: 'message_groups',
             parent: {
               id: chat.id,
-              context: null,
-              parent_collection: { id: 'assets', parent: null, context: null },
+              parent_collection: { id: 'assets' },
             },
-            context: null,
           },
         },
         object_type: 'AICMessageGroup',
         object: {
-          id: messageGroupId,
           actor_id: { type: 'user', id: useSettingsStore.getState().settings.user_profile.id || 'user' },
           task: '',
           materials_ids: [],
@@ -152,7 +147,6 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
               tool_calls: [],
             },
           ],
-          lock_id: null,
         },
       });
 

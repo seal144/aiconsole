@@ -22,8 +22,7 @@ async def _handle_CreateMutation(root: DataContext, mutation: CreateMutation):
     object_type = root.type_to_cls_mapping[mutation.object_type]
 
     mutation_object = mutation.object.copy()
-    if "id" in mutation_object:
-        del mutation_object["id"]
+
     obj = object_type(**mutation_object, id=mutation.ref.id)
 
     attr = asset

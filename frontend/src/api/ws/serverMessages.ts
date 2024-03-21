@@ -88,14 +88,6 @@ export const SettingsServerMessageSchema = BaseServerMessageSchema.extend({
 
 export type SettingsServerMessage = z.infer<typeof SettingsServerMessageSchema>;
 
-export const NotifyAboutAssetMutationServerMessageSchema = BaseServerMessageSchema.extend({
-  type: z.literal('NotifyAboutAssetMutationServerMessage'),
-  request_id: z.string(),
-  mutation: AssetMutationSchema, // Assuming ChatMutationSchema is defined
-});
-
-export type NotifyAboutAssetMutationServerMessage = z.infer<typeof NotifyAboutAssetMutationServerMessageSchema>;
-
 export const ChatOpenedServerMessageSchema = BaseServerMessageSchema.extend({
   type: z.literal('ChatOpenedServerMessage'),
   chat: AICChatSchema,
@@ -124,9 +116,18 @@ export const ResponseServerMessageSchema = BaseServerMessageSchema.extend({
   type: z.literal('ResponseServerMessage'),
 });
 
+export const NotifyAboutAssetMutationServerMessageSchema = BaseServerMessageSchema.extend({
+  type: z.literal('NotifyAboutAssetMutationServerMessage'),
+  request_id: z.string(),
+  mutation: AssetMutationSchema,
+});
+
+export type NotifyAboutAssetMutationServerMessage = z.infer<typeof NotifyAboutAssetMutationServerMessageSchema>;
+
 export type ResponseServerMessage = z.infer<typeof ResponseServerMessageSchema>;
 
 export const ServerMessageSchema = z.discriminatedUnion('type', [
+  NotifyAboutAssetMutationServerMessageSchema,
   NotificationServerMessageSchema,
   DebugJSONServerMessageSchema,
   ErrorServerMessageSchema,
@@ -136,7 +137,6 @@ export const ServerMessageSchema = z.discriminatedUnion('type', [
   ProjectLoadingServerMessageSchema,
   AssetsUpdatedServerMessageSchema,
   SettingsServerMessageSchema,
-  NotifyAboutAssetMutationServerMessageSchema,
   ChatOpenedServerMessageSchema,
   ChatClosedServerMessageSchema,
   DuplicateAssetServerMessageSchema,
