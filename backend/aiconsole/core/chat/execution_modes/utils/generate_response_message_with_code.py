@@ -45,6 +45,8 @@ async def generate_response_message_with_code(
             id=message_id,
             timestamp=datetime.now().isoformat(),
             content="",
+            is_streaming=False,
+            tool_calls=[],
         ),
     )
 

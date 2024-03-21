@@ -95,7 +95,11 @@ export const createActionSlice: StateCreator<ChatStore, [], [], ActionSlice> = (
       useWebSocketStore.getState().sendMessage({
         type: 'ProcessChatClientMessage',
         request_id: uuidv4(),
-        chat_ref: { id: chat.id, context: null, parent_collection: { id: 'assets', parent: null } },
+        chat_ref: {
+          id: chat.id,
+          context: null,
+          parent_collection: { id: 'assets', parent: null },
+        },
       });
     } catch (err) {
       if ((err as Error).name === 'AbortError') {

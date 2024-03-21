@@ -79,7 +79,7 @@ export async function handleServerMessage(message: ServerMessage) {
         });
       }
       break;
-    case 'NotifyAboutChatMutationServerMessage': {
+    case 'NotifyAboutAssetMutationServerMessage': {
       const chat = deepCopyChat(useChatStore.getState().chat);
       if (!chat) {
         throw new Error('Chat is not initialized');
@@ -103,6 +103,12 @@ export async function handleServerMessage(message: ServerMessage) {
 
       useChatStore.setState({
         chat,
+        chatOptions: {
+          agentId: chat.chat_options.agent_id,
+          materialsIds: chat.chat_options.materials_ids,
+          aiCanAddExtraMaterials: chat.chat_options.ai_can_add_extra_materials,
+          draft_command: chat.chat_options.draft_command,
+        },
       });
       break;
     case 'ResponseServerMessage': {

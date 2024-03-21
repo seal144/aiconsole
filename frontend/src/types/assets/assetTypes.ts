@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
+import { ZodTypeAny, z } from 'zod';
 
 export type AssetDefinedIn = 'aiconsole' | 'project';
 export const assetDefinedInOptions: AssetDefinedIn[] = ['aiconsole', 'project'];
@@ -91,18 +91,31 @@ export const UserProfileSchema = z.object({
 
 export type UserProfile = z.infer<typeof UserProfileSchema>;
 
-export const CollectionRefSchema = z.object({
-  id: z.literal('assets'),
-  parent: z.union([z.null(), z.undefined()]),
-  context: z.union([z.null(), z.undefined()]),
-});
+export interface CollectionRef {
+  id: string;
+  parent?: ObjectRef | null;
+  context?: null;
+}
 
-export type CollectionRef = z.infer<typeof CollectionRefSchema>;
+export interface ObjectRef {
+  id: string;
+  parent_collection: CollectionRef;
+  context?: null;
+}
 
-export const ObjectRefSchema = z.object({
-  id: z.string(),
-  context: z.union([z.null(), z.undefined()]),
-  parent_collection: CollectionRefSchema,
-});
+export const CollectionRefSchema: z.ZodLazy<ZodTypeAny> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    parent: ObjectRefSchema.optional(),
+    context: z.null().optional(),
+  }),
+);
 
-export type ObjectRef = z.infer<typeof ObjectRefSchema>;
+export const ObjectRefSchema: z.ZodLazy<ZodTypeAny> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    parent_collection: CollectionRefSchema,
+    context: z.null().optional(),
+    refSegments: z.array(z.string()).optional(),
+  }),
+);

@@ -111,25 +111,44 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
       }
 
       const messageGroupId = uuid();
+      const messageId = uuid();
 
-      await get().userMutateChat([
-        {
-          type: 'CreateMessageGroupMutation',
-          message_group_id: messageGroupId,
+      //  "AICMessageGroup": AICMessageGroup,
+      //       "AICMessage": AICMessage,
+      //       "AICToolCall": AICToolCall,
+      //       "AICChat": AICChat,
+
+      await get().userMutateChat({
+        type: 'CreateMutation',
+        ref: {
+          id: messageGroupId,
+          parent_collection: {
+            id: 'message_groups',
+            parent: {
+              id: chat.id,
+              parent_collection: { id: 'assets' },
+            },
+          },
+        },
+        object_type: 'AICMessageGroup',
+        object: {
           actor_id: { type: 'user', id: useSettingsStore.getState().settings.user_profile.id || 'user' },
           task: '',
           materials_ids: [],
           analysis: '',
           role: 'user',
+          messages: [
+            {
+              is_streaming: false,
+              id: messageId,
+              message_group_id: messageGroupId,
+              content: command,
+              timestamp: new Date().toISOString(),
+              tool_calls: [],
+            },
+          ],
         },
-        {
-          type: 'CreateMessageMutation',
-          message_id: uuid(),
-          message_group_id: messageGroupId,
-          content: command,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
+      });
 
       await get().saveCommandAndMessagesToHistory(command, true);
     }

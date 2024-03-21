@@ -14,9 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
 import { AICChatSchema } from '@/types/assets/chatTypes';
-import { ChatMutationSchema } from './chat/chatMutations';
+import { z } from 'zod';
+import { AssetMutationSchema } from './assetMutations';
 
 export const BaseServerMessageSchema = z.object({});
 
@@ -88,15 +88,6 @@ export const SettingsServerMessageSchema = BaseServerMessageSchema.extend({
 
 export type SettingsServerMessage = z.infer<typeof SettingsServerMessageSchema>;
 
-export const NotifyAboutChatMutationServerMessageSchema = BaseServerMessageSchema.extend({
-  type: z.literal('NotifyAboutChatMutationServerMessage'),
-  request_id: z.string(),
-  chat_id: z.string(),
-  mutation: ChatMutationSchema, // Assuming ChatMutationSchema is defined
-});
-
-export type NotifyAboutChatMutationServerMessage = z.infer<typeof NotifyAboutChatMutationServerMessageSchema>;
-
 export const ChatOpenedServerMessageSchema = BaseServerMessageSchema.extend({
   type: z.literal('ChatOpenedServerMessage'),
   chat: AICChatSchema,
@@ -125,9 +116,18 @@ export const ResponseServerMessageSchema = BaseServerMessageSchema.extend({
   type: z.literal('ResponseServerMessage'),
 });
 
+export const NotifyAboutAssetMutationServerMessageSchema = BaseServerMessageSchema.extend({
+  type: z.literal('NotifyAboutAssetMutationServerMessage'),
+  request_id: z.string(),
+  mutation: AssetMutationSchema,
+});
+
+export type NotifyAboutAssetMutationServerMessage = z.infer<typeof NotifyAboutAssetMutationServerMessageSchema>;
+
 export type ResponseServerMessage = z.infer<typeof ResponseServerMessageSchema>;
 
 export const ServerMessageSchema = z.discriminatedUnion('type', [
+  NotifyAboutAssetMutationServerMessageSchema,
   NotificationServerMessageSchema,
   DebugJSONServerMessageSchema,
   ErrorServerMessageSchema,
@@ -137,7 +137,6 @@ export const ServerMessageSchema = z.discriminatedUnion('type', [
   ProjectLoadingServerMessageSchema,
   AssetsUpdatedServerMessageSchema,
   SettingsServerMessageSchema,
-  NotifyAboutChatMutationServerMessageSchema,
   ChatOpenedServerMessageSchema,
   ChatClosedServerMessageSchema,
   DuplicateAssetServerMessageSchema,

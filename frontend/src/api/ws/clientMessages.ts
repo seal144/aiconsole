@@ -15,8 +15,8 @@
 // limitations under the License.
 
 import { z } from 'zod';
-import { ChatMutationSchema } from './chat/chatMutations';
 import { CollectionRefSchema, ObjectRefSchema } from '@/types/assets/assetTypes';
+import { AssetMutationSchema } from './assetMutations';
 
 export const BaseClientMessageSchema = z.object({});
 
@@ -25,12 +25,7 @@ export type BaseClientMessage = z.infer<typeof BaseClientMessageSchema>;
 export const DoMutationClientMessageSchema = BaseClientMessageSchema.extend({
   type: z.literal('DoMutationClientMessage'),
   request_id: z.string(),
-  mutation: z.object({
-    ref: ObjectRefSchema,
-    type: z.literal('CreateMutation'),
-    object_type: z.string(),
-    object: ChatMutationSchema,
-  }),
+  mutation: AssetMutationSchema,
 });
 export type DoMutationClientMessage = z.infer<typeof DoMutationClientMessageSchema>;
 
