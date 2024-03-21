@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import uuid
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
-import uuid
 
 from pydantic import BaseModel, Field
 
@@ -81,7 +81,11 @@ class AICChatOptions(BaseModel):
     draft_command: Optional[str] = None
 
     def is_default(self):
-        return self.agent_id == "" and self.materials_ids == []
+        return (
+            self.agent_id == ""
+            and self.materials_ids == []
+            and (self.draft_command is None or self.draft_command == "")
+        )
 
 
 class AICChat(AICChatHeadline):
