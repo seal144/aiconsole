@@ -209,7 +209,7 @@ export function ChatPage() {
         label: 'Send',
         icon: SendRotated,
         action: async () => {
-          await submitCommand(command);
+          await submitCommand(command, id === 'new');
           await newCommand();
         },
       };

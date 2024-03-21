@@ -33,7 +33,7 @@ export type CommandSlice = {
   getCommand: () => string;
   appendFilePathToCommand: (path: string) => void;
   saveCommandAndMessagesToHistory: (command: string, isUserCommand: boolean) => Promise<void>;
-  submitCommand: (prompt: string) => Promise<void>;
+  submitCommand: (prompt: string, isNewChat?: boolean) => Promise<void>;
   initCommandHistory: () => Promise<void>;
   commandPending: boolean;
 };
@@ -89,7 +89,7 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
       }));
     }
   },
-  submitCommand: async (command: string) => {
+  submitCommand: async (command: string, isNewChat = false) => {
     if (get().commandPending) {
       return;
     }
@@ -101,6 +101,11 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
       //Let's wait until any chat option modifiactions are saved
       await new Promise((resolve) => setTimeout(resolve, 50));
       console.debug('Waiting for chatOptionsSaveDebounceTimer to be null');
+    }
+
+    if (isNewChat) {
+      const chat = get().chat;
+      await get().createChat(chat!);
     }
 
     if (command.trim() !== '') {
