@@ -79,4 +79,4 @@ class ProcessChatClientMessage(BaseClientMessage):
 
 class StopChatClientMessage(BaseClientMessage):
     request_id: str
-    chat_ref: AssetRef
+    chat_ref: ChatRef

@@ -71,7 +71,8 @@ export const createMessageSlice: StateCreator<ChatStore, [], [], MessageSlice> =
         request_id: lockId,
         ref: { id: chat_id, context: null, parent_collection: { id: 'assets', parent: null } },
       },
-      (response) => response.type === 'ResponseServerMessage' && response.payload.chat_id === chat_id,
+      (response) =>
+        response.type === 'ResponseServerMessage' && response.payload.chat_id === chat_id && !response.is_error,
     );
   },
   unlockChat: async (lockId: string) => {

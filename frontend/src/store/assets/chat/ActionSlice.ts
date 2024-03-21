@@ -70,10 +70,9 @@ export const createActionSlice: StateCreator<ChatStore, [], [], ActionSlice> = (
       useWebSocketStore.getState().sendMessage({
         type: 'StopChatClientMessage',
         request_id: uuidv4(),
-        ref: {
-          context: null,
+        chat_ref: {
           id: chat.id,
-          parent: { id: 'assets', parent: null },
+          context: null,
           parent_collection: { id: 'assets', parent: null },
         },
       });

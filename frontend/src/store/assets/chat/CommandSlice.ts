@@ -146,7 +146,6 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
             {
               is_streaming: false,
               id: messageId,
-              message_group_id: messageGroupId,
               content: command,
               timestamp: new Date().toISOString(),
               tool_calls: [],
