@@ -66,7 +66,7 @@ async def handle_incoming_message(connection: AICConnection, json: dict):
     handlers = {
         AcquireLockClientMessage.__name__: _handle_acquire_lock_ws_message,
         ReleaseLockClientMessage.__name__: _handle_release_lock_ws_message,
-        SubscribeToClientMessage.__name__: _handle_open_chat_ws_message,
+        SubscribeToClientMessage.__name__: _subscribe_to_client_message,
         DuplicateAssetClientMessage.__name__: _handle_duplicate_chat_ws_message,
         StopChatClientMessage.__name__: _handle_stop_chat_ws_message,
         UnsubscribeClientMessage.__name__: _handle_close_chat_ws_message,
@@ -118,7 +118,7 @@ async def _handle_release_lock_ws_message(connection: AICConnection, json: dict)
     )
 
 
-async def _handle_open_chat_ws_message(connection: AICConnection, json: dict):
+async def _subscribe_to_client_message(connection: AICConnection, json: dict):
 
     message = SubscribeToClientMessage(**json)
 

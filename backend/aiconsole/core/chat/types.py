@@ -123,7 +123,7 @@ class AICChat(AICChatHeadline):
     def create_empty_chat(cls):
         return AICChat(
             id=str(uuid.uuid4()),
-            name="",
+            name="New Chat",
             usage="",
             usage_examples=[],
             defined_in=AssetLocation.PROJECT_DIR,

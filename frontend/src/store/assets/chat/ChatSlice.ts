@@ -26,6 +26,7 @@ import { useAssetStore } from '../useAssetStore';
 import { ChatStore, useChatStore } from './useChatStore';
 
 export type ChatSlice = {
+  isSaved: boolean;
   chat?: AICChat;
   chatOptions?: {
     agent_id: string;
@@ -50,6 +51,7 @@ export type ChatSlice = {
 };
 
 export const createChatSlice: StateCreator<ChatStore, [], [], ChatSlice> = (set, get) => ({
+  isSaved: false,
   isChatLoading: false,
   chat: undefined,
   chatOptions: undefined,
@@ -191,7 +193,11 @@ export const createChatSlice: StateCreator<ChatStore, [], [], ChatSlice> = (set,
       object: chat,
     };
 
-    await get().userMutateChat(mutation);
+    useWebSocketStore.getState().sendMessage({
+      type: 'DoMutationClientMessage',
+      request_id: uuidv4(),
+      mutation,
+    });
   },
 });
 
@@ -214,6 +220,16 @@ const debounceChatOptionsUpdate = (
 
   useChatStore.setState({
     chatOptionsSaveDebounceTimer: setTimeout(async () => {
+      const isSaved = useChatStore.getState().isSaved;
+
+      if (!isSaved) {
+        useChatStore.getState().createChat(chat);
+        useChatStore.setState({ isSaved: true });
+        useAssetStore.setState((state) => ({
+          assets: [chat, ...state.assets],
+        }));
+      }
+
       const mutation: SetValueMutation = {
         type: 'SetValueMutation',
         ref: {

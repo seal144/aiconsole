@@ -29,7 +29,7 @@ import { cn } from '@/utils/common/cn';
 import { COMMANDS } from '@/utils/constants';
 import { ArrowDown, ReplyIcon, Square } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import ScrollToBottom, { useAnimating, useScrollToBottom, useSticky } from 'react-scroll-to-bottom';
 import { v4 as uuidv4 } from 'uuid';
 import { EditorHeader } from '../EditorHeader';
@@ -74,6 +74,7 @@ const ScrollToBottomButton = () => {
 export function ChatPage() {
   // Monitors params and initialises useChatStore.chat and useAssetStore.selectedAsset zustand stores
   const params = useParams();
+  const navigate = useNavigate();
   const id = params.id || '';
   const assetType = 'chat';
   const searchParams = useSearchParams()[0];
@@ -88,6 +89,7 @@ export function ChatPage() {
   const isAnalysisRunning = useChatStore((state) => state.chat?.is_analysis_in_progress);
   const isExecutionRunning = useChatStore((state) => state.isExecutionRunning());
   const submitCommand = useChatStore((state) => state.submitCommand);
+  const isSaved = useChatStore((state) => state.isSaved);
   const stopWork = useChatStore((state) => state.stopWork);
   const newCommand = useChatStore((state) => state.newCommand);
   const isProjectLoading = useProjectStore((state) => state.isProjectLoading);
@@ -162,11 +164,20 @@ export function ChatPage() {
       });
     }
 
+    useChatStore.setState({ isSaved: id !== 'new' });
+
     return () => {
       AssetsAPI.closeChat(id);
       useChatStore.setState({ chat: undefined });
     };
   }, [copyId, id, dt, assetType, forceRefresh, setChat]);
+
+  useEffect(() => {
+    if (isSaved && id === 'new') {
+      console.log('Navigating to chat', chat?.id);
+      navigate(`/assets/${chat?.id}`);
+    }
+  }, [isSaved]);
 
   const isLastMessageFromUser =
     chat?.message_groups.length && chat.message_groups[chat.message_groups.length - 1].actor_id.type === 'user';
