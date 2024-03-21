@@ -23,6 +23,11 @@ async def _handle_CreateMutation(root: DataContext, mutation: CreateMutation):
 
     mutation_object = mutation.object.copy()
 
+    # FIXME: This is a hack to remove the id from the object, when its preset
+    # objects should have id as our types (AIChat, AICMessage) have ids
+    if "id" in mutation_object:
+        del mutation_object["id"]
+
     obj = object_type(**mutation_object, id=mutation.ref.id)
 
     attr = asset

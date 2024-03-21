@@ -101,7 +101,7 @@ export const createMessageSlice: StateCreator<ChatStore, [], [], MessageSlice> =
         }
 
         for (const mutation of mutations) {
-          // applyMutation(chat, mutation);
+          applyMutation(chat, mutation);
 
           // send to server
           useWebSocketStore.getState().sendMessage({
