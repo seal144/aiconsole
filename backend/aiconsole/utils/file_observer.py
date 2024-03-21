@@ -1,12 +1,47 @@
+import asyncio
 import logging
+import threading
 from pathlib import Path
 from typing import Callable
 
+from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-from aiconsole.utils.BatchingWatchDogHandler import BatchingWatchDogHandler
-
 _log = logging.getLogger(__name__)
+
+
+class BatchingWatchDogHandler(FileSystemEventHandler):
+    def __init__(self, reload, extension=".toml"):
+        self.lock = threading.RLock()
+        self.timer = None
+        self.reload = reload
+        self.extension = extension
+
+    def on_moved(self, event):
+        return self.on_modified(event)
+
+    def on_created(self, event):
+        return self.on_modified(event)
+
+    def on_deleted(self, event):
+        return self.on_modified(event)
+
+    def on_modified(self, event):
+        if event.is_directory or not event.src_path.endswith(self.extension):
+            return
+
+        with self.lock:
+
+            def reload():
+                with self.lock:
+                    if self.timer is not None:
+                        self.timer.cancel()
+                    self.timer = None
+                    asyncio.run(self.reload())
+
+            if self.timer is None:
+                self.timer = threading.Timer(1.0, reload)
+                self.timer.start()
 
 
 class FileObserver:

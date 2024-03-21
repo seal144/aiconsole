@@ -99,15 +99,6 @@ class AICFileDataContext(DataContext):
 
     async def mutate(self, mutation: "AssetMutation", originating_from_server: bool) -> None:
         try:
-            # TODO: CHANGE THIS
-            # # Check if ref is locked or any of it's parents are locked with the current lock_id, if not raise an exception
-            # if isinstance(mutation.ref, ObjectRef):
-            #     if _no_lock_taken[mutation.ref].is_set():
-            #         raise Exception(
-            #             f"Lock not acquired for chat {mutation.ref.id} request_id={self.lock_id}",
-            #         )
-
-            # TODO: specific code for mutations
             await apply_mutation(self, mutation)
 
         except Exception as e:
@@ -138,15 +129,13 @@ class AICFileDataContext(DataContext):
         # else:
         #    message_group.role = "assistant"
 
-        # FIXME: Tepm for making test work
         await connection_manager().send_to_ref(
             NotifyAboutAssetMutationServerMessage(
                 request_id=self.lock_id,
                 mutation=mutation,
             ),
             mutation.ref,
-            # except_connection=None if originating_from_server else self.origin,
-            except_connection=None,
+            except_connection=None if originating_from_server else self.origin,
         )
 
     async def acquire_write_lock(self, ref: ObjectRef, originating_from_server: bool):
@@ -176,6 +165,8 @@ class AICFileDataContext(DataContext):
 
                 if self.origin and not originating_from_server:
                     self.origin.lock_released(ref=ref, request_id=self.lock_id)
+
+                await get_project_assets().save_asset(obj, obj.id, create=False)
             else:
                 raise Exception(f"Lock {ref} is not acquired by {self.lock_id}")
 

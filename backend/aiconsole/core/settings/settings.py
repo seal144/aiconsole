@@ -17,11 +17,12 @@ import logging
 from functools import lru_cache
 from typing import Type
 
+from aiconsole.api.websockets.server_messages import SettingsServerMessage
 from aiconsole.core.settings.fs.settings_file_storage import SettingsUpdatedEvent
-from aiconsole.core.settings.settings_notifications import SettingsNotifications
 from aiconsole.core.settings.settings_storage import SettingsStorage
 from aiconsole.core.settings.utils.merge_settings_data import merge_settings_data
 from aiconsole.utils.events import internal_events
+from aiconsole.utils.notifications import Notifications
 from aiconsole_toolkit.settings.partial_settings_data import PartialSettingsData
 from aiconsole_toolkit.settings.settings_data import SettingsData
 
@@ -30,7 +31,7 @@ _log = logging.getLogger(__name__)
 
 class Settings:
     _storage: SettingsStorage | None = None
-    _settings_notifications: SettingsNotifications | None = None
+    _notifications: Notifications | None = None
 
     def configure(self, storage_type: Type[SettingsStorage], **kwargs) -> None:
         """
@@ -42,7 +43,7 @@ class Settings:
         self.clean_up()
 
         self._storage = storage_type(**kwargs)
-        self._settings_notifications = SettingsNotifications()
+        self._notifications = Notifications()
 
         internal_events().subscribe(
             SettingsUpdatedEvent,
@@ -51,6 +52,7 @@ class Settings:
 
         if not hasattr(self, "_user_profile_service"):
             from aiconsole.core.users.user import user_profile_service
+
             self._user_profile_service = user_profile_service()
 
         self._user_profile_service.configure_user()
@@ -65,7 +67,7 @@ class Settings:
             self._storage.destroy()
 
         self._storage = None
-        self._settings_notifications = None
+        self._notifications = None
 
         internal_events().unsubscribe(
             SettingsUpdatedEvent,
@@ -78,11 +80,11 @@ class Settings:
 
         :param SettingsUpdatedEvent: The event indicating that settings have been updated.
         """
-        if not self._storage or not self._settings_notifications:
+        if not self._storage or not self._notifications:
             _log.error("Settings not configured.")
             raise ValueError("Settings not configured")
 
-        await self._settings_notifications.notify()
+        await self._notifications.notify(SettingsServerMessage(initial=self._notifications.to_suppress))
 
     @property
     def unified_settings(self) -> SettingsData:
@@ -91,7 +93,7 @@ class Settings:
 
         :return: A unified settings data object.
         """
-        if not self._storage or not self._settings_notifications:
+        if not self._storage or not self._notifications:
             _log.error("Settings not configured.")
             raise ValueError("Settings not configured")
 
@@ -104,11 +106,11 @@ class Settings:
         :param settings_data: The settings data to save.
         :param to_global: True to save settings globally, False to save them at the project level.
         """
-        if not self._storage or not self._settings_notifications:
+        if not self._storage or not self._notifications:
             _log.error("Settings not configured.")
             raise ValueError("Settings not configured")
 
-        self._settings_notifications.suppress_next_notification()
+        self._notifications.suppress_next_notification()
         self._storage.save(settings_data, to_global=to_global)
 
 

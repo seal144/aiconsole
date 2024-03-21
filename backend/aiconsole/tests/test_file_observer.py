@@ -1,7 +1,7 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from aiconsole.core.settings.fs.file_observer import FileObserver
+from aiconsole.utils.file_observer import FileObserver
 
 
 def test_start_observer():

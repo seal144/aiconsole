@@ -2,12 +2,11 @@ from pathlib import Path
 from typing import Optional, Protocol
 
 from aiconsole_toolkit.settings.partial_settings_data import PartialSettingsData
-from aiconsole_toolkit.settings.settings_data import SettingsData
 
 
 class SettingsStorage(Protocol):
     @property
-    def global_settings(self) -> SettingsData:  # fmt: off
+    def global_settings(self) -> PartialSettingsData:  # fmt: off
         ...
 
     @property

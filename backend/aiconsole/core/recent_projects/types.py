@@ -14,13 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # TODO: Rename file to models.py
-from pydantic import BaseModel
+from pathlib import Path
+from typing import Annotated
 
-from aiconsole.utils.serializable_path import SerializablePath
+from pydantic import BaseModel, PlainSerializer
 
 
 class RecentProject(BaseModel):
     name: str
-    path: SerializablePath
+    path: Annotated[Path, PlainSerializer(lambda x: str(x), return_type=str)]
     recent_chats: list[str]
     incorrect_path: bool

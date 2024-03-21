@@ -23,9 +23,7 @@ from aiconsole.api.websockets.client_messages import (
     UnsubscribeClientMessage,
 )
 from aiconsole.api.websockets.server_messages import (
-    ChatClosedServerMessage,
     ChatOpenedServerMessage,
-    NotifyAboutAssetMutationServerMessage,
     ResponseServerMessage,
 )
 from aiconsole.app import app, lifespan
@@ -157,7 +155,6 @@ class ChatTestFramework:
                         messages=[],
                     ),
                 )
-                self._wait_for_websocket_response(websocket, NotifyAboutAssetMutationServerMessage)
 
                 await ReleaseLockClientMessage(
                     request_id=self._request_id,
@@ -201,8 +198,6 @@ class ChatTestFramework:
                     content=message,
                 ),
             )
-
-            self._wait_for_websocket_response(websocket, NotifyAboutAssetMutationServerMessage)
 
             await ProcessChatClientMessage(request_id=self._request_id, chat_ref=self.chat_ref).send(websocket)
 

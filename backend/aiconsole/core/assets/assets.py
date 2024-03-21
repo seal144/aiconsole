@@ -38,13 +38,13 @@ _log = logging.getLogger(__name__)
 
 
 class Assets:
-    # _assets have lists, where the 1st element is the one overriding the others
+    # Cached_assets item value is a list, where item[0] is the one overriding the others
     # Currently there can be only 1 overriden element
-    _assets: dict[str, list[Asset]]
+    cached_assets: dict[str, list[Asset]]
 
     def __init__(self):
         self._suppress_notification_until: datetime.datetime | None = None
-        self._assets = {}
+        self.cached_assets = {}
 
         self.observer = watchdog.observers.Observer()
 
@@ -65,13 +65,13 @@ class Assets:
         """
         Return all loaded assets.
         """
-        return list(assets[0] for assets in self._assets.values() if assets)
+        return list(assets[0] for assets in self.cached_assets.values() if assets)
 
     def assets_with_enabled_flag_set_to(self, enabled: bool) -> list[Asset]:
         """
         Return all loaded assets with a specific status.
         """
-        return [assets[0] for assets in self._assets.values() if self.is_enabled(assets[0].id) == enabled]
+        return [assets[0] for assets in self.cached_assets.values() if self.is_enabled(assets[0].id) == enabled]
 
     async def save_asset(self, asset: Asset, old_asset_id: str, create: bool, scope: str | None = None):
         if asset.defined_in != AssetLocation.PROJECT_DIR and not create:
@@ -100,32 +100,38 @@ class Assets:
 
         new_asset = await save_asset_to_fs(asset, old_asset_id, scope or "default")
         if new_asset:
-            if asset.id not in self._assets:
-                self._assets[asset.id] = []
+            if asset.id not in self.cached_assets:
+                self.cached_assets[asset.id] = []
 
             # integrity checks and deleting old assets from structure
             if not create:
-                if not self._assets[asset.id] or self._assets[asset.id][0].defined_in != AssetLocation.PROJECT_DIR:
+                if (
+                    not self.cached_assets[asset.id]
+                    or self.cached_assets[asset.id][0].defined_in != AssetLocation.PROJECT_DIR
+                ):
                     raise Exception(f"Asset {asset.id} cannot be edited")
-                self._assets[asset.id].pop(0)
+                self.cached_assets[asset.id].pop(0)
             else:
-                if self._assets[asset.id] and self._assets[asset.id][0].defined_in == AssetLocation.PROJECT_DIR:
+                if (
+                    self.cached_assets[asset.id]
+                    and self.cached_assets[asset.id][0].defined_in == AssetLocation.PROJECT_DIR
+                ):
                     raise Exception(f"Asset {asset.id} already exists")
 
-            self._assets[asset.id].insert(0, new_asset)
+            self.cached_assets[asset.id].insert(0, new_asset)
         else:
-            if asset.id in self._assets:
-                del self._assets[asset.id]
+            if asset.id in self.cached_assets:
+                del self.cached_assets[asset.id]
 
         self._suppress_notification()
 
         return rename
 
     async def delete_asset(self, asset_id):
-        asset = self._assets[asset_id].pop(0)
+        asset = self.cached_assets[asset_id].pop(0)
 
-        if len(self._assets[asset_id]) == 0:
-            del self._assets[asset_id]
+        if len(self.cached_assets[asset_id]) == 0:
+            del self.cached_assets[asset_id]
 
         delete_asset_from_fs(asset.type, asset_id)
 
@@ -140,10 +146,10 @@ class Assets:
         """
         Get a specific asset.
         """
-        if id not in self._assets or len(self._assets[id]) == 0:
+        if id not in self.cached_assets or len(self.cached_assets[id]) == 0:
             return None
 
-        for asset in self._assets[id]:
+        for asset in self.cached_assets[id]:
             if location is None or asset.defined_in == location:
                 if type and asset.type != type:
                     return None
@@ -172,7 +178,7 @@ class Assets:
 
             for k, v in d.items():
                 li[k].extend(v)
-        self._assets = li
+        self.cached_assets = li
 
         await connection_manager().send_to_all(
             AssetsUpdatedServerMessage(
@@ -183,7 +189,7 @@ class Assets:
                         or self._suppress_notification_until < datetime.datetime.now()
                     )
                 ),
-                count=len(self._assets),
+                count=len(self.cached_assets),
             )
         )
 

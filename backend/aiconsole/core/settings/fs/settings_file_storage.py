@@ -4,13 +4,12 @@ from pathlib import Path
 from typing import Optional
 
 from aiconsole.consts import AICONSOLE_USER_CONFIG_DIR
-from aiconsole.core.settings.fs.file_observer import FileObserver
 from aiconsole.core.settings.fs.settings_file_format import (
     load_settings_file,
     save_settings_file,
 )
-from aiconsole.core.settings.settings_storage import SettingsStorage
 from aiconsole.utils.events import InternalEvent, internal_events
+from aiconsole.utils.file_observer import FileObserver
 from aiconsole_toolkit.settings.partial_settings_data import PartialSettingsData
 
 _log = logging.getLogger(__name__)
@@ -31,7 +30,7 @@ class SettingsUpdatedEvent(InternalEvent):
     pass
 
 
-class SettingsFileStorage(SettingsStorage):
+class SettingsFileStorage:
     def __init__(
         self,
         project_path: Path | None,
@@ -49,11 +48,11 @@ class SettingsFileStorage(SettingsStorage):
         return self._project_settings_file_path
 
     @property
-    def global_settings(self):
+    def global_settings(self) -> PartialSettingsData:
         return self._global_settings
 
     @property
-    def project_settings(self):
+    def project_settings(self) -> PartialSettingsData:
         return self._project_settings
 
     def change_project(self, project_path: Optional[Path] = None, disable_observer: bool = False):
