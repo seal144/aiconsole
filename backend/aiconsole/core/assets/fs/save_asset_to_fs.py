@@ -43,9 +43,9 @@ async def save_asset_to_fs(asset: Asset, old_asset_id: str, scope: str) -> Asset
     project_assets_directory_path.mkdir(parents=True, exist_ok=True)
     file_path = construct_file_path(asset, project_assets_directory_path)
 
-    if asset.type == AssetType.CHAT and await need_to_delete_chat_asset(asset, file_path):
-        await async_os.remove(file_path)
-        return
+    # if asset.type == AssetType.CHAT and await need_to_delete_chat_asset(asset, file_path):
+    #     await async_os.remove(file_path)
+    #     return
 
     original_st_mtime = await get_original_mtime_if_exists(file_path)
     update_last_modified = True
