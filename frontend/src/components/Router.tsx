@@ -83,35 +83,21 @@ const HomeRoute = () => (
 const AssetPage = () => {
   const params = useParams();
   const [searchParams] = useSearchParams();
-  const type = searchParams.get('type') || '';
   const id = params.id || '';
 
   const asset = useAssetStore((state) => (id === 'new' ? state.newAssetFromParams(searchParams) : state.getAsset(id)));
+  const type = id === 'new' ? searchParams.get('type') : asset?.type;
 
-  if (id === 'new') {
-    if (type === 'chat') {
-      return <ChatPage />;
-    }
+  if (type === 'chat') {
+    return <ChatPage />;
+  }
 
-    if (type === 'agent') {
-      return <AssetEditor assetType={'agent'} />;
-    }
+  if (type === 'agent') {
+    return <AssetEditor assetType={'agent'} />;
+  }
 
-    if (type === 'material') {
-      return <AssetEditor assetType={'material'} />;
-    }
-  } else {
-    if (asset?.type === 'chat') {
-      return <ChatPage />;
-    }
-
-    if (asset?.type === 'agent') {
-      return <AssetEditor assetType={'agent'} />;
-    }
-
-    if (asset?.type === 'material') {
-      return <AssetEditor assetType={'material'} />;
-    }
+  if (type === 'material') {
+    return <AssetEditor assetType={'material'} />;
   }
 
   return <></>;
