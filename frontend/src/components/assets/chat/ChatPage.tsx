@@ -23,7 +23,7 @@ import { SendRotated } from '@/components/common/icons/SendRotated';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
 import { useToastsStore } from '@/store/common/useToastsStore';
 import { useProjectStore } from '@/store/projects/useProjectStore';
-import { AICChat, createEmptyChat } from '@/types/assets/chatTypes';
+import { AICChat } from '@/types/assets/chatTypes';
 import { useAssetContextMenu } from '@/utils/assets/useContextMenuForEditable';
 import { cn } from '@/utils/common/cn';
 import { COMMANDS } from '@/utils/constants';
@@ -168,7 +168,6 @@ export function ChatPage() {
 
     return () => {
       AssetsAPI.closeChat(idParam);
-      useChatStore.setState({ chat: createEmptyChat() });
     };
   }, [copyId, idParam, dt, assetType, forceRefresh, setChat]);
 
