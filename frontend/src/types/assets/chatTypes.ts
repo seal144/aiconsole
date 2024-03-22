@@ -54,6 +54,8 @@ const AICChatOptionsSchema = z.object({
   draft_command: z.string().default(''),
 });
 
+export type AICChatOptions = z.infer<typeof AICChatOptionsSchema>;
+
 export const AICChatSchema = AssetSchema.extend({
   lock_id: z.string().optional(),
   title_edited: z.boolean(),
@@ -63,6 +65,38 @@ export const AICChatSchema = AssetSchema.extend({
 });
 
 export type AICChat = z.infer<typeof AICChatSchema>;
+
+// Helper functions
+
+export function createDefaultChatOptions(): AICChatOptions {
+  return {
+    agent_id: '',
+    materials_ids: [],
+    ai_can_add_extra_materials: true,
+    draft_command: '',
+  };
+}
+
+export function createEmptyChat(): AICChat {
+  return {
+    id: 'new',
+    type: 'chat',
+    name: 'New chat',
+    version: '0.0.1',
+    usage: '',
+    usage_examples: [],
+    override: false,
+    last_modified: new Date().toISOString(),
+    defined_in: 'project',
+    enabled: true,
+    enabled_by_default: true,
+    lock_id: undefined,
+    title_edited: false,
+    chat_options: createDefaultChatOptions(),
+    message_groups: [],
+    is_analysis_in_progress: false,
+  };
+}
 
 // Helper functions
 

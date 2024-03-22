@@ -23,7 +23,7 @@ import { SendRotated } from '@/components/common/icons/SendRotated';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
 import { useToastsStore } from '@/store/common/useToastsStore';
 import { useProjectStore } from '@/store/projects/useProjectStore';
-import { AICChat } from '@/types/assets/chatTypes';
+import { AICChat, createEmptyChat } from '@/types/assets/chatTypes';
 import { useAssetContextMenu } from '@/utils/assets/useContextMenuForEditable';
 import { cn } from '@/utils/common/cn';
 import { COMMANDS } from '@/utils/constants';
@@ -75,7 +75,7 @@ export function ChatPage() {
   // Monitors params and initialises useChatStore.chat and useAssetStore.selectedAsset zustand stores
   const params = useParams();
   const navigate = useNavigate();
-  const id = params.id || '';
+  const idParam = params.id || '';
   const assetType = 'chat';
   const searchParams = useSearchParams()[0];
   const copyId = searchParams.get('copy');
@@ -159,25 +159,24 @@ export function ChatPage() {
       });
     } else {
       //For id === 'new' This will get a default new asset
-      AssetsAPI.fetchAsset<AICChat>({ assetType, id }).then((chat) => {
+      AssetsAPI.fetchAsset<AICChat>({ assetType, id: idParam }).then((chat) => {
         setChat(chat);
       });
     }
 
-    useChatStore.setState({ isSaved: id !== 'new' });
+    useChatStore.setState({ isSaved: idParam !== 'new' });
 
     return () => {
-      AssetsAPI.closeChat(id);
-      useChatStore.setState({ chat: undefined });
+      AssetsAPI.closeChat(idParam);
+      useChatStore.setState({ chat: createEmptyChat() });
     };
-  }, [copyId, id, dt, assetType, forceRefresh, setChat]);
+  }, [copyId, idParam, dt, assetType, forceRefresh, setChat]);
 
   useEffect(() => {
-    if (isSaved && id === 'new') {
-      console.log('Navigating to chat', chat?.id);
-      navigate(`/assets/${chat?.id}`);
+    if (isSaved && idParam === 'new') {
+      navigate(`/assets/${chat?.id}`, { replace: true });
     }
-  }, [isSaved]);
+  }, [isSaved, idParam, chat]);
 
   const isLastMessageFromUser =
     chat?.message_groups.length && chat.message_groups[chat.message_groups.length - 1].actor_id.type === 'user';
@@ -220,7 +219,7 @@ export function ChatPage() {
         label: 'Send',
         icon: SendRotated,
         action: async () => {
-          await submitCommand(command, id === 'new');
+          await submitCommand(command);
           await newCommand();
         },
       };

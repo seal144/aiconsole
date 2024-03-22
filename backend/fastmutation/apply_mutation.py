@@ -1,6 +1,6 @@
 from typing import Any, Awaitable, Callable
 
-from aiconsole.core.chat.types import AICChatOptions
+from aiconsole.core.chat.types import AICChatOptions, Asset
 from aiconsole.core.project.project import get_project_assets
 from fastmutation.data_context import DataContext
 from fastmutation.mutations import (
@@ -46,6 +46,9 @@ async def _handle_CreateMutation(root: DataContext, mutation: CreateMutation):
         attr = obj
 
     await get_project_assets().save_asset(asset or attr, (asset and asset.id) or "new", create=asset is None)
+
+    if isinstance(attr, Asset):
+        await get_project_assets().reload(initial=True)
 
 
 async def _handle_DeleteMutation(root: DataContext, mutation: DeleteMutation):

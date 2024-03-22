@@ -1,4 +1,5 @@
 import { Icon } from '@/components/common/icons/Icon';
+import { useChatStore } from '@/store/assets/chat/useChatStore';
 import { MATERIAL_CONTENT_TYPE_ICONS, getAssetIcon } from '@/utils/assets/getAssetIcon';
 import { cn } from '@/utils/common/cn';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
@@ -19,6 +20,7 @@ export const AddAssetDropdown = () => {
 
   const handleClick = (path?: string) => () => {
     if (path) {
+      useChatStore.setState({ isSaved: false });
       navigate(path);
     }
   };

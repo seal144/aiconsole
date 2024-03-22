@@ -20,7 +20,7 @@ import { AssetsAPI } from '@/api/api/AssetsAPI';
 import { CreateMutation, SetValueMutation } from '@/api/ws/assetMutations';
 import { applyMutation } from '@/api/ws/chat/applyMutation';
 import { useWebSocketStore } from '@/api/ws/useWebSocketStore';
-import { AICChat } from '@/types/assets/chatTypes';
+import { AICChat, createEmptyChat } from '@/types/assets/chatTypes';
 import { v4 as uuidv4 } from 'uuid';
 import { useAssetStore } from '../useAssetStore';
 import { ChatStore, useChatStore } from './useChatStore';
@@ -53,7 +53,7 @@ export type ChatSlice = {
 export const createChatSlice: StateCreator<ChatStore, [], [], ChatSlice> = (set, get) => ({
   isSaved: false,
   isChatLoading: false,
-  chat: undefined,
+  chat: createEmptyChat(),
   chatOptions: undefined,
   agent: undefined,
   lastUsedChat: undefined,

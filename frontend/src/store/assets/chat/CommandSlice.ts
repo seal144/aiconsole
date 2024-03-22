@@ -89,7 +89,7 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
       }));
     }
   },
-  submitCommand: async (command: string, isNewChat = false) => {
+  submitCommand: async (command: string) => {
     if (get().commandPending) {
       return;
     }
@@ -101,11 +101,6 @@ export const createCommandSlice: StateCreator<ChatStore, [], [], CommandSlice> =
       //Let's wait until any chat option modifiactions are saved
       await new Promise((resolve) => setTimeout(resolve, 50));
       console.debug('Waiting for chatOptionsSaveDebounceTimer to be null');
-    }
-
-    if (isNewChat) {
-      const chat = get().chat;
-      await get().createChat(chat!);
     }
 
     if (command.trim() !== '') {
