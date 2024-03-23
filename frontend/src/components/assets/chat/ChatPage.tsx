@@ -29,12 +29,13 @@ import { cn } from '@/utils/common/cn';
 import { COMMANDS } from '@/utils/constants';
 import { ArrowDown, ReplyIcon, Square } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import ScrollToBottom, { useAnimating, useScrollToBottom, useSticky } from 'react-scroll-to-bottom';
 import { v4 as uuidv4 } from 'uuid';
 import { EditorHeader } from '../EditorHeader';
 import { CommandInput } from './CommandInput';
 import { Spinner } from './Spinner';
+import React from 'react';
 
 // Electron adds the path property to File objects
 interface FileWithPath extends File {
@@ -71,18 +72,19 @@ const ScrollToBottomButton = () => {
   );
 };
 
-export function ChatPage() {
+export const ChatPage = React.memo(function ChatPage() {
+  const [showSpinner, setShowSpinner] = useState(false);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   // Monitors params and initialises useChatStore.chat and useAssetStore.selectedAsset zustand stores
-  const params = useParams();
+  const { state } = useLocation();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const idParam = params.id || '';
-  const assetType = 'chat';
-  const searchParams = useSearchParams()[0];
+  const [searchParams] = useSearchParams();
   const copyId = searchParams.get('copy');
   const dt = searchParams.get('dt') || '';
   const forceRefresh = searchParams.get('forceRefresh'); // used to force a refresh
-  const command = useChatStore((state) => state.commandHistory[state.commandIndex]);
 
+  const command = useChatStore((state) => state.commandHistory[state.commandIndex]);
   const chat = useChatStore((state) => state.chat);
   const setLastUsedChat = useChatStore((state) => state.setLastUsedChat);
   const loadingMessages = useChatStore((state) => state.loadingMessages);
@@ -98,11 +100,10 @@ export function ChatPage() {
   const menuItems = useAssetContextMenu({ asset: chat, assetType: 'chat' });
   const renameChat = useChatStore((state) => state.renameChat);
   const setChat = useChatStore((state) => state.setChat);
+
+  const idParam = id || '';
+  const assetType = 'chat';
   const hasAnyCommandInput = command.trim() !== '';
-
-  const [showSpinner, setShowSpinner] = useState(false);
-
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setShowSpinner(false);
@@ -150,32 +151,37 @@ export function ChatPage() {
 
   // Acquire the initial object
   useEffect(() => {
-    if (copyId) {
-      AssetsAPI.fetchAsset<AICChat>({ assetType, id: copyId }).then((orgChat) => {
-        orgChat.id = uuidv4();
-        orgChat.name = orgChat.name + ' (copy)';
-        orgChat.title_edited = true;
-        setChat(orgChat);
-      });
-    } else {
-      //For id === 'new' This will get a default new asset
-      AssetsAPI.fetchAsset<AICChat>({ assetType, id: idParam }).then((chat) => {
-        setChat(chat);
-      });
+    if (!state?.prevId) {
+      if (copyId) {
+        AssetsAPI.fetchAsset<AICChat>({ assetType, id: copyId }).then((orgChat) => {
+          orgChat.id = uuidv4();
+          orgChat.name = orgChat.name + ' (copy)';
+          orgChat.title_edited = true;
+          setChat(orgChat);
+        });
+      } else {
+        //For id === 'new' This will get a default new asset
+        AssetsAPI.fetchAsset<AICChat>({ assetType, id: idParam }).then((chat) => {
+          setChat(chat);
+        });
+      }
     }
 
     useChatStore.setState({ isSaved: idParam !== 'new' });
 
     return () => {
-      AssetsAPI.closeChat(idParam);
+      if (idParam !== 'new') {
+        AssetsAPI.closeChat(idParam);
+        useChatStore.setState({ chat: undefined });
+      }
     };
-  }, [copyId, idParam, dt, assetType, forceRefresh, setChat]);
+  }, [copyId, idParam, dt, assetType, state, forceRefresh, setChat]);
 
   useEffect(() => {
     if (isSaved && idParam === 'new') {
-      navigate(`/assets/${chat?.id}`, { replace: true });
+      navigate(`/assets/${chat?.id}`, { replace: true, state: { prevId: idParam } });
     }
-  }, [isSaved, idParam, chat]);
+  }, [isSaved, idParam, navigate, chat]);
 
   const isLastMessageFromUser =
     chat?.message_groups.length && chat.message_groups[chat.message_groups.length - 1].actor_id.type === 'user';
@@ -286,4 +292,4 @@ export function ChatPage() {
       </div>
     </div>
   );
-}
+});
