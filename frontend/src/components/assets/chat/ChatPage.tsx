@@ -208,6 +208,16 @@ export const ChatPage = React.memo(function ChatPage() {
     if (newName !== chat.name) {
       const newChat = { ...chat, name: newName, title_edited: true } as AICChat;
 
+      if (!isSaved) {
+        showToast({
+          title: 'Error',
+          message: 'Cannot rename a new chat.',
+          variant: 'error',
+        });
+
+        return;
+      }
+
       await renameChat(newChat);
 
       showToast({
