@@ -90,6 +90,7 @@ export function MessageComponent({ message, group }: MessageProps) {
   return (
     <div>
       <EditableContentMessage
+        enableTTS={!!message.content}
         initialContent={message.content}
         handleAcceptedContent={handleSaveClick}
         handleRemoveClick={handleRemoveClick}

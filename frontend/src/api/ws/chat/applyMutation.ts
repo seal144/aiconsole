@@ -1,4 +1,7 @@
-import { AICChat, getMessageGroup, getMessageLocation, getToolCallLocation } from '@/types/assets/chatTypes';
+import { useTTSStore } from '@/audio/useTTSStore';
+import { Asset } from '@/types/assets/assetTypes';
+import { AICChat } from '@/types/assets/chatTypes';
+import { getRefSegments } from '@/utils/assets/getRefSegments';
 import { MessageBuffer } from '@/utils/common/MessageBuffer';
 import {
   AppendToStringMutation,
@@ -7,9 +10,6 @@ import {
   DeleteMutation,
   SetValueMutation,
 } from '../assetMutations';
-import { ChatMutation } from './chatMutations';
-import { Asset } from '@/types/assets/assetTypes';
-import { getRefSegments } from '@/utils/assets/getRefSegments';
 
 /**
  * KEEEP THIS IN SYNC WITH BACKEND apply_mutation!
@@ -202,7 +202,7 @@ function findAttribute(asset: Asset | AICChat, refSegments: string[]): Record<st
 
 function handleCreateMutation(asset: Asset | AICChat, mutation: CreateMutation): void {
   const { refSegments } = mutation.ref;
-  const attr = findAttribute(asset, refSegments);
+  let attr = findAttribute(asset, refSegments);
   const object = mutation.object;
   if (object.id === undefined) {
     object.id = mutation.ref.id;
@@ -229,10 +229,13 @@ function handleSetValueMutation(asset: Asset | AICChat, mutation: SetValueMutati
   const { key, value } = mutation;
   const { refSegments } = mutation.ref;
   const attr = findAttribute(asset, refSegments) as Record<string, unknown>;
-  if (Array.isArray(attr)) {
-    attr.find((a) => a.id === mutation.ref.id)[key] = value;
-  } else if (typeof attr === 'object' && attr !== null) {
-    attr[key] = value;
+  const assetToChange = Array.isArray(attr) ? attr.find((a) => a.id === mutation.ref.id) : attr;
+  assetToChange[key] = value;
+
+  // Finish playing speech if content has finished changing
+  // Should probably be added externally as an additional handler for is_streaming (using some kind of staticlly typed ref?)
+  if (key === 'is_streaming' && !value) {
+    useTTSStore.getState().readText(assetToChange['content'], false);
   }
 }
 
@@ -240,11 +243,13 @@ function handleAppendToStringMutation(asset: Asset | AICChat, mutation: AppendTo
   const { key, value } = mutation;
   const { refSegments } = mutation.ref;
   const attr = findAttribute(asset, refSegments) as Record<string, unknown>;
-  if (Array.isArray(attr)) {
-    const assetToChange = attr.find((a) => a.id === mutation.ref.id);
-    assetToChange[key] = (assetToChange[key] as string) + value;
-  } else if (typeof attr === 'object' && attr !== null) {
-    attr[key] = value;
+  const assetToChange = Array.isArray(attr) ? attr.find((a) => a.id === mutation.ref.id) : attr;
+  assetToChange[key] = (assetToChange[key] as string) + value;
+
+  // Play Speech if content is changed
+  // Should probably be added externally as an additional handler for is_streaming (using some kind of staticlly typed ref?)
+  if (useTTSStore.getState().hasAutoPlay && key === 'content') {
+    useTTSStore.getState().readText(assetToChange[key], true);
   }
 }
 

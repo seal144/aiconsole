@@ -14,13 +14,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback, useState } from 'react';
-import { MessageControls } from './MessageControls';
-import { CodeInput } from '../../CodeInput';
-import { cn } from '@/utils/common/cn';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
+import { cn } from '@/utils/common/cn';
+import { useCallback, useState } from 'react';
+import { CodeInput } from '../../CodeInput';
+import { MessageControls } from './MessageControls';
+import { useTTSStore } from '@/audio/useTTSStore';
 
 interface EditableContentMessageProps {
+  enableTTS?: boolean;
   initialContent: string;
   language?: string;
   children?: React.ReactNode;
@@ -33,6 +35,7 @@ interface EditableContentMessageProps {
 }
 
 export function EditableContentMessage({
+  enableTTS,
   initialContent,
   children,
   language,
@@ -45,6 +48,7 @@ export function EditableContentMessage({
 }: EditableContentMessageProps) {
   const isBeingProcessed = useChatStore((state) => !!state.chat?.lock_id);
   const [content, setContent] = useState(initialContent);
+  const { isPlaying, numLoading, hasAutoPlay, readText, stopReading } = useTTSStore();
 
   const handleEditClick = () => {
     if (isBeingProcessed) {
@@ -88,13 +92,29 @@ export function EditableContentMessage({
 
       <div
         className={cn('flex flex-none gap-4 px-4 self-start', {
-          'min-w-[100px] ml-[92px]': hideControls,
+          'min-w-[112px] ml-[92px]': hideControls,
         })}
       >
         {!isBeingProcessed && (
           <MessageControls
             isEditing={isEditing}
             hideControls={hideControls}
+            onPlayClick={
+              enableTTS
+                ? async () => {
+                    await readText(content, false);
+                  }
+                : undefined
+            }
+            onPlayStopClick={
+              enableTTS
+                ? () => {
+                    stopReading();
+                  }
+                : undefined
+            }
+            isPlaying={hasAutoPlay}
+            isSoundLoading={numLoading > 0 && !isPlaying}
             onCancelClick={handleCancelEditClick}
             onEditClick={handleEditClick}
             onSaveClick={handleSaveClick}
