@@ -15,7 +15,7 @@
 // limitations under the License.
 
 import { RefreshCcw } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Icon } from '@/components/common/icons/Icon';
 import { useChatStore } from '@/store/assets/chat/useChatStore';
@@ -107,10 +107,14 @@ export const EmptyChat = ({ textAreaRef }: EmptyChatProps) => {
   const assets = useAssetStore((state) => state.assets);
   const [lastExamples, setLastExamples] = useState<string[]>([]);
   const [showExamples, setShowExamples] = useState(true);
-  const [examplesVersion, setExamplesVersion] = useState(0);
 
-  const examplePrompts = useMemo(() => {
-    // Adjusting to include the full asset with its usage examples
+  const [examplePrompts, setExamplePrompts] = useState<{ asset: Asset; example: string }[]>([]);
+
+  useEffect(() => {
+    setLastExamples(examplePrompts.map(({ example }) => example));
+  }, [examplePrompts]);
+
+  const getExamplePrompts = useCallback(() => {
     const usageExamplesWithAsset = assets
       .flatMap((asset) => asset.usage_examples.map((example) => ({ asset, example })))
       .filter(({ asset, example }) => !lastExamples.includes(example) && asset.enabled);
@@ -120,20 +124,23 @@ export const EmptyChat = ({ textAreaRef }: EmptyChatProps) => {
       .slice(0, NUMBER_OF_DISPLAYED_EXAMPLES);
 
     return randomExamplesWithAsset;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [examplesVersion, assets]);
+  }, [assets, lastExamples]);
 
   useEffect(() => {
-    setLastExamples(examplePrompts.map(({ example }) => example));
-  }, [examplePrompts]);
+    const randomExamplesWithAsset = getExamplePrompts();
 
-  const refreshUsageExamples = () => {
+    setExamplePrompts(randomExamplesWithAsset);
+  }, []);
+
+  const refreshUsageExamples = useCallback(() => {
     setShowExamples(false);
     setTimeout(() => {
+      const randomExamplesWithAsset = getExamplePrompts();
+
+      setExamplePrompts(randomExamplesWithAsset);
       setShowExamples(true);
-      setExamplesVersion((prev) => prev + 1);
     }, 300);
-  };
+  }, [getExamplePrompts]);
 
   const onSelected = (asset: Asset, example: string) => () => {
     textAreaRef.current?.focus();
