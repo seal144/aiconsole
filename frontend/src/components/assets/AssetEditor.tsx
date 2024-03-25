@@ -269,11 +269,11 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
   const confirmPageEscape = () => {
     getInitialAsset();
     setItem(false);
+    setIsAvatarOverwritten(false);
     proceed?.();
   };
 
-  const discardChanges = () => {
-    getInitialAsset();
+  const handleCloseAlert = () => {
     reset?.();
   };
 
@@ -366,7 +366,7 @@ export function AssetEditor({ assetType }: { assetType: AssetType }) {
             <AlertDialog
               title={`Do you want to leave the ${assetType} settings?`}
               isOpen={blockerState === 'blocked'}
-              onClose={discardChanges}
+              onClose={handleCloseAlert}
               onConfirm={confirmPageEscape}
               confirmationButtonText="Leave"
               cancelButtonText="Cancel"
